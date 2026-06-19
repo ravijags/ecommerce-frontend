@@ -1,5 +1,5 @@
 function ProductCard({ name, price, description, image, onAddToCart}) {
-    const imageUrl = (image && image.startswith("http"))
+    const imageUrl = (image && image.startsWith("http"))
       ? image
       : "https://picsum.photos/200/150"
     
