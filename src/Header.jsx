@@ -30,7 +30,7 @@ function Header({ cartCount }) {
           </>
         )}
 
-        <Link to="/" className="text-white hover:text-yellow-300">
+        <Link to="/cart" className="text-white hover:text-yellow-300">
           Cart ({cartCount})
         </Link>
       </nav>

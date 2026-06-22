@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import ProductCard from '../ProductCard'
 
-function Home({ cartCount, setCartCount }) {
+function Home({ addToCart }) {
   const [products, setProducts] = useState([])
 
   useEffect(() => {
@@ -21,7 +21,7 @@ function Home({ cartCount, setCartCount }) {
             price={product.price}
             description={product.description}
             image={product.image}
-            onAddToCart={() => setCartCount(cartCount + 1)}
+            onAddToCart={() => addToCart(product)}
           />
         ))}
       </div>
