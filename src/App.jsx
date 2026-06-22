@@ -4,17 +4,23 @@ import Header from './Header'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Register from './pages/Register'
+import Cart from './pages/Cart'
 
 function App() {
-  const [cartCount, setCartCount] = useState(0)
+  const [cartItems, setCartItems] = useState([])
+
+  const addToCart = (product) => {
+    setCartItems([...cartItems, product])
+  }
 
   return (
     <div className="bg-gray-100 min-h-screen">
-      <Header cartCount={cartCount} />
+      <Header cartCount={cartItems.length} />
       <Routes>
-        <Route path="/" element={<Home cartCount={cartCount} setCartCount={setCartCount} />} />
+        <Route path="/" element={<Home addToCart={addToCart} />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/cart" element={<Cart cartItems={cartItems} setCartItems={setCartItems} />} />
       </Routes>
     </div>
   )
