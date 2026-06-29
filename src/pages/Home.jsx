@@ -5,7 +5,7 @@ function Home({ addToCart }) {
   const [products, setProducts] = useState([])
 
   useEffect(() => {
-    fetch("https://ecommerce-v2-y8jy.onrender.com/api/products")
+    fetch(`${import.meta.env.VITE_API_URL}/api/products`)
       .then(res => res.json())
       .then(data => setProducts(data.products))
   }, [])

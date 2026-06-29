@@ -15,7 +15,7 @@ function Register() {
     setLoading(true)
 
     try {
-      const response = await fetch('https://ecommerce-v2-y8jy.onrender.com/api/auth/register', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

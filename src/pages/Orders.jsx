@@ -14,7 +14,7 @@ function Orders() {
       return
     }
 
-    fetch('https://ecommerce-v2-y8jy.onrender.com/api/orders', {
+    fetch(`${import.meta.env.VITE_API_URL}/api/orders`, {
       headers: {
         'authorization': token,
       }

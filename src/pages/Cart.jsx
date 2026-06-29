@@ -21,7 +21,7 @@ function Cart({ cartItems, setCartItems }) {
 
     try {
       // Step 1 - Create order in YOUR backend
-      const orderResponse = await fetch('https://ecommerce-v2-y8jy.onrender.com/api/orders', {
+      const orderResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/orders`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -48,7 +48,7 @@ function Cart({ cartItems, setCartItems }) {
       }
 
       // Step 2 - Create Razorpay order
-      const paymentResponse = await fetch('https://ecommerce-v2-y8jy.onrender.com/api/payment/create-order', {
+      const paymentResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/payment/create-order`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -76,7 +76,7 @@ function Cart({ cartItems, setCartItems }) {
         order_id: paymentData.razorpayOrderId,
         handler: async (response) => {
           // Step 4 - Verify payment
-          const verifyResponse = await fetch('https://ecommerce-v2-y8jy.onrender.com/api/payment/verify', {
+          const verifyResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/payment/verify`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
