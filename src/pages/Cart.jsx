@@ -86,7 +86,7 @@ function Cart({ cartItems, setCartItems }) {
               razorpayOrderId: response.razorpay_order_id,
               razorpayPaymentId: response.razorpay_payment_id,
               razorpaySignature: response.razorpay_signature,
-              orderId: orderData._id,
+              orderId: orderData.order._id,
             }),
           })
 

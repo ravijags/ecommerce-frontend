@@ -5,6 +5,7 @@ import Home from './pages/Home'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Cart from './pages/Cart'
+import Orders from './pages/Orders'
 
 function App() {
   const [cartItems, setCartItems] = useState([])
@@ -21,6 +22,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/cart" element={<Cart cartItems={cartItems} setCartItems={setCartItems} />} />
+        <Route path="/orders" element={<Orders />} />
       </Routes>
     </div>
   )
