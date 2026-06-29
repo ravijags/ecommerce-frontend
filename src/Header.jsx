@@ -17,16 +17,20 @@ function Header({ cartCount }) {
         <Link to="/" className="text-white hover:text-yellow-300">Home</Link>
 
         {token ? (
+          <>
+          <Link to="/orders" className="text-white hover:text-yellow-300">Orders</Link>
           <button
             onClick={handleLogout}
             className="text-white hover:text-yellow-300 cursor-pointer"
           >
             Logout
           </button>
+          </>
         ) : (
           <>
             <Link to="/register" className="text-white hover:text-yellow-300">Register</Link>
             <Link to="/login" className="text-white hover:text-yellow-300">Login</Link>
+            <Link to="/orders" className="text-white hover:text-yellow-300">Orders</Link>
           </>
         )}
 
