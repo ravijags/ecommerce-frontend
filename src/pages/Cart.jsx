@@ -1,6 +1,7 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 function Cart({ cartItems, setCartItems }) {
+  const navigate = useNavigate()
 
   const removeFromCart = (index) => {
     const newCart = cartItems.filter((_, i) => i !== index)
@@ -8,6 +9,113 @@ function Cart({ cartItems, setCartItems }) {
   }
 
   const totalPrice = cartItems.reduce((total, item) => total + item.price, 0)
+
+  const handleCheckout = async () => {
+    const token = localStorage.getItem('token')
+    console.log("Token:", token)
+
+    if (!token) {
+      navigate('/login')
+      return
+    }
+
+    try {
+      // Step 1 - Create order in YOUR backend
+      const orderResponse = await fetch('https://ecommerce-v2-y8jy.onrender.com/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'authorization': token,
+        },
+        body: JSON.stringify({
+          items: cartItems.map(item => ({
+            product: item._id,
+            quantity: 1,
+            price: item.price,
+          })),
+          totalAmount: totalPrice,
+          shippingAddress: 'Default Address, Delhi',
+        }),
+      })
+
+      const orderData = await orderResponse.json()
+      console.log("Order Response Status:", orderResponse.ok)
+      console.log("Order Data:", orderData)
+
+      if (!orderResponse.ok) {
+        alert('Failed to create order!')
+        return
+      }
+
+      // Step 2 - Create Razorpay order
+      const paymentResponse = await fetch('https://ecommerce-v2-y8jy.onrender.com/api/payment/create-order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'authorization': token,
+        },
+        body: JSON.stringify({ orderId: orderData.order._id }),
+      })
+
+      const paymentData = await paymentResponse.json()
+      console.log("Payment Response Status:", paymentResponse.ok)
+      console.log("Payment Data:", paymentData)
+
+      if (!paymentResponse.ok) {
+        alert('Failed to create payment!')
+        return
+      }
+
+      // Step 3 - Open Razorpay popup
+      const options = {
+        key: paymentData.keyId,
+        amount: paymentData.amount,
+        currency: paymentData.currency,
+        name: 'Ecommerce Store',
+        description: 'Order Payment',
+        order_id: paymentData.razorpayOrderId,
+        handler: async (response) => {
+          // Step 4 - Verify payment
+          const verifyResponse = await fetch('https://ecommerce-v2-y8jy.onrender.com/api/payment/verify', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'authorization': token,
+            },
+            body: JSON.stringify({
+              razorpayOrderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature,
+              orderId: orderData._id,
+            }),
+          })
+
+          const verifyData = await verifyResponse.json()
+
+          if (verifyData.success) {
+            alert('Payment successful! 🎉')
+            setCartItems([])
+            navigate('/')
+          } else {
+            alert('Payment verification failed!')
+          }
+        },
+        prefill: {
+          email: 'test@example.com',
+        },
+        theme: {
+          color: '#3b82f6',
+        },
+      }
+
+      const razorpay = new window.Razorpay(options)
+      razorpay.open()
+
+    } catch (err) {
+      console.error(err)
+      alert('Something went wrong!')
+    }
+  }
 
   return (
     <main className="max-w-3xl mx-auto px-6 py-8">
@@ -47,7 +155,10 @@ function Cart({ cartItems, setCartItems }) {
               <span className="text-lg font-bold text-gray-800">Total:</span>
               <span className="text-lg font-bold text-green-500">${totalPrice}</span>
             </div>
-            <button className="w-full bg-blue-500 text-white py-2 rounded-lg mt-4 hover:bg-blue-600 cursor-pointer">
+            <button
+              onClick={handleCheckout}
+              className="w-full bg-blue-500 text-white py-2 rounded-lg mt-4 hover:bg-blue-600 cursor-pointer"
+            >
               Proceed to Checkout
             </button>
           </div>
