@@ -7,6 +7,7 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import Cart from './pages/Cart'
 import Orders from './pages/Orders'
+import NotFound from './pages/NotFound'
 
 function App() {
   const [cartItems, setCartItems] = useState([])
@@ -26,6 +27,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/cart" element={<Cart cartItems={cartItems} setCartItems={setCartItems} />} />
         <Route path="/orders" element={<Orders />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </div>
   )
