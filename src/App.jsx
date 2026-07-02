@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Routes, Route } from 'react-router-dom'
+import toast, { Toaster } from 'react-hot-toast'
 import Header from './Header'
 import Home from './pages/Home'
 import Login from './pages/Login'
@@ -12,10 +13,12 @@ function App() {
 
   const addToCart = (product) => {
     setCartItems([...cartItems, product])
+    toast.success(`${product.name} added to cart!`)
   }
 
   return (
     <div className="bg-gray-100 min-h-screen">
+      <Toaster position="top-right"/>
       <Header cartCount={cartItems.length} />
       <Routes>
         <Route path="/" element={<Home addToCart={addToCart} />} />

@@ -1,4 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
+import toast from 'react-hot-toast'
 
 function Cart({ cartItems, setCartItems }) {
   const navigate = useNavigate()
@@ -6,13 +7,13 @@ function Cart({ cartItems, setCartItems }) {
   const removeFromCart = (index) => {
     const newCart = cartItems.filter((_, i) => i !== index)
     setCartItems(newCart)
+    toast.success('Item removed from cart!')
   }
 
   const totalPrice = cartItems.reduce((total, item) => total + item.price, 0)
 
   const handleCheckout = async () => {
     const token = localStorage.getItem('token')
-    console.log("Token:", token)
 
     if (!token) {
       navigate('/login')
@@ -20,7 +21,6 @@ function Cart({ cartItems, setCartItems }) {
     }
 
     try {
-      // Step 1 - Create order in YOUR backend
       const orderResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/orders`, {
         method: 'POST',
         headers: {
@@ -39,15 +39,12 @@ function Cart({ cartItems, setCartItems }) {
       })
 
       const orderData = await orderResponse.json()
-      console.log("Order Response Status:", orderResponse.ok)
-      console.log("Order Data:", orderData)
 
       if (!orderResponse.ok) {
-        alert('Failed to create order!')
+        toast.error('Failed to create order!')
         return
       }
 
-      // Step 2 - Create Razorpay order
       const paymentResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/payment/create-order`, {
         method: 'POST',
         headers: {
@@ -58,15 +55,12 @@ function Cart({ cartItems, setCartItems }) {
       })
 
       const paymentData = await paymentResponse.json()
-      console.log("Payment Response Status:", paymentResponse.ok)
-      console.log("Payment Data:", paymentData)
 
       if (!paymentResponse.ok) {
-        alert('Failed to create payment!')
+        toast.error('Failed to create payment!')
         return
       }
 
-      // Step 3 - Open Razorpay popup
       const options = {
         key: paymentData.keyId,
         amount: paymentData.amount,
@@ -75,7 +69,6 @@ function Cart({ cartItems, setCartItems }) {
         description: 'Order Payment',
         order_id: paymentData.razorpayOrderId,
         handler: async (response) => {
-          // Step 4 - Verify payment
           const verifyResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/payment/verify`, {
             method: 'POST',
             headers: {
@@ -93,11 +86,11 @@ function Cart({ cartItems, setCartItems }) {
           const verifyData = await verifyResponse.json()
 
           if (verifyData.success) {
-            alert('Payment successful! 🎉')
+            toast.success('Payment successful! 🎉')
             setCartItems([])
             navigate('/')
           } else {
-            alert('Payment verification failed!')
+            toast.error('Payment verification failed!')
           }
         },
         prefill: {
@@ -113,7 +106,7 @@ function Cart({ cartItems, setCartItems }) {
 
     } catch (err) {
       console.error(err)
-      alert('Something went wrong!')
+      toast.error('Something went wrong!')
     }
   }
 

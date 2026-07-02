@@ -1,16 +1,16 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import toast from 'react-hot-toast'
 
 function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
   const navigate = useNavigate()
 
   const handleLogin = async () => {
-    setError('')
+    
     setLoading(true)
 
     try {
@@ -25,16 +25,17 @@ function Login() {
       const data = await response.json()
 
       if (!response.ok) {
-        setError(data.message || 'Login failed!')
+        toast.error(data.message || 'Login failed!')
         setLoading(false)
         return
       }
 
       localStorage.setItem('token', data.token)
+      toast.success('Welcome back! 🎉')
       navigate('/')
 
     } catch (err) {
-      setError('Something went wrong!')
+      toast.error('Something went wrong!')
       setLoading(false)
     }
   }
@@ -43,11 +44,7 @@ function Login() {
     <main className="max-w-md mx-auto px-6 py-12">
       <h2 className="text-2xl font-bold text-gray-800 mb-6">Login</h2>
 
-      {error && (
-        <p className="bg-red-100 text-red-600 px-4 py-2 rounded-lg mb-4">
-          {error}
-        </p>
-      )}
+      
 
       <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
 
