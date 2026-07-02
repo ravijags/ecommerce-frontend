@@ -3,12 +3,22 @@ import ProductCard from '../ProductCard'
 
 function Home({ addToCart }) {
   const [products, setProducts] = useState([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL}/api/products`)
       .then(res => res.json())
-      .then(data => setProducts(data.products))
+      .then(data => { setProducts(data.products)
+                      setLoading(false)})
   }, [])
+  
+  if(loading) {
+  return (
+    <div className="fixed inset-0 flex justify-center items-center">
+      <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+    </div>
+  )
+}
 
   return (
     <main className="max-w-6xl mx-auto px-6 py-8">
