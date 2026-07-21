@@ -11,6 +11,7 @@ import NotFound from './pages/NotFound'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminOrders from './pages/admin/AdminOrders'
 import AdminProducts from './pages/admin/AdminProducts'
+import ProductDetail from './pages/ProductDetail'
 
 function App() {
   const [cartItems, setCartItems] = useState([])
@@ -33,6 +34,7 @@ function App() {
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/admin/orders" element={<AdminOrders />} />
         <Route path="/admin/products" element={<AdminProducts />} />
+        <Route path="/products/:id" element={<ProductDetail addToCart={addToCart} />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </div>
