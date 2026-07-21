@@ -8,6 +8,9 @@ import Register from './pages/Register'
 import Cart from './pages/Cart'
 import Orders from './pages/Orders'
 import NotFound from './pages/NotFound'
+import AdminDashboard from './pages/admin/AdminDashboard'
+import AdminOrders from './pages/admin/AdminOrders'
+import AdminProducts from './pages/admin/AdminProducts'
 
 function App() {
   const [cartItems, setCartItems] = useState([])
@@ -27,6 +30,9 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/cart" element={<Cart cartItems={cartItems} setCartItems={setCartItems} />} />
         <Route path="/orders" element={<Orders />} />
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin/orders" element={<AdminOrders />} />
+        <Route path="/admin/products" element={<AdminProducts />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </div>
