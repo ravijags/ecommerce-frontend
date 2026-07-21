@@ -19,6 +19,7 @@ function Header({ cartCount }) {
         {token ? (
           <>
           <Link to="/orders" className="text-white hover:text-yellow-300">Orders</Link>
+          <Link to="/admin" className="text-white hover:text-yellow-300">Admin</Link>
           <button
             onClick={handleLogout}
             className="text-white hover:text-yellow-300 cursor-pointer"
