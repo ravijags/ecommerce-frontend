@@ -4,7 +4,21 @@ import toast from 'react-hot-toast'
 function Cart({ cartItems, setCartItems }) {
   const navigate = useNavigate()
 
-  const removeFromCart = (index) => {
+  const removeFromCart = async (index) => {
+    const token = localStorage.getItem('token')
+  const item = cartItems[index]
+
+  if (token) {
+    try {
+      await fetch(`${import.meta.env.VITE_API_URL}/api/cart/${item._id}`, {
+        method: 'DELETE',
+        headers: { authorization: token }
+      })
+    } catch (error) {
+      toast.error('Failed to remove item!')
+      return
+    }
+  }
     const newCart = cartItems.filter((_, i) => i !== index)
     setCartItems(newCart)
     toast.success('Item removed from cart!')
@@ -86,6 +100,12 @@ function Cart({ cartItems, setCartItems }) {
           const verifyData = await verifyResponse.json()
 
           if (verifyData.success) {
+            if (token) {
+           await fetch(`${import.meta.env.VITE_API_URL}/api/cart`, {
+                method: 'DELETE',
+                headers: { authorization: token }
+              })
+           }
             toast.success('Payment successful! 🎉')
             setCartItems([])
             navigate('/')
