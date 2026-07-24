@@ -67,7 +67,7 @@ function Orders() {
                     <span className="text-gray-700 text-sm">
                       {item.product ? item.product.name : 'Product'} x{item.quantity}
                     </span>
-                    <span className="text-gray-700 text-sm">${item.price}</span>
+                    <span className="text-gray-700 text-sm">₹{item.price}</span>
                   </div>
                 ))}
               </div>
@@ -90,7 +90,7 @@ function Orders() {
                     {order.status}
                   </span>
                 </div>
-                <p className="font-bold text-gray-800">${order.totalAmount}</p>
+                <p className="font-bold text-gray-800">₹{order.totalAmount}</p>
               </div>
 
             </div>
