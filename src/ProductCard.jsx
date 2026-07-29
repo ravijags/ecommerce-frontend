@@ -1,78 +1,154 @@
 import { Link } from 'react-router-dom'
 import { ShoppingCart, Heart, Star } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { useState } from 'react'
 
-function ProductCard({ name, price, description, image, onAddToCart, id, rating, discount, originalPrice, brand }) {
+function ProductCard({ name, price, image, onAddToCart, id, rating, discount, originalPrice, brand }) {
+  const [wishlist, setWishlist] = useState(false)
+  const [added, setAdded] = useState(false)
+
   const imageUrl = (image && image.startsWith('http'))
     ? image
-    : 'https://dummyjson.com/image/400x300'
+    : 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400'
+
+  const handleAddToCart = () => {
+    onAddToCart()
+    setAdded(true)
+    setTimeout(() => setAdded(false), 1500)
+  }
 
   return (
-    <div className="bg-white rounded-2xl overflow-hidden group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100">
-
-      {/* Image container */}
-      <Link to={`/products/${id}`} className="block relative overflow-hidden">
-        <div className="aspect-square overflow-hidden bg-gray-50">
+    <div
+      className="bg-white rounded-2xl overflow-hidden flex flex-col h-full group"
+      style={{ border: '1px solid #f1f5f9', transition: 'box-shadow 0.2s, transform 0.2s' }}
+      onMouseEnter={e => {
+        e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.08)'
+        e.currentTarget.style.transform = 'translateY(-2px)'
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.boxShadow = 'none'
+        e.currentTarget.style.transform = 'translateY(0)'
+      }}
+    >
+      {/* Image */}
+      <Link to={`/products/${id}`} className="block relative flex-shrink-0" style={{ height: '200px' }}>
+        <div className="w-full h-full overflow-hidden" style={{ backgroundColor: '#f8fafc' }}>
           <img
             src={imageUrl}
             alt={name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-cover"
+            style={{ transition: 'transform 0.4s' }}
+            onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
+            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+            loading="lazy"
           />
         </div>
 
-        {/* Discount badge */}
+        {/* Discount */}
         {discount > 0 && (
-          <div className="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-lg">
+          <div
+            className="absolute top-2.5 left-2.5 text-white font-bold rounded-lg px-2 py-0.5"
+            style={{ backgroundColor: '#ef4444', fontSize: 10 }}
+          >
             {Math.round(discount)}% OFF
           </div>
         )}
 
-        {/* Wishlist button */}
-        <button className="absolute top-3 right-3 bg-white rounded-full p-2 shadow-md opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110 cursor-pointer">
-          <Heart size={16} className="text-gray-400 hover:text-red-500 transition-colors" />
+        {/* Wishlist */}
+        <button
+          className="absolute top-2.5 right-2.5 bg-white rounded-full p-1.5 shadow-sm cursor-pointer"
+          style={{
+            opacity: wishlist ? 1 : 0,
+            transition: 'opacity 0.2s',
+            border: 'none'
+          }}
+          onClick={e => {
+            e.preventDefault()
+            setWishlist(!wishlist)
+          }}
+          onMouseEnter={e => e.currentTarget.parentElement.parentElement.querySelector('.wishlist-btn') && null}
+        >
+          <Heart
+            size={13}
+            style={{ color: wishlist ? '#ef4444' : '#94a3b8' }}
+            fill={wishlist ? '#ef4444' : 'none'}
+          />
         </button>
       </Link>
 
-      {/* Product info */}
-      <div className="p-4">
+      {/* Info */}
+      <div className="p-3 flex flex-col flex-1">
 
         {/* Brand */}
         {brand && (
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">{brand}</p>
+          <p
+            className="font-bold uppercase mb-1"
+            style={{ color: '#C9A84C', fontSize: 9, letterSpacing: '0.12em' }}
+          >
+            {brand}
+          </p>
         )}
 
         {/* Name */}
-        <Link to={`/products/${id}`}>
-          <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 hover:text-gray-600 transition-colors leading-snug mb-2">
+        <Link to={`/products/${id}`} className="flex-shrink-0">
+          <h3
+            className="font-semibold leading-snug mb-2"
+            style={{
+              color: '#0f172a',
+              fontSize: 13,
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+              minHeight: '2.4rem'
+            }}
+          >
             {name}
           </h3>
         </Link>
 
         {/* Rating */}
         {rating > 0 && (
-          <div className="flex items-center gap-1 mb-2">
-            <div className="flex items-center bg-green-500 text-white text-xs px-1.5 py-0.5 rounded gap-0.5">
-              <span className="font-semibold">{rating.toFixed(1)}</span>
-              <Star size={10} fill="white" />
+          <div className="flex items-center gap-1.5 mb-2">
+            <div
+              className="flex items-center gap-0.5 text-white px-1.5 py-0.5 rounded"
+              style={{ backgroundColor: '#16a34a', fontSize: 9 }}
+            >
+              <span className="font-bold">{rating.toFixed(1)}</span>
+              <Star size={7} fill="white" stroke="none" />
             </div>
-            <span className="text-xs text-gray-400">(2.3k)</span>
           </div>
         )}
 
+        {/* Push to bottom */}
+        <div className="flex-1" />
+
         {/* Price */}
-        <div className="flex items-center gap-2 mb-3">
-          <span className="text-lg font-bold text-gray-900">₹{price.toLocaleString()}</span>
+        <div className="flex items-baseline gap-1.5 mb-3">
+          <span className="font-black" style={{ color: '#0f172a', fontSize: 14 }}>
+            ₹{price?.toLocaleString('en-IN')}
+          </span>
           {originalPrice > price && (
-            <span className="text-sm text-gray-400 line-through">₹{originalPrice.toLocaleString()}</span>
+            <span className="line-through" style={{ color: '#cbd5e1', fontSize: 11 }}>
+              ₹{originalPrice?.toLocaleString('en-IN')}
+            </span>
           )}
         </div>
 
-        {/* Add to cart button */}
+        {/* Button */}
         <button
-          onClick={onAddToCart}
-          className="w-full flex items-center justify-center gap-2 bg-gray-900 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-700 active:scale-95 transition-all duration-200 cursor-pointer"
+          onClick={handleAddToCart}
+          className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl font-bold uppercase cursor-pointer flex-shrink-0 transition-all duration-200"
+          style={{
+            backgroundColor: added ? '#C9A84C' : '#0f172a',
+            color: added ? '#0f172a' : '#fff',
+            fontSize: 11,
+            letterSpacing: '0.05em',
+            border: 'none'
+          }}
         >
-          <ShoppingCart size={16} />
-          Add to Cart
+          <ShoppingCart size={12} />
+          {added ? 'Added!' : 'Add to Cart'}
         </button>
 
       </div>
