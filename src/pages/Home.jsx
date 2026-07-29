@@ -7,13 +7,14 @@ function Home({ addToCart, searchQuery }) {
   const [category, setCategory] = useState('')
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/api/products?limit=500`)
-      .then(res => res.json())
-      .then(data => {
-        setProducts(data.products)
-        setLoading(false)
-      })
-  }, [])
+  window.scrollTo(0, 0)
+  fetch(`${import.meta.env.VITE_API_URL}/api/products?limit=500`)
+    .then(res => res.json())
+    .then(data => {
+      setProducts(data.products)
+      setLoading(false)
+    })
+}, [])
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = !searchQuery ||
@@ -24,12 +25,15 @@ function Home({ addToCart, searchQuery }) {
   })
 
   if (loading) {
-    return (
-      <div className="fixed inset-0 flex justify-center items-center">
-        <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    )
-  }
+  return (
+    <div className="fixed inset-0 flex justify-center items-center bg-white">
+      <div
+        className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin"
+        style={{ borderColor: '#C9A84C', borderTopColor: 'transparent' }}
+      />
+    </div>
+  )
+}
 
   return (
     <>
@@ -98,17 +102,17 @@ function Home({ addToCart, searchQuery }) {
   { slug: 'vehicle', name: 'Vehicle' },
 ].map((cat, i) => (
   <button
-    key={i}
-    onClick={() => setCategory(cat.slug)}
-    className={`px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex-shrink-0 ${
-      category === cat.slug
-        ? 'text-white'
-        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-    }`}
-    style={category === cat.slug ? { backgroundColor: '#0f172a' } : {}}
-  >
-    {cat.name}
-  </button>
+  key={i}
+  onClick={() => setCategory(cat.slug)}
+  className="px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex-shrink-0"
+  style={{
+    backgroundColor: category === cat.slug ? '#0f172a' : '#f1f5f9',
+    color: category === cat.slug ? '#ffffff' : '#64748b',
+    border: category === cat.slug ? '2px solid #C9A84C' : '2px solid transparent',
+  }}
+>
+  {cat.name}
+</button>
 ))}
           </div>
         </div>

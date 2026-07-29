@@ -324,16 +324,15 @@ function Header({ cartCount, onSearch }) {
                       Login
                     </Link>
                     <Link
-                     to="/register"
-                     className="hidden lg:block px-5 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-90"
-                     style={{
-                      backgroundColor: '#C9A84C',
-                      color: '#0f172a',
-                      fontWeight: 700
-                     }}
-                     >
-                      Sign Up
-                    </Link>
+  to="/register"
+  className="hidden lg:block px-5 py-2.5 rounded-xl text-sm font-bold transition-all hover:opacity-90"
+  style={{
+    backgroundColor: '#C9A84C',
+    color: '#0f172a',
+  }}
+>
+  Sign Up
+</Link>
                   </div>
                 )}
 

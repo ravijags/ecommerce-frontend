@@ -108,15 +108,18 @@ function ProductCard({ name, price, description, image, onAddToCart, id, rating,
 
         {/* Add to cart */}
         <motion.button
-          onClick={onAddToCart}
-          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wide transition-all cursor-pointer"
-          style={{ backgroundColor: '#0f172a', color: '#fff' }}
-          whileHover={{ backgroundColor: '#C9A84C', color: '#0f172a' }}
-          whileTap={{ scale: 0.97 }}
-        >
-          <ShoppingCart size={14} />
-          Add to Cart
-        </motion.button>
+  onClick={onAddToCart}
+  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wide cursor-pointer"
+  style={{ backgroundColor: '#0f172a', color: '#fff' }}
+  whileHover={{
+    backgroundColor: '#C9A84C',
+    color: '#0f172a',
+  }}
+  whileTap={{ scale: 0.97 }}
+>
+  <ShoppingCart size={14} />
+  Add to Cart
+</motion.button>
 
       </div>
     </motion.div>
