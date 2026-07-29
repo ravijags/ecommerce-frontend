@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { ShoppingCart, Heart, Star, ArrowLeft, Shield, Truck, RotateCcw } from 'lucide-react'
+import { ShoppingCart, Heart, Star, ChevronLeft, Shield, Truck, RotateCcw, Plus, Minus, Share2 } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 
 function ProductDetail({ addToCart }) {
@@ -8,6 +9,8 @@ function ProductDetail({ addToCart }) {
   const [loading, setLoading] = useState(true)
   const [selectedImage, setSelectedImage] = useState(0)
   const [quantity, setQuantity] = useState(1)
+  const [wishlisted, setWishlisted] = useState(false)
+  const [addedToCart, setAddedToCart] = useState(false)
   const { id } = useParams()
   const navigate = useNavigate()
 
@@ -24,128 +27,151 @@ function ProductDetail({ addToCart }) {
       })
   }, [id])
 
+  const handleAddToCart = () => {
+    for (let i = 0; i < quantity; i++) addToCart(product)
+    setAddedToCart(true)
+    toast.success(`Added ${quantity} item${quantity > 1 ? 's' : ''} to cart!`)
+    setTimeout(() => setAddedToCart(false), 2000)
+  }
+
   if (loading) {
     return (
-      <div className="fixed inset-0 flex justify-center items-center">
-        <div className="w-10 h-10 border-4 border-gray-900 border-t-transparent rounded-full animate-spin"></div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: '#C9A84C', borderTopColor: 'transparent' }} />
       </div>
     )
   }
 
   if (!product) return null
 
-  const images = product.images && product.images.length > 0
-    ? product.images
-    : [product.image || 'https://dummyjson.com/image/400x300']
+  const images = product.images?.length > 0 ? product.images : [product.image || 'https://dummyjson.com/image/400x300']
+  const hasDiscount = product.originalPrice > product.price
+  const discountPct = hasDiscount ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0
 
   return (
-    <main className="max-w-7xl mx-auto px-4 py-8">
+    <main className="max-w-7xl mx-auto px-4 py-6">
 
       {/* Breadcrumb */}
-      <div className="flex items-center gap-2 mb-6 text-sm text-gray-500">
-        <Link to="/" className="hover:text-gray-900 transition-colors flex items-center gap-1">
-          <ArrowLeft size={16} />
+      <nav className="flex items-center gap-1.5 mb-6 text-sm">
+        <Link to="/" className="flex items-center gap-1 font-medium transition-colors" style={{ color: '#64748b' }}>
+          <ChevronLeft size={15} />
           Back
         </Link>
-        <span>/</span>
-        <span className="text-gray-400">{product.category}</span>
-        <span>/</span>
-        <span className="text-gray-900 font-medium">{product.name}</span>
-      </div>
+        <span style={{ color: '#cbd5e1' }}>/</span>
+        <span className="capitalize" style={{ color: '#64748b' }}>{product.category}</span>
+        <span style={{ color: '#cbd5e1' }}>/</span>
+        <span className="font-medium truncate max-w-48" style={{ color: '#0f172a' }}>{product.name}</span>
+      </nav>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
 
-        {/* Left - Images */}
-        <div className="flex gap-4">
+        {/* Images */}
+        <div className="flex gap-3">
 
-          {/* Thumbnail strip */}
-          <div className="flex flex-col gap-2">
-            {images.slice(0, 5).map((img, i) => (
-              <button
-                key={i}
-                onClick={() => setSelectedImage(i)}
-                className={`w-16 h-16 rounded-lg overflow-hidden border-2 transition-all cursor-pointer ${
-                  selectedImage === i
-                    ? 'border-gray-900'
-                    : 'border-gray-200 hover:border-gray-400'
-                }`}
-              >
-                <img src={img} alt="" className="w-full h-full object-cover" />
-              </button>
-            ))}
-          </div>
-
-          {/* Main image */}
-          <div className="flex-1 bg-gray-50 rounded-2xl overflow-hidden aspect-square">
-            <img
-              src={images[selectedImage]}
-              alt={product.name}
-              className="w-full h-full object-contain p-8"
-            />
-          </div>
-
-        </div>
-
-        {/* Right - Product info */}
-        <div className="flex flex-col">
-
-          {/* Brand */}
-          {product.brand && (
-            <p className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">
-              {product.brand}
-            </p>
+          {/* Thumbnails */}
+          {images.length > 1 && (
+            <div className="flex flex-col gap-2">
+              {images.slice(0, 5).map((img, i) => (
+                <motion.button
+                  key={i}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setSelectedImage(i)}
+                  className="w-14 h-14 rounded-xl overflow-hidden border-2 transition-all flex-shrink-0"
+                  style={{
+                    borderColor: selectedImage === i ? '#C9A84C' : '#e2e8f0',
+                    background: '#f8fafc',
+                  }}
+                >
+                  <img src={img} alt="" className="w-full h-full object-cover" />
+                </motion.button>
+              ))}
+            </div>
           )}
 
-          {/* Name */}
-          <h1 className="text-3xl font-black text-gray-900 mb-3 leading-tight">
+          {/* Main image */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={selectedImage}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="flex-1 rounded-2xl overflow-hidden flex items-center justify-center aspect-square"
+              style={{ background: '#f8fafc' }}
+            >
+              <img
+                src={images[selectedImage]}
+                alt={product.name}
+                className="w-full h-full object-contain p-8"
+              />
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        {/* Info */}
+        <div className="flex flex-col">
+
+          {/* Brand + share */}
+          <div className="flex items-start justify-between mb-2">
+            {product.brand && (
+              <span className="text-xs font-bold tracking-widest uppercase px-2 py-1 rounded-lg" style={{ background: '#f1f5f9', color: '#64748b' }}>
+                {product.brand}
+              </span>
+            )}
+            <button className="ml-auto p-2 rounded-xl transition-all" style={{ color: '#94a3b8' }}>
+              <Share2 size={16} />
+            </button>
+          </div>
+
+          <h1 className="text-2xl lg:text-3xl font-black leading-tight mb-3" style={{ color: '#0f172a' }}>
             {product.name}
           </h1>
 
           {/* Rating */}
           {product.rating > 0 && (
             <div className="flex items-center gap-3 mb-4">
-              <div className="flex items-center gap-1 bg-green-500 text-white px-2 py-1 rounded-lg">
-                <span className="font-bold text-sm">{product.rating.toFixed(1)}</span>
-                <Star size={12} fill="white" />
+              <div className="flex items-center gap-1 px-2 py-1 rounded-lg" style={{ background: '#0f172a' }}>
+                <span className="text-xs font-bold" style={{ color: '#C9A84C' }}>{product.rating.toFixed(1)}</span>
+                <Star size={10} fill="#C9A84C" color="#C9A84C" />
               </div>
-              <span className="text-gray-500 text-sm">
-                {product.reviewCount?.toLocaleString() || '2,345'} ratings
+              <span className="text-sm" style={{ color: '#64748b' }}>
+                {(product.reviewCount || 2345).toLocaleString()} reviews
               </span>
-              <span className="text-gray-300">|</span>
-              <span className="text-green-600 text-sm font-medium">
+              <span style={{ color: '#e2e8f0' }}>|</span>
+              <span className="text-sm font-medium" style={{ color: product.stock > 0 ? '#22c55e' : '#ef4444' }}>
                 {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
               </span>
             </div>
           )}
 
           {/* Price */}
-          <div className="border-t border-b border-gray-100 py-4 mb-6">
-            <div className="flex items-baseline gap-3">
-              <span className="text-4xl font-black text-gray-900">
+          <div className="rounded-2xl p-4 mb-5" style={{ background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+            <div className="flex items-baseline gap-3 mb-1">
+              <span className="text-4xl font-black" style={{ color: '#0f172a' }}>
                 ₹{product.price?.toLocaleString()}
               </span>
-              {product.originalPrice > product.price && (
+              {hasDiscount && (
                 <>
-                  <span className="text-xl text-gray-400 line-through">
+                  <span className="text-lg line-through" style={{ color: '#94a3b8' }}>
                     ₹{product.originalPrice?.toLocaleString()}
                   </span>
-                  <span className="bg-red-100 text-red-600 text-sm font-bold px-2 py-1 rounded-lg">
-                    {product.discount}% OFF
+                  <span className="text-sm font-bold px-2 py-0.5 rounded-lg" style={{ background: '#C9A84C22', color: '#92740a' }}>
+                    {discountPct}% OFF
                   </span>
                 </>
               )}
             </div>
-            <p className="text-green-600 text-sm mt-1">Inclusive of all taxes</p>
+            <p className="text-xs font-medium" style={{ color: '#22c55e' }}>Inclusive of all taxes · Free delivery above ₹999</p>
           </div>
 
           {/* Highlights */}
-          {product.highlights && product.highlights.length > 0 && (
-            <div className="mb-6">
-              <h3 className="font-bold text-gray-900 mb-2">Highlights</h3>
-              <ul className="space-y-1">
+          {product.highlights?.length > 0 && (
+            <div className="mb-5">
+              <p className="text-sm font-bold mb-2" style={{ color: '#0f172a' }}>Highlights</p>
+              <ul className="space-y-1.5">
                 {product.highlights.map((h, i) => (
-                  <li key={i} className="flex items-center gap-2 text-sm text-gray-600">
-                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full flex-shrink-0"></span>
+                  <li key={i} className="flex items-start gap-2 text-sm" style={{ color: '#475569' }}>
+                    <span className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style={{ background: '#C9A84C' }} />
                     {h}
                   </li>
                 ))}
@@ -154,54 +180,76 @@ function ProductDetail({ addToCart }) {
           )}
 
           {/* Quantity */}
-          <div className="flex items-center gap-4 mb-6">
-            <span className="text-sm font-semibold text-gray-700">Quantity:</span>
-            <div className="flex items-center border-2 border-gray-200 rounded-xl overflow-hidden">
+          <div className="flex items-center gap-4 mb-5">
+            <span className="text-sm font-semibold" style={{ color: '#0f172a' }}>Qty</span>
+            <div className="flex items-center gap-0 rounded-xl overflow-hidden border-2" style={{ borderColor: '#e2e8f0' }}>
               <button
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                className="px-4 py-2 hover:bg-gray-100 transition-colors cursor-pointer font-bold text-lg"
+                className="px-3 py-2 transition-colors"
+                style={{ color: '#0f172a' }}
               >
-                −
+                <Minus size={14} />
               </button>
-              <span className="px-4 py-2 font-semibold min-w-12 text-center">{quantity}</span>
+              <span className="px-4 py-2 font-bold text-sm min-w-8 text-center" style={{ color: '#0f172a' }}>
+                {quantity}
+              </span>
               <button
-                onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
-                className="px-4 py-2 hover:bg-gray-100 transition-colors cursor-pointer font-bold text-lg"
+                onClick={() => setQuantity(Math.min(product.stock || 99, quantity + 1))}
+                className="px-3 py-2 transition-colors"
+                style={{ color: '#0f172a' }}
               >
-                +
+                <Plus size={14} />
               </button>
             </div>
           </div>
 
-          {/* Buttons */}
-          <div className="flex gap-3 mb-8">
-            <button
-              onClick={() => {
-                for (let i = 0; i < quantity; i++) addToCart(product)
-                toast.success(`${product.name} added to cart!`)
-              }}
+          {/* CTAs */}
+          <div className="flex gap-3 mb-6">
+            <motion.button
+              whileTap={{ scale: 0.97 }}
+              onClick={handleAddToCart}
               disabled={product.stock === 0}
-              className="flex-1 flex items-center justify-center gap-2 bg-gray-900 text-white py-4 rounded-xl font-bold hover:bg-gray-700 transition-colors cursor-pointer disabled:opacity-50 text-lg"
+              className="flex-1 py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all"
+              style={{
+                background: addedToCart ? '#22c55e' : '#0f172a',
+                color: '#fff',
+                cursor: product.stock === 0 ? 'not-allowed' : 'pointer',
+                opacity: product.stock === 0 ? 0.5 : 1,
+              }}
             >
-              <ShoppingCart size={20} />
-              Add to Cart
-            </button>
-            <button className="px-4 py-4 border-2 border-gray-200 rounded-xl hover:border-red-300 hover:bg-red-50 transition-colors cursor-pointer group">
-              <Heart size={20} className="text-gray-400 group-hover:text-red-500 transition-colors" />
-            </button>
+              <ShoppingCart size={17} />
+              {addedToCart ? 'Added!' : 'Add to Cart'}
+            </motion.button>
+
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setWishlisted(!wishlisted)}
+              className="px-4 rounded-xl border-2 transition-all"
+              style={{
+                borderColor: wishlisted ? '#ef4444' : '#e2e8f0',
+                background: wishlisted ? '#fef2f2' : '#fff',
+                color: wishlisted ? '#ef4444' : '#94a3b8',
+              }}
+            >
+              <Heart size={18} fill={wishlisted ? '#ef4444' : 'none'} />
+            </motion.button>
           </div>
 
           {/* Trust badges */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-3">
             {[
-              { icon: <Truck size={20} />, title: 'Free Delivery', desc: 'On orders above ₹999' },
-              { icon: <RotateCcw size={20} />, title: '7 Day Return', desc: 'Easy return policy' },
-              { icon: <Shield size={20} />, title: '100% Secure', desc: 'Safe payments' },
-            ].map((badge, i) => (
-              <div key={i} className="flex flex-col items-center text-center p-3 bg-gray-50 rounded-xl">
-                <div className="text-gray-600 mb-1">{badge.icon}</div>
-                <p className="text-xs font-bold text-gray-900">{badge.title}</p>
-                <p className="text-xs text-gray-500">{badge.desc}</p>
+              { Icon: Truck, title: 'Free Delivery', desc: 'Above ₹999' },
+              { Icon: RotateCcw, title: '7-Day Return', desc: 'Easy returns' },
+              { Icon: Shield, title: 'Secure Pay', desc: '100% safe' },
+            ].map(({ Icon, title, desc }) => (
+              <div
+                key={title}
+                className="flex flex-col items-center text-center p-3 rounded-xl"
+                style={{ background: '#f8fafc', border: '1px solid #e2e8f0' }}
+              >
+                <Icon size={18} style={{ color: '#C9A84C' }} className="mb-1" />
+                <p className="text-xs font-bold" style={{ color: '#0f172a' }}>{title}</p>
+                <p className="text-xs" style={{ color: '#94a3b8' }}>{desc}</p>
               </div>
             ))}
           </div>
@@ -210,10 +258,12 @@ function ProductDetail({ addToCart }) {
       </div>
 
       {/* Description */}
-      <div className="mt-12 border-t border-gray-100 pt-8">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Product Description</h2>
-        <p className="text-gray-600 leading-relaxed">{product.description}</p>
-      </div>
+      {product.description && (
+        <div className="mt-12 pt-8" style={{ borderTop: '1px solid #e2e8f0' }}>
+          <h2 className="text-lg font-black mb-3" style={{ color: '#0f172a' }}>Product Description</h2>
+          <p className="leading-relaxed" style={{ color: '#475569' }}>{product.description}</p>
+        </div>
+      )}
 
     </main>
   )
