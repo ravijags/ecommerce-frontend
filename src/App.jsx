@@ -12,9 +12,11 @@ import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminOrders from './pages/admin/AdminOrders'
 import AdminProducts from './pages/admin/AdminProducts'
 import ProductDetail from './pages/ProductDetail'
+import Footer from './components/Footer'
 
 function App() {
   const [cartItems, setCartItems] = useState([])
+  const [searchQuery, setSearchQuery] = useState('')
 
   // Load cart from MongoDB on app start
   useEffect(() => {
@@ -83,11 +85,11 @@ function App() {
   }
 
   return (
-    <div className="bg-gray-100 min-h-screen">
+    <div className="bg-gray-50 min-h-screen">
       <Toaster position="top-right" />
-      <Header cartCount={cartItems.length} />
+      <Header cartCount={cartItems.length} onSearch={setSearchQuery} />
       <Routes>
-        <Route path="/" element={<Home addToCart={addToCart} />} />
+        <Route path="/" element={<Home addToCart={addToCart} searchQuery={searchQuery} />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/cart" element={<Cart cartItems={cartItems} setCartItems={setCartItems} />} />
@@ -98,6 +100,7 @@ function App() {
         <Route path="/admin/products" element={<AdminProducts />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
+      <Footer />
     </div>
   )
 }
