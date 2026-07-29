@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import {
   Search, ShoppingCart, Heart, User,
-  Package, Settings, LogOut, X, Menu, ChevronDown
+  Package, Settings, LogOut, X, Menu
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
@@ -43,206 +43,391 @@ function Header({ cartCount, onSearch }) {
 
   return (
     <>
-      <header className="sticky top-0 z-50 bg-white shadow-sm">
+      <header style={{
+        position: 'sticky',
+        top: 0,
+        zIndex: 50,
+        backgroundColor: '#fff',
+        boxShadow: '0 1px 0 #f1f5f9'
+      }}>
 
         {/* Announcement bar */}
-        <div style={{ backgroundColor: '#0f172a' }} className="py-2 px-4 text-center">
-          <p className="text-xs font-medium tracking-widest uppercase" style={{ color: '#94a3b8' }}>
+        <div style={{
+          backgroundColor: '#0f172a',
+          padding: '8px 16px',
+          textAlign: 'center'
+        }}>
+          <p style={{
+            color: '#94a3b8',
+            fontSize: 11,
+            letterSpacing: '0.1em',
+            textTransform: 'uppercase',
+            fontWeight: 500
+          }}>
             Free shipping above ₹999 &nbsp;·&nbsp; Use code{' '}
-            <span style={{ color: '#C9A84C' }} className="font-bold">PREMIA10</span>
+            <span style={{ color: '#C9A84C', fontWeight: 700 }}>PREMIA10</span>
             {' '}&nbsp;·&nbsp; New arrivals every week
           </p>
         </div>
 
         {/* Main header */}
-        <div className="border-b" style={{ borderColor: '#f1f5f9' }}>
-          <div className="max-w-7xl mx-auto px-4 py-3">
-            <div className="flex items-center gap-6">
+        <div style={{
+          borderBottom: '1px solid #f8fafc',
+          backgroundColor: '#fff'
+        }}>
+          <div style={{
+            maxWidth: 1280,
+            margin: '0 auto',
+            padding: '0 20px',
+            height: 64,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 16
+          }}>
 
-              {/* Hamburger - mobile only */}
-              <button
-                onClick={() => setMobileMenuOpen(true)}
-                className="lg:hidden p-2 rounded-xl hover:bg-gray-50 transition-colors"
-              >
-                <Menu size={22} style={{ color: '#0f172a' }} />
-              </button>
+            {/* Hamburger - mobile */}
+            <button
+              onClick={() => setMobileMenuOpen(true)}
+              style={{
+                display: 'none',
+                padding: 8,
+                borderRadius: 10,
+                border: 'none',
+                backgroundColor: 'transparent',
+                cursor: 'pointer'
+              }}
+              className="mobile-only"
+            >
+              <Menu size={22} color="#0f172a" />
+            </button>
 
-              {/* Logo */}
-              <Link to="/" className="flex-shrink-0">
-                <PremiaLogo variant="light" size="md" />
-              </Link>
+            {/* Logo */}
+            <Link to="/" style={{ flexShrink: 0, textDecoration: 'none' }}>
+              <PremiaLogo variant="light" size="md" />
+            </Link>
 
-              {/* Search - hidden on mobile */}
-              <div className="flex-1 max-w-2xl hidden md:block">
-                <div
-                  className="flex items-center rounded-xl transition-all duration-200"
+            {/* Search - desktop */}
+            <div style={{ flex: 1, maxWidth: 560 }} className="desktop-search">
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                backgroundColor: searchFocused ? '#fff' : '#f8fafc',
+                border: searchFocused ? '2px solid #0f172a' : '2px solid #f1f5f9',
+                borderRadius: 12,
+                transition: 'all 0.15s',
+                boxShadow: searchFocused ? '0 0 0 4px rgba(15,23,42,0.06)' : 'none'
+              }}>
+                <Search size={15} color="#94a3b8" style={{ marginLeft: 14, flexShrink: 0 }} />
+                <input
+                  type="text"
+                  placeholder="Search Apple, Nike, Samsung..."
+                  value={searchQuery}
+                  onChange={handleSearch}
+                  onFocus={() => setSearchFocused(true)}
+                  onBlur={() => setSearchFocused(false)}
                   style={{
-                    backgroundColor: searchFocused ? '#fff' : '#f8fafc',
-                    border: searchFocused
-                      ? '2px solid #0f172a'
-                      : '2px solid #f1f5f9',
-                    boxShadow: searchFocused ? '0 0 0 4px rgba(15,23,42,0.06)' : 'none'
+                    flex: 1,
+                    padding: '10px 12px',
+                    fontSize: 13,
+                    border: 'none',
+                    outline: 'none',
+                    backgroundColor: 'transparent',
+                    color: '#0f172a',
+                    fontFamily: 'Inter, system-ui'
                   }}
-                >
-                  <Search size={16} className="ml-4 flex-shrink-0" style={{ color: '#94a3b8' }} />
-                  <input
-                    type="text"
-                    placeholder="Search Apple, Nike, Samsung and more..."
-                    value={searchQuery}
-                    onChange={handleSearch}
-                    onFocus={() => setSearchFocused(true)}
-                    onBlur={() => setSearchFocused(false)}
-                    className="w-full px-3 py-3 text-sm focus:outline-none bg-transparent"
-                    style={{ color: '#0f172a' }}
-                  />
-                  {searchQuery && (
-                    <button
-                      onClick={clearSearch}
-                      className="mr-3 p-1 rounded-full hover:bg-gray-100 transition-colors"
-                    >
-                      <X size={13} style={{ color: '#94a3b8' }} />
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Right icons */}
-              <div className="flex items-center gap-1 ml-auto lg:ml-0">
-
-                {/* Mobile search toggle */}
-                <button
-                  onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
-                  className="md:hidden p-2.5 rounded-xl hover:bg-gray-50 transition-colors"
-                >
-                  <Search size={20} style={{ color: '#64748b' }} />
-                </button>
-
-                {token ? (
-                  <>
-                    <Link
-                      to="/orders"
-                      className="hidden lg:flex flex-col items-center p-2.5 rounded-xl hover:bg-gray-50 transition-colors group min-w-[52px]"
-                    >
-                      <Package size={20} style={{ color: '#64748b' }} className="group-hover:text-gray-900 transition-colors" />
-                      <span className="text-xs mt-0.5 transition-colors" style={{ color: '#94a3b8' }}>Orders</span>
-                    </Link>
-                    <Link
-                      to="/admin"
-                      className="hidden lg:flex flex-col items-center p-2.5 rounded-xl hover:bg-gray-50 transition-colors group min-w-[52px]"
-                    >
-                      <Settings size={20} style={{ color: '#64748b' }} className="group-hover:text-gray-900 transition-colors" />
-                      <span className="text-xs mt-0.5 transition-colors" style={{ color: '#94a3b8' }}>Admin</span>
-                    </Link>
-                    <button
-                      onClick={handleLogout}
-                      className="hidden lg:flex flex-col items-center p-2.5 rounded-xl hover:bg-gray-50 transition-colors group min-w-[52px]"
-                    >
-                      <LogOut size={20} style={{ color: '#64748b' }} className="group-hover:text-gray-900 transition-colors" />
-                      <span className="text-xs mt-0.5 transition-colors" style={{ color: '#94a3b8' }}>Logout</span>
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <Link
-                      to="/login"
-                      className="hidden lg:flex flex-col items-center p-2.5 rounded-xl hover:bg-gray-50 transition-colors group min-w-[52px]"
-                    >
-                      <User size={20} style={{ color: '#64748b' }} />
-                      <span className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>Login</span>
-                    </Link>
-                    <Link
-                      to="/register"
-                      className="hidden lg:block px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors hover:opacity-90"
-                      style={{ backgroundColor: '#0f172a' }}
-                    >
-                      Sign Up
-                    </Link>
-                  </>
+                />
+                {searchQuery && (
+                  <button
+                    onClick={clearSearch}
+                    style={{
+                      marginRight: 10,
+                      padding: 4,
+                      borderRadius: '50%',
+                      border: 'none',
+                      backgroundColor: '#f1f5f9',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center'
+                    }}
+                  >
+                    <X size={11} color="#64748b" />
+                  </button>
                 )}
-
-                {/* Wishlist */}
-                <button className="flex flex-col items-center p-2.5 rounded-xl hover:bg-gray-50 transition-colors group min-w-[52px]">
-                  <Heart size={20} style={{ color: '#64748b' }} className="group-hover:text-red-500 transition-colors" />
-                  <span className="text-xs mt-0.5 hidden lg:block" style={{ color: '#94a3b8' }}>Wishlist</span>
-                </button>
-
-                {/* Cart */}
-                <Link
-                  to="/cart"
-                  className="flex flex-col items-center p-2.5 rounded-xl hover:bg-gray-50 transition-colors group min-w-[52px] relative"
-                >
-                  <div className="relative">
-                    <ShoppingCart size={20} style={{ color: '#64748b' }} className="group-hover:text-gray-900 transition-colors" />
-                    <AnimatePresence>
-                      {cartCount > 0 && (
-                        <motion.span
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          exit={{ scale: 0 }}
-                          className="absolute -top-2 -right-2 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold leading-none"
-                          style={{ backgroundColor: '#C9A84C', fontSize: 9 }}
-                        >
-                          {cartCount > 9 ? '9+' : cartCount}
-                        </motion.span>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                  <span className="text-xs mt-0.5 hidden lg:block" style={{ color: '#94a3b8' }}>Cart</span>
-                </Link>
-
               </div>
             </div>
 
-            {/* Mobile search */}
-            <AnimatePresence>
-              {mobileSearchOpen && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  className="md:hidden mt-3 overflow-hidden"
-                >
-                  <div
-                    className="flex items-center rounded-xl"
-                    style={{ border: '2px solid #0f172a', backgroundColor: '#fff' }}
+            {/* Right icons */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4,
+              marginLeft: 'auto'
+            }}>
+
+              {/* Mobile search */}
+              <button
+                onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
+                style={{
+                  padding: '8px 10px',
+                  borderRadius: 10,
+                  border: 'none',
+                  backgroundColor: 'transparent',
+                  cursor: 'pointer',
+                  display: 'none'
+                }}
+                className="mobile-only"
+              >
+                <Search size={20} color="#64748b" />
+              </button>
+
+              {token ? (
+                <>
+                  <Link
+                    to="/orders"
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      padding: '6px 10px',
+                      borderRadius: 10,
+                      textDecoration: 'none',
+                      gap: 2
+                    }}
+                    className="desktop-only nav-icon"
                   >
-                    <Search size={16} className="ml-3" style={{ color: '#94a3b8' }} />
-                    <input
-                      type="text"
-                      placeholder="Search products..."
-                      value={searchQuery}
-                      onChange={handleSearch}
-                      autoFocus
-                      className="w-full px-3 py-2.5 text-sm focus:outline-none"
-                    />
-                    {searchQuery && (
-                      <button onClick={clearSearch} className="mr-3">
-                        <X size={13} style={{ color: '#94a3b8' }} />
-                      </button>
-                    )}
-                  </div>
-                </motion.div>
+                    <Package size={20} color="#64748b" />
+                    <span style={{ fontSize: 10, color: '#94a3b8', fontWeight: 500 }}>Orders</span>
+                  </Link>
+
+                  <Link
+                    to="/admin"
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      padding: '6px 10px',
+                      borderRadius: 10,
+                      textDecoration: 'none',
+                      gap: 2
+                    }}
+                    className="desktop-only nav-icon"
+                  >
+                    <Settings size={20} color="#64748b" />
+                    <span style={{ fontSize: 10, color: '#94a3b8', fontWeight: 500 }}>Admin</span>
+                  </Link>
+
+                  <button
+                    onClick={handleLogout}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      padding: '6px 10px',
+                      borderRadius: 10,
+                      border: 'none',
+                      backgroundColor: 'transparent',
+                      cursor: 'pointer',
+                      gap: 2
+                    }}
+                    className="desktop-only nav-icon"
+                  >
+                    <LogOut size={20} color="#64748b" />
+                    <span style={{ fontSize: 10, color: '#94a3b8', fontWeight: 500 }}>Logout</span>
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      padding: '6px 10px',
+                      borderRadius: 10,
+                      textDecoration: 'none',
+                      gap: 2
+                    }}
+                    className="desktop-only nav-icon"
+                  >
+                    <User size={20} color="#64748b" />
+                    <span style={{ fontSize: 10, color: '#94a3b8', fontWeight: 500 }}>Login</span>
+                  </Link>
+
+                  <Link
+                    to="/register"
+                    style={{
+                      backgroundColor: '#C9A84C',
+                      color: '#0f172a',
+                      padding: '9px 18px',
+                      borderRadius: 10,
+                      fontSize: 12,
+                      fontWeight: 700,
+                      textDecoration: 'none',
+                      letterSpacing: '0.02em'
+                    }}
+                    className="desktop-only"
+                  >
+                    Sign Up
+                  </Link>
+                </>
               )}
-            </AnimatePresence>
+
+              {/* Wishlist */}
+              <button
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  padding: '6px 10px',
+                  borderRadius: 10,
+                  border: 'none',
+                  backgroundColor: 'transparent',
+                  cursor: 'pointer',
+                  gap: 2
+                }}
+                className="nav-icon"
+              >
+                <Heart size={20} color="#64748b" />
+                <span style={{ fontSize: 10, color: '#94a3b8', fontWeight: 500 }}
+                  className="desktop-only">Wishlist</span>
+              </button>
+
+              {/* Cart */}
+              <Link
+                to="/cart"
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  padding: '6px 10px',
+                  borderRadius: 10,
+                  textDecoration: 'none',
+                  position: 'relative',
+                  gap: 2
+                }}
+                className="nav-icon"
+              >
+                <div style={{ position: 'relative' }}>
+                  <ShoppingCart size={20} color="#64748b" />
+                  <AnimatePresence>
+                    {cartCount > 0 && (
+                      <motion.span
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        exit={{ scale: 0 }}
+                        style={{
+                          position: 'absolute',
+                          top: -8,
+                          right: -8,
+                          backgroundColor: '#C9A84C',
+                          color: '#0f172a',
+                          fontSize: 9,
+                          fontWeight: 800,
+                          width: 16,
+                          height: 16,
+                          borderRadius: '50%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        {cartCount > 9 ? '9+' : cartCount}
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </div>
+                <span style={{ fontSize: 10, color: '#94a3b8', fontWeight: 500 }}
+                  className="desktop-only">Cart</span>
+              </Link>
+
+            </div>
           </div>
+
+          {/* Mobile search dropdown */}
+          <AnimatePresence>
+            {mobileSearchOpen && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                style={{
+                  overflow: 'hidden',
+                  padding: '0 16px 12px',
+                  backgroundColor: '#fff'
+                }}
+                className="mobile-only"
+              >
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  border: '2px solid #0f172a',
+                  borderRadius: 12,
+                  backgroundColor: '#fff'
+                }}>
+                  <Search size={15} color="#94a3b8" style={{ marginLeft: 12 }} />
+                  <input
+                    type="text"
+                    placeholder="Search products..."
+                    value={searchQuery}
+                    onChange={handleSearch}
+                    autoFocus
+                    style={{
+                      flex: 1,
+                      padding: '10px 12px',
+                      fontSize: 13,
+                      border: 'none',
+                      outline: 'none',
+                      fontFamily: 'Inter, system-ui'
+                    }}
+                  />
+                  {searchQuery && (
+                    <button onClick={clearSearch} style={{ marginRight: 10, border: 'none', background: 'none', cursor: 'pointer' }}>
+                      <X size={13} color="#94a3b8" />
+                    </button>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Category nav - desktop only */}
-        <div className="hidden lg:block bg-white border-b" style={{ borderColor: '#f1f5f9' }}>
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="flex items-center overflow-x-auto gap-1">
+        <div style={{
+          backgroundColor: '#fff',
+          borderBottom: '1px solid #f1f5f9'
+        }} className="desktop-only">
+          <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 20px' }}>
+            <div style={{
+              display: 'flex',
+              overflowX: 'auto',
+              msOverflowStyle: 'none',
+              scrollbarWidth: 'none'
+            }}>
               {categories.map((cat, i) => (
                 <button
                   key={i}
-                  className="px-4 py-3 text-xs font-medium whitespace-nowrap transition-all duration-200 border-b-2 border-transparent flex-shrink-0"
-                  style={{ color: '#64748b' }}
+                  style={{
+                    flexShrink: 0,
+                    padding: '12px 16px',
+                    fontSize: 12,
+                    fontWeight: 500,
+                    color: '#64748b',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    borderBottom: '2px solid transparent',
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    transition: 'color 0.15s, border-color 0.15s',
+                    outline: 'none'
+                  }}
                   onMouseEnter={e => {
-                    e.target.style.color = '#0f172a'
-                    e.target.style.borderBottomColor = '#C9A84C'
+                    e.currentTarget.style.color = '#0f172a'
+                    e.currentTarget.style.borderBottomColor = '#C9A84C'
                   }}
                   onMouseLeave={e => {
-                    e.target.style.color = '#64748b'
-                    e.target.style.borderBottomColor = 'transparent'
+                    e.currentTarget.style.color = '#64748b'
+                    e.currentTarget.style.borderBottomColor = 'transparent'
                   }}
                 >
                   {cat}
@@ -262,149 +447,211 @@ function Header({ cartCount, onSearch }) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 lg:hidden"
-              style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
               onClick={() => setMobileMenuOpen(false)}
+              style={{
+                position: 'fixed', inset: 0,
+                backgroundColor: 'rgba(0,0,0,0.5)',
+                zIndex: 50
+              }}
             />
             <motion.div
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
-              transition={{ type: 'tween', duration: 0.3 }}
-              className="fixed left-0 top-0 bottom-0 w-72 bg-white z-50 flex flex-col shadow-2xl"
+              transition={{ type: 'tween', duration: 0.25 }}
+              style={{
+                position: 'fixed', left: 0, top: 0, bottom: 0,
+                width: 280, backgroundColor: '#fff',
+                zIndex: 51, display: 'flex', flexDirection: 'column',
+                boxShadow: '4px 0 24px rgba(0,0,0,0.12)'
+              }}
             >
-              <div className="flex items-center justify-between p-4 border-b" style={{ borderColor: '#f1f5f9' }}>
+              <div style={{
+                display: 'flex', alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '16px 20px',
+                borderBottom: '1px solid #f1f5f9'
+              }}>
                 <PremiaLogo variant="light" size="sm" />
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="p-2 rounded-xl hover:bg-gray-50"
+                  style={{ border: 'none', background: 'none', cursor: 'pointer', padding: 4 }}
                 >
-                  <X size={20} style={{ color: '#64748b' }} />
+                  <X size={20} color="#64748b" />
                 </button>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-4">
+              <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px' }}>
                 {token ? (
-                  <div className="mb-6 space-y-1">
-                    <Link
-                      to="/orders"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center gap-3 py-3 px-3 rounded-xl hover:bg-gray-50 transition-colors"
-                      style={{ color: '#0f172a' }}
-                    >
-                      <Package size={18} style={{ color: '#C9A84C' }} />
-                      <span className="font-medium text-sm">My Orders</span>
-                    </Link>
-                    <Link
-                      to="/admin"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center gap-3 py-3 px-3 rounded-xl hover:bg-gray-50 transition-colors"
-                      style={{ color: '#0f172a' }}
-                    >
-                      <Settings size={18} style={{ color: '#C9A84C' }} />
-                      <span className="font-medium text-sm">Admin Panel</span>
-                    </Link>
+                  <div style={{ marginBottom: 20 }}>
+                    {[
+                      { to: '/orders', icon: <Package size={16} />, label: 'My Orders' },
+                      { to: '/admin', icon: <Settings size={16} />, label: 'Admin Panel' },
+                    ].map((item, i) => (
+                      <Link
+                        key={i}
+                        to={item.to}
+                        onClick={() => setMobileMenuOpen(false)}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 12,
+                          padding: '12px 12px', borderRadius: 10,
+                          color: '#0f172a', textDecoration: 'none',
+                          fontSize: 13, fontWeight: 500, marginBottom: 4
+                        }}
+                      >
+                        <span style={{ color: '#C9A84C' }}>{item.icon}</span>
+                        {item.label}
+                      </Link>
+                    ))}
                     <button
                       onClick={handleLogout}
-                      className="flex items-center gap-3 py-3 px-3 rounded-xl hover:bg-red-50 transition-colors w-full"
-                      style={{ color: '#ef4444' }}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 12,
+                        padding: '12px 12px', borderRadius: 10,
+                        color: '#ef4444', border: 'none',
+                        backgroundColor: 'transparent', cursor: 'pointer',
+                        fontSize: 13, fontWeight: 500, width: '100%'
+                      }}
                     >
-                      <LogOut size={18} />
-                      <span className="font-medium text-sm">Logout</span>
+                      <LogOut size={16} />
+                      Logout
                     </button>
                   </div>
                 ) : (
-                  <div className="flex gap-3 mb-6">
+                  <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
                     <Link
                       to="/login"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="flex-1 text-center py-2.5 rounded-xl font-semibold text-sm border-2 transition-colors"
-                      style={{ borderColor: '#0f172a', color: '#0f172a' }}
+                      style={{
+                        flex: 1, textAlign: 'center', padding: '10px',
+                        borderRadius: 10, border: '2px solid #0f172a',
+                        color: '#0f172a', textDecoration: 'none',
+                        fontSize: 13, fontWeight: 600
+                      }}
                     >
                       Login
                     </Link>
                     <Link
-  to="/register"
-  className="hidden lg:block px-5 py-2.5 rounded-xl text-sm font-bold transition-all hover:opacity-90"
-  style={{
-    backgroundColor: '#C9A84C',
-    color: '#0f172a',
-  }}
->
-  Sign Up
-</Link>
+                      to="/register"
+                      onClick={() => setMobileMenuOpen(false)}
+                      style={{
+                        flex: 1, textAlign: 'center', padding: '10px',
+                        borderRadius: 10, backgroundColor: '#C9A84C',
+                        color: '#0f172a', textDecoration: 'none',
+                        fontSize: 13, fontWeight: 700
+                      }}
+                    >
+                      Sign Up
+                    </Link>
                   </div>
                 )}
 
-                <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: '#94a3b8' }}>
+                <p style={{
+                  fontSize: 10, fontWeight: 700, color: '#94a3b8',
+                  textTransform: 'uppercase', letterSpacing: '0.15em',
+                  marginBottom: 12
+                }}>
                   Categories
                 </p>
-                <div className="space-y-1">
-                  {categories.map((cat, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center justify-between w-full py-2.5 px-3 rounded-xl hover:bg-gray-50 transition-colors text-sm"
-                      style={{ color: '#334155' }}
-                    >
-                      <span>{cat}</span>
-                      <span style={{ color: '#cbd5e1' }}>›</span>
-                    </button>
-                  ))}
-                </div>
+                {categories.map((cat, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setMobileMenuOpen(false)}
+                    style={{
+                      display: 'flex', alignItems: 'center',
+                      justifyContent: 'space-between',
+                      width: '100%', padding: '10px 12px',
+                      borderRadius: 10, border: 'none',
+                      backgroundColor: 'transparent', cursor: 'pointer',
+                      fontSize: 13, color: '#334155', marginBottom: 2
+                    }}
+                  >
+                    {cat}
+                    <span style={{ color: '#cbd5e1' }}>›</span>
+                  </button>
+                ))}
               </div>
-
             </motion.div>
           </>
         )}
       </AnimatePresence>
 
-      {/* Mobile bottom nav */}
-      <div
-        className="fixed bottom-0 left-0 right-0 z-40 lg:hidden border-t"
-        style={{ backgroundColor: '#fff', borderColor: '#f1f5f9' }}
-      >
-        <div className="flex items-center justify-around py-2">
-          <Link to="/" className="flex flex-col items-center gap-1 px-4 py-1">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0f172a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
-              <polyline points="9 22 9 12 15 12 15 22"/>
-            </svg>
-            <span className="text-xs font-medium" style={{ color: '#0f172a' }}>Home</span>
-          </Link>
-          <button
-            onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
-            className="flex flex-col items-center gap-1 px-4 py-1"
-          >
-            <Search size={22} style={{ color: '#94a3b8' }} />
-            <span className="text-xs font-medium" style={{ color: '#94a3b8' }}>Search</span>
-          </button>
-          <button className="flex flex-col items-center gap-1 px-4 py-1">
-            <Heart size={22} style={{ color: '#94a3b8' }} />
-            <span className="text-xs font-medium" style={{ color: '#94a3b8' }}>Wishlist</span>
-          </button>
-          <Link to="/cart" className="flex flex-col items-center gap-1 px-4 py-1 relative">
-            <div className="relative">
-              <ShoppingCart size={22} style={{ color: '#94a3b8' }} />
-              {cartCount > 0 && (
-                <span
-                  className="absolute -top-2 -right-2 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold"
-                  style={{ backgroundColor: '#C9A84C', fontSize: 8 }}
-                >
-                  {cartCount}
+      {/* Bottom mobile nav */}
+      <div style={{
+        position: 'fixed', bottom: 0, left: 0, right: 0,
+        backgroundColor: '#fff', borderTop: '1px solid #f1f5f9',
+        display: 'flex', zIndex: 40, paddingBottom: 'env(safe-area-inset-bottom)'
+      }} className="mobile-only">
+        {[
+          { to: '/', icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>, label: 'Home' },
+          { to: null, icon: <Search size={22} />, label: 'Search', onClick: () => setMobileSearchOpen(!mobileSearchOpen) },
+          { to: null, icon: <Heart size={22} />, label: 'Wishlist' },
+          { to: '/cart', icon: <ShoppingCart size={22} />, label: 'Cart', badge: cartCount },
+          { to: token ? '/orders' : '/login', icon: <User size={22} />, label: token ? 'Account' : 'Login' },
+        ].map((item, i) => (
+          item.to ? (
+            <Link
+              key={i}
+              to={item.to}
+              style={{
+                flex: 1, display: 'flex', flexDirection: 'column',
+                alignItems: 'center', gap: 3, padding: '8px 0',
+                color: '#94a3b8', textDecoration: 'none',
+                fontSize: 10, fontWeight: 500, position: 'relative'
+              }}
+            >
+              {item.badge > 0 && (
+                <span style={{
+                  position: 'absolute', top: 4, right: '22%',
+                  backgroundColor: '#C9A84C', color: '#0f172a',
+                  fontSize: 8, fontWeight: 800,
+                  width: 14, height: 14, borderRadius: '50%',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}>
+                  {item.badge}
                 </span>
               )}
-            </div>
-            <span className="text-xs font-medium" style={{ color: '#94a3b8' }}>Cart</span>
-          </Link>
-          <Link to={token ? '/orders' : '/login'} className="flex flex-col items-center gap-1 px-4 py-1">
-            <User size={22} style={{ color: '#94a3b8' }} />
-            <span className="text-xs font-medium" style={{ color: '#94a3b8' }}>
-              {token ? 'Account' : 'Login'}
-            </span>
-          </Link>
-        </div>
+              {item.icon}
+              {item.label}
+            </Link>
+          ) : (
+            <button
+              key={i}
+              onClick={item.onClick}
+              style={{
+                flex: 1, display: 'flex', flexDirection: 'column',
+                alignItems: 'center', gap: 3, padding: '8px 0',
+                color: '#94a3b8', border: 'none', backgroundColor: 'transparent',
+                fontSize: 10, fontWeight: 500, cursor: 'pointer'
+              }}
+            >
+              {item.icon}
+              {item.label}
+            </button>
+          )
+        ))}
       </div>
+
+      {/* CSS for responsive helpers */}
+      <style>{`
+        @media (max-width: 1023px) {
+          .desktop-only { display: none !important; }
+          .mobile-only { display: flex !important; }
+          .desktop-search { display: none !important; }
+        }
+        @media (min-width: 1024px) {
+          .mobile-only { display: none !important; }
+          .desktop-only { display: flex !important; }
+          .desktop-search { display: block !important; }
+        }
+        .nav-icon:hover svg {
+          color: #0f172a !important;
+        }
+        .nav-icon:hover span {
+          color: #0f172a !important;
+        }
+      `}</style>
+
     </>
   )
 }

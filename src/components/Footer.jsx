@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Mail, Phone, MapPin } from 'lucide-react'
+import { Mail, Phone, MapPin, Truck, RotateCcw, Shield, BadgeCheck } from 'lucide-react'
 import { FaInstagram, FaXTwitter, FaFacebook, FaYoutube } from 'react-icons/fa6'
 import PremiaLogo from './PremiaLogo'
 
@@ -27,42 +27,60 @@ function Footer() {
       { name: 'Press', href: '/' },
       { name: 'Privacy Policy', href: '/' },
       { name: 'Terms of Service', href: '/' },
-      { name: 'Cookie Policy', href: '/' },
     ],
   }
 
-  const socialLinks = [
-  { icon: <FaInstagram size={18} />, href: '#', label: 'Instagram' },
-  { icon: <FaXTwitter size={18} />, href: '#', label: 'Twitter' },
-  { icon: <FaFacebook size={18} />, href: '#', label: 'Facebook' },
-  { icon: <FaYoutube size={18} />, href: '#', label: 'YouTube' },
-]
-
   const trustBadges = [
-    { icon: '🔒', title: '100% Secure', desc: 'SSL encrypted payments' },
-    { icon: '🚚', title: 'Free Delivery', desc: 'On orders above ₹999' },
-    { icon: '↩️', title: '7-Day Returns', desc: 'Hassle-free returns' },
-    { icon: '✓', title: 'Genuine Products', desc: '100% authentic brands' },
+    { icon: <Truck size={22} />, title: 'Free Delivery', desc: 'On orders above ₹999' },
+    { icon: <RotateCcw size={22} />, title: '7-Day Returns', desc: 'Hassle-free returns' },
+    { icon: <Shield size={22} />, title: '100% Secure', desc: 'SSL encrypted payments' },
+    { icon: <BadgeCheck size={22} />, title: 'Genuine Products', desc: '100% authentic brands' },
+  ]
+
+  const socialLinks = [
+    { icon: <FaInstagram size={16} />, href: '#', label: 'Instagram' },
+    { icon: <FaXTwitter size={16} />, href: '#', label: 'Twitter' },
+    { icon: <FaFacebook size={16} />, href: '#', label: 'Facebook' },
+    { icon: <FaYoutube size={16} />, href: '#', label: 'YouTube' },
   ]
 
   return (
-    <footer style={{ backgroundColor: '#0a0a0a' }} className="text-white mt-16">
+    <footer style={{ backgroundColor: '#0a0a0a', marginTop: 64 }}>
 
-      {/* Trust badges strip */}
-      <div style={{ borderBottom: '1px solid #1a1a1a' }}>
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Trust badges */}
+      <div style={{ borderBottom: '1px solid #141414' }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '40px 24px' }}>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: 24
+          }}>
             {trustBadges.map((badge, i) => (
-              <div key={i} className="flex items-center gap-4">
-                <div
-                  className="w-12 h-12 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
-                  style={{ backgroundColor: '#111', border: '1px solid #1e1e1e' }}
-                >
+              <div key={i} style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 16
+              }}>
+                <div style={{
+                  width: 48, height: 48,
+                  backgroundColor: '#111',
+                  border: '1px solid #1e1e1e',
+                  borderRadius: 12,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#C9A84C',
+                  flexShrink: 0
+                }}>
                   {badge.icon}
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-white">{badge.title}</p>
-                  <p className="text-xs" style={{ color: '#475569' }}>{badge.desc}</p>
+                  <p style={{ color: '#fff', fontSize: 13, fontWeight: 700, marginBottom: 2 }}>
+                    {badge.title}
+                  </p>
+                  <p style={{ color: '#475569', fontSize: 12 }}>
+                    {badge.desc}
+                  </p>
                 </div>
               </div>
             ))}
@@ -71,42 +89,64 @@ function Footer() {
       </div>
 
       {/* Main footer */}
-      <div style={{ borderBottom: '1px solid #1a1a1a' }}>
-        <div className="max-w-7xl mx-auto px-6 py-12">
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
+      <div style={{ borderBottom: '1px solid #141414' }}>
+        <div style={{
+          maxWidth: 1280,
+          margin: '0 auto',
+          padding: '56px 24px'
+        }}>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '2fr 1fr 1fr 1fr',
+            gap: 48
+          }}>
 
             {/* Brand column */}
-            <div className="lg:col-span-2">
+            <div>
               <PremiaLogo variant="dark" size="md" />
-              <p className="mt-4 text-sm leading-relaxed" style={{ color: '#475569', maxWidth: '280px' }}>
-                India's most premium ecommerce destination. 348+ curated products from the world's finest brands. Every item handpicked. Every price unbeatable.
+              <p style={{
+                color: '#475569',
+                fontSize: 13,
+                lineHeight: 1.7,
+                marginTop: 16,
+                maxWidth: 280
+              }}>
+                India's most premium ecommerce destination. Curated products from the world's finest brands. Every item handpicked. Every price unbeatable.
               </p>
 
-              {/* Contact info */}
-              <div className="mt-6 space-y-3">
-                <div className="flex items-center gap-3">
-                  <Mail size={14} style={{ color: '#C9A84C' }} />
-                  <span className="text-sm" style={{ color: '#475569' }}>support@premia.in</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Phone size={14} style={{ color: '#C9A84C' }} />
-                  <span className="text-sm" style={{ color: '#475569' }}>1800-PREMIA (Mon-Sat 9am-6pm)</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <MapPin size={14} style={{ color: '#C9A84C' }} />
-                  <span className="text-sm" style={{ color: '#475569' }}>New Delhi, India</span>
-                </div>
+              {/* Contact */}
+              <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {[
+                  { icon: <Mail size={13} />, text: 'support@premia.in' },
+                  { icon: <Phone size={13} />, text: '1800-PREMIA (Mon-Sat 9am-6pm)' },
+                  { icon: <MapPin size={13} />, text: 'New Delhi, India' },
+                ].map((item, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <span style={{ color: '#C9A84C', flexShrink: 0 }}>{item.icon}</span>
+                    <span style={{ color: '#475569', fontSize: 12 }}>{item.text}</span>
+                  </div>
+                ))}
               </div>
 
-              {/* Social links */}
-              <div className="flex items-center gap-3 mt-6">
-                {socialLinks.map((social, i) => (
+              {/* Social */}
+              <div style={{ display: 'flex', gap: 10, marginTop: 24 }}>
+                {socialLinks.map((s, i) => (
                   <a
                     key={i}
-                    href={social.href}
-                    aria-label={social.label}
-                    className="w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200"
-                    style={{ backgroundColor: '#111', border: '1px solid #1e1e1e', color: '#475569' }}
+                    href={s.href}
+                    aria-label={s.label}
+                    style={{
+                      width: 36, height: 36,
+                      backgroundColor: '#111',
+                      border: '1px solid #1e1e1e',
+                      borderRadius: 8,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#475569',
+                      textDecoration: 'none',
+                      transition: 'all 0.2s'
+                    }}
                     onMouseEnter={e => {
                       e.currentTarget.style.backgroundColor = '#C9A84C'
                       e.currentTarget.style.color = '#0a0a0a'
@@ -118,36 +158,43 @@ function Footer() {
                       e.currentTarget.style.borderColor = '#1e1e1e'
                     }}
                   >
-                    {social.icon}
+                    {s.icon}
                   </a>
                 ))}
               </div>
             </div>
 
-            {/* Links columns */}
+            {/* Link columns */}
             {Object.entries(footerLinks).map(([title, links]) => (
               <div key={title}>
-                <h3
-                  className="text-xs font-bold uppercase tracking-widest mb-5"
-                  style={{ color: '#C9A84C' }}
-                >
+                <h3 style={{
+                  color: '#C9A84C',
+                  fontSize: 10,
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.18em',
+                  marginBottom: 20
+                }}>
                   {title}
                 </h3>
-                <ul className="space-y-3">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   {links.map((link, i) => (
-                    <li key={i}>
-                      <Link
-                        to={link.href}
-                        className="text-sm transition-colors duration-200"
-                        style={{ color: '#475569' }}
-                        onMouseEnter={e => e.target.style.color = '#fff'}
-                        onMouseLeave={e => e.target.style.color = '#475569'}
-                      >
-                        {link.name}
-                      </Link>
-                    </li>
+                    <Link
+                      key={i}
+                      to={link.href}
+                      style={{
+                        color: '#475569',
+                        fontSize: 13,
+                        textDecoration: 'none',
+                        transition: 'color 0.15s'
+                      }}
+                      onMouseEnter={e => e.target.style.color = '#fff'}
+                      onMouseLeave={e => e.target.style.color = '#475569'}
+                    >
+                      {link.name}
+                    </Link>
                   ))}
-                </ul>
+                </div>
               </div>
             ))}
 
@@ -156,52 +203,85 @@ function Footer() {
       </div>
 
       {/* Newsletter */}
-      <div style={{ borderBottom: '1px solid #1a1a1a' }}>
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
-            <div>
-              <h3 className="text-base font-bold text-white mb-1">
-                Subscribe to PREMIA Newsletter
-              </h3>
-              <p className="text-sm" style={{ color: '#475569' }}>
-                Get exclusive deals, new arrivals and style tips straight to your inbox.
-              </p>
-            </div>
-            <div className="flex gap-3 w-full lg:w-auto">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="flex-1 lg:w-72 px-4 py-3 rounded-xl text-sm focus:outline-none"
-                style={{
-                  backgroundColor: '#111',
-                  border: '1px solid #1e1e1e',
-                  color: '#fff',
-                }}
-              />
-              <button
-                className="px-6 py-3 rounded-xl text-sm font-bold transition-opacity hover:opacity-90 flex-shrink-0"
-                style={{ backgroundColor: '#C9A84C', color: '#0a0a0a' }}
-              >
-                Subscribe
-              </button>
-            </div>
+      <div style={{ borderBottom: '1px solid #141414' }}>
+        <div style={{
+          maxWidth: 1280,
+          margin: '0 auto',
+          padding: '32px 24px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 24,
+          flexWrap: 'wrap'
+        }}>
+          <div>
+            <h3 style={{ color: '#fff', fontSize: 15, fontWeight: 700, marginBottom: 4 }}>
+              Subscribe to PREMIA Newsletter
+            </h3>
+            <p style={{ color: '#475569', fontSize: 13 }}>
+              Get exclusive deals, new arrivals and style tips.
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <input
+              type="email"
+              placeholder="Enter your email"
+              style={{
+                backgroundColor: '#111',
+                border: '1px solid #1e1e1e',
+                borderRadius: 10,
+                padding: '10px 16px',
+                fontSize: 13,
+                color: '#fff',
+                outline: 'none',
+                width: 260,
+                fontFamily: 'Inter, system-ui'
+              }}
+            />
+            <button style={{
+              backgroundColor: '#C9A84C',
+              color: '#0a0a0a',
+              border: 'none',
+              borderRadius: 10,
+              padding: '10px 20px',
+              fontSize: 13,
+              fontWeight: 700,
+              cursor: 'pointer',
+              whiteSpace: 'nowrap'
+            }}>
+              Subscribe
+            </button>
           </div>
         </div>
       </div>
 
       {/* Bottom bar */}
-      <div className="max-w-7xl mx-auto px-6 py-5">
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
-          <p className="text-xs" style={{ color: '#2a2a2a' }}>
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '20px 24px' }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: 16
+        }}>
+          <p style={{ color: '#2a2a2a', fontSize: 12 }}>
             © 2026 PREMIA. All rights reserved. Made with ♥ in India.
           </p>
-          <div className="flex items-center gap-6">
-            <span className="text-xs" style={{ color: '#2a2a2a' }}>We accept:</span>
-            {['VISA', 'MASTERCARD', 'UPI', 'RUPAY', 'EMI'].map((method, i) => (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ color: '#2a2a2a', fontSize: 11 }}>We accept:</span>
+            {['VISA', 'Mastercard', 'UPI', 'RuPay', 'EMI'].map((method, i) => (
               <span
                 key={i}
-                className="text-xs font-bold px-2 py-1 rounded"
-                style={{ backgroundColor: '#111', color: '#333', border: '1px solid #1e1e1e' }}
+                style={{
+                  backgroundColor: '#111',
+                  color: '#333',
+                  border: '1px solid #1e1e1e',
+                  borderRadius: 6,
+                  padding: '3px 8px',
+                  fontSize: 10,
+                  fontWeight: 700,
+                  letterSpacing: '0.05em'
+                }}
               >
                 {method}
               </span>

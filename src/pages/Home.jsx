@@ -38,7 +38,6 @@ function Home({ addToCart, searchQuery }) {
   const [sort, setSort] = useState('default')
   const [page, setPage] = useState(1)
   const PER_PAGE = 20
-
   const shuffleRef = useRef(null)
 
   if (products.length > 0 && !shuffleRef.current) {
@@ -57,9 +56,7 @@ function Home({ addToCart, searchQuery }) {
       })
   }, [])
 
-  useEffect(() => {
-    setPage(1)
-  }, [category, searchQuery, sort])
+  useEffect(() => { setPage(1) }, [category, searchQuery, sort])
 
   const filtered = shuffledProducts.filter(p => {
     const matchSearch = !searchQuery ||
@@ -82,14 +79,23 @@ function Home({ addToCart, searchQuery }) {
 
   if (loading) {
     return (
-      <div className="fixed inset-0 flex flex-col justify-center items-center bg-white gap-3">
-        <div
-          className="w-10 h-10 border-4 border-t-transparent rounded-full animate-spin"
-          style={{ borderColor: '#C9A84C', borderTopColor: 'transparent' }}
-        />
-        <p className="text-xs font-bold tracking-widest uppercase" style={{ color: '#C9A84C' }}>
+      <div style={{
+        position: 'fixed', inset: 0,
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center',
+        backgroundColor: '#fff', gap: 12
+      }}>
+        <div style={{
+          width: 40, height: 40,
+          border: '3px solid #C9A84C',
+          borderTopColor: 'transparent',
+          borderRadius: '50%',
+          animation: 'spin 0.8s linear infinite'
+        }} />
+        <p style={{ color: '#C9A84C', fontSize: 11, fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase' }}>
           Loading PREMIA...
         </p>
+        <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
       </div>
     )
   }
@@ -99,83 +105,94 @@ function Home({ addToCart, searchQuery }) {
 
       {/* HERO */}
       {!searchQuery && !category && (
-        <section style={{ backgroundColor: '#0f172a' }}>
-          <div className="max-w-7xl mx-auto px-4 lg:px-8 py-14 lg:py-24">
+        <div style={{ backgroundColor: '#0f172a', padding: '64px 0' }}>
+          <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <p
-                className="font-bold tracking-[0.3em] uppercase mb-4"
-                style={{ color: '#C9A84C', fontSize: 11 }}
-              >
+              <p style={{
+                color: '#C9A84C', fontSize: 11, fontWeight: 700,
+                letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 16
+              }}>
                 Curated for the Discerning
               </p>
-              <h1
-                className="font-black text-white mb-5"
-                style={{
-                  fontSize: 'clamp(34px, 5vw, 62px)',
-                  letterSpacing: '-2px',
-                  lineHeight: 1.02
-                }}
-              >
+              <h1 style={{
+                color: '#fff', fontWeight: 900, lineHeight: 1.02,
+                letterSpacing: '-2px', marginBottom: 20,
+                fontSize: 'clamp(32px, 5vw, 60px)'
+              }}>
                 The New Standard<br />
                 <span style={{ color: '#C9A84C' }}>of Shopping.</span>
               </h1>
-              <p
-                className="mb-8 leading-relaxed"
-                style={{ color: '#475569', fontSize: 15, maxWidth: 420 }}
-              >
+              <p style={{
+                color: '#475569', fontSize: 15, lineHeight: 1.7,
+                maxWidth: 400, marginBottom: 32
+              }}>
                 194+ premium products from top brands worldwide.
                 Every item handpicked. Every price unbeatable.
               </p>
-              <div className="flex flex-wrap gap-3">
-                <motion.button
+              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                <button
                   onClick={() => document.getElementById('products-section')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="px-7 py-3 rounded-xl font-bold uppercase cursor-pointer"
-                  style={{ backgroundColor: '#C9A84C', color: '#0f172a', fontSize: 12, letterSpacing: '0.08em', border: 'none' }}
-                  whileHover={{ opacity: 0.88 }}
-                  whileTap={{ scale: 0.97 }}
+                  style={{
+                    backgroundColor: '#C9A84C', color: '#0f172a',
+                    border: 'none', borderRadius: 12, padding: '12px 28px',
+                    fontSize: 12, fontWeight: 700, letterSpacing: '0.08em',
+                    textTransform: 'uppercase', cursor: 'pointer'
+                  }}
                 >
                   Explore Now
-                </motion.button>
-                <motion.button
+                </button>
+                <button
                   onClick={() => setCategory('smartphones')}
-                  className="px-7 py-3 rounded-xl font-semibold cursor-pointer"
-                  style={{ border: '1px solid #1e293b', color: '#64748b', fontSize: 12, backgroundColor: 'transparent' }}
-                  whileHover={{ borderColor: '#C9A84C', color: '#C9A84C' }}
-                  whileTap={{ scale: 0.97 }}
+                  style={{
+                    backgroundColor: 'transparent', color: '#64748b',
+                    border: '1px solid #1e293b', borderRadius: 12,
+                    padding: '12px 28px', fontSize: 12, fontWeight: 600, cursor: 'pointer'
+                  }}
                 >
                   Shop Electronics
-                </motion.button>
+                </button>
               </div>
             </motion.div>
           </div>
-        </section>
+        </div>
       )}
 
       {/* CATEGORY STRIP */}
-      <div
-        className="bg-white sticky z-40"
-        style={{ top: '130px', borderBottom: '1px solid #f1f5f9' }}
-      >
-        <div className="max-w-7xl mx-auto px-4 lg:px-8">
-          <div className="flex overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+      <div style={{
+        backgroundColor: '#fff',
+        borderBottom: '1px solid #f1f5f9',
+        position: 'sticky',
+        top: 128,
+        zIndex: 40,
+      }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
+          <div style={{
+            display: 'flex',
+            overflowX: 'auto',
+            msOverflowStyle: 'none',
+            scrollbarWidth: 'none',
+          }}>
             {categories.map((cat, i) => (
               <button
                 key={i}
                 onClick={() => setCategory(cat.slug)}
-                className="flex-shrink-0 px-4 py-3.5 font-medium transition-all cursor-pointer whitespace-nowrap"
                 style={{
+                  flexShrink: 0,
+                  padding: '14px 16px',
                   fontSize: 12,
-                  color: category === cat.slug ? '#0f172a' : '#94a3b8',
                   fontWeight: category === cat.slug ? 700 : 500,
-                  borderBottom: category === cat.slug ? '2px solid #C9A84C' : '2px solid transparent',
+                  color: category === cat.slug ? '#0f172a' : '#94a3b8',
                   backgroundColor: 'transparent',
                   border: 'none',
                   borderBottom: category === cat.slug ? '2px solid #C9A84C' : '2px solid transparent',
-                  outline: 'none'
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  outline: 'none',
+                  transition: 'color 0.15s',
                 }}
               >
                 {cat.name}
@@ -186,35 +203,43 @@ function Home({ addToCart, searchQuery }) {
       </div>
 
       {/* PRODUCTS */}
-      <section id="products-section" className="max-w-7xl mx-auto px-4 lg:px-8 py-8">
+      <div
+        id="products-section"
+        style={{ maxWidth: 1280, margin: '0 auto', padding: '32px 24px' }}
+      >
 
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="font-black" style={{ color: '#0f172a', fontSize: 18, letterSpacing: '-0.3px' }}>
-              {searchQuery
-                ? `Results for "${searchQuery}"`
-                : category
-                  ? categories.find(c => c.slug === category)?.name || category
-                  : 'All Products'
-              }
-              <span className="font-normal ml-2" style={{ color: '#94a3b8', fontSize: 14 }}>
-                ({sorted.length})
-              </span>
-            </h2>
-          </div>
+        <div style={{
+          display: 'flex', alignItems: 'center',
+          justifyContent: 'space-between', marginBottom: 24
+        }}>
+          <h2 style={{
+            color: '#0f172a', fontSize: 18,
+            fontWeight: 800, letterSpacing: '-0.3px'
+          }}>
+            {searchQuery
+              ? `"${searchQuery}"`
+              : category
+                ? categories.find(c => c.slug === category)?.name
+                : 'All Products'
+            }
+            <span style={{ color: '#94a3b8', fontSize: 14, fontWeight: 400, marginLeft: 8 }}>
+              ({sorted.length})
+            </span>
+          </h2>
 
           <select
             value={sort}
             onChange={e => setSort(e.target.value)}
-            className="cursor-pointer focus:outline-none"
             style={{
               backgroundColor: '#fff',
               border: '1px solid #e2e8f0',
               color: '#0f172a',
               fontSize: 12,
               padding: '8px 12px',
-              borderRadius: 10
+              borderRadius: 10,
+              cursor: 'pointer',
+              outline: 'none',
             }}
           >
             {sortOptions.map(opt => (
@@ -223,20 +248,24 @@ function Home({ addToCart, searchQuery }) {
           </select>
         </div>
 
-        {/* Empty state */}
+        {/* Empty */}
         {sorted.length === 0 ? (
-          <div className="text-center py-24">
-            <p style={{ fontSize: 48 }} className="mb-4">🔍</p>
-            <p className="font-bold mb-2" style={{ color: '#0f172a', fontSize: 18 }}>
+          <div style={{ textAlign: 'center', padding: '80px 0' }}>
+            <p style={{ fontSize: 48, marginBottom: 16 }}>🔍</p>
+            <p style={{ color: '#0f172a', fontSize: 18, fontWeight: 700, marginBottom: 8 }}>
               No products found
             </p>
-            <p className="mb-6" style={{ color: '#94a3b8', fontSize: 14 }}>
+            <p style={{ color: '#94a3b8', fontSize: 14, marginBottom: 24 }}>
               Try a different search or category
             </p>
             <button
               onClick={() => setCategory('')}
-              className="px-6 py-3 rounded-xl font-semibold text-white cursor-pointer"
-              style={{ backgroundColor: '#0f172a', border: 'none', fontSize: 13 }}
+              style={{
+                backgroundColor: '#0f172a', color: '#fff',
+                border: 'none', borderRadius: 12,
+                padding: '12px 24px', fontSize: 13,
+                fontWeight: 600, cursor: 'pointer'
+              }}
             >
               View All Products
             </button>
@@ -244,21 +273,24 @@ function Home({ addToCart, searchQuery }) {
         ) : (
           <>
             {/* Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 lg:gap-4">
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+              gap: 16,
+            }}>
               {paginated.map((product, i) => (
                 <motion.div
                   key={product._id}
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.25, delay: Math.min(i * 0.03, 0.3) }}
-                  className="flex"
+                  transition={{ duration: 0.2, delay: Math.min(i * 0.025, 0.25) }}
+                  style={{ display: 'flex' }}
                 >
-                  <div className="w-full">
+                  <div style={{ width: '100%' }}>
                     <ProductCard
                       id={product._id}
                       name={product.name}
                       price={product.price}
-                      description={product.description}
                       image={product.image}
                       rating={product.rating}
                       discount={product.discount}
@@ -273,22 +305,25 @@ function Home({ addToCart, searchQuery }) {
 
             {/* Load more */}
             {hasMore && (
-              <div className="text-center mt-10">
-                <motion.button
+              <div style={{ textAlign: 'center', marginTop: 40 }}>
+                <button
                   onClick={() => setPage(p => p + 1)}
-                  className="px-8 py-3 rounded-xl font-bold cursor-pointer"
-                  style={{ backgroundColor: '#0f172a', color: '#fff', fontSize: 13, border: 'none' }}
-                  whileHover={{ backgroundColor: '#C9A84C', color: '#0f172a' }}
-                  whileTap={{ scale: 0.97 }}
+                  style={{
+                    backgroundColor: '#0f172a', color: '#fff',
+                    border: 'none', borderRadius: 12,
+                    padding: '12px 32px', fontSize: 13,
+                    fontWeight: 700, cursor: 'pointer',
+                    letterSpacing: '0.05em'
+                  }}
                 >
                   Load More · {sorted.length - paginated.length} remaining
-                </motion.button>
+                </button>
               </div>
             )}
           </>
         )}
 
-      </section>
+      </div>
 
     </div>
   )
