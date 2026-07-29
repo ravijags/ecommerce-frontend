@@ -165,19 +165,28 @@ function ProductDetail({ addToCart }) {
           </div>
 
           {/* Highlights */}
-          {product.highlights?.length > 0 && (
-            <div className="mb-5">
-              <p className="text-sm font-bold mb-2" style={{ color: '#0f172a' }}>Highlights</p>
-              <ul className="space-y-1.5">
-                {product.highlights.map((h, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm" style={{ color: '#475569' }}>
-                    <span className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style={{ background: '#C9A84C' }} />
-                    {h}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+          {(() => {
+            const highlights = []
+            if (product.brand) highlights.push(`Brand: ${product.brand}`)
+            if (product.category) highlights.push(`Category: ${product.category.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}`)
+            if (product.stock > 0) highlights.push(`${product.stock} units available`)
+            if (product.rating) highlights.push(`Rated ${product.rating.toFixed(1)}/5 by customers`)
+            if (hasDiscount) highlights.push(`Save ₹${(product.originalPrice - product.price).toLocaleString()} on this item`)
+            if (product.price > 999) highlights.push('Free delivery on this order')
+            return highlights.length > 0 ? (
+              <div className="mb-5">
+                <p className="text-sm font-bold mb-2" style={{ color: '#0f172a' }}>Highlights</p>
+                <ul className="space-y-1.5">
+                  {highlights.map((h, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm" style={{ color: '#475569' }}>
+                      <span className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style={{ background: '#C9A84C' }} />
+                      {h}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null
+          })()}
 
           {/* Quantity */}
           <div className="flex items-center gap-4 mb-5">
