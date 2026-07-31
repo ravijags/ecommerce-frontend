@@ -9,7 +9,7 @@ function ProductCard({ name, price, image, onAddToCart, id, rating, discount, or
 
   const imageUrl = (image && image.startsWith('http'))
     ? image
-    : `https://placehold.co/400x400/f8fafc/94a3b8?text=${encodeURIComponent(name?.slice(0,10) || 'Product')}`
+    : `https://placehold.co/400x400/f1f5f9/94a3b8?text=${encodeURIComponent(name?.slice(0, 12) || 'Product')}`
 
   const handleAddToCart = () => {
     onAddToCart()
@@ -38,6 +38,7 @@ function ProductCard({ name, price, image, onAddToCart, id, rating, discount, or
             alt={name}
             className="w-full h-full object-contain p-2"
             style={{ transition: 'transform 0.4s' }}
+            onError={e => { e.target.src = `https://placehold.co/400x400/f1f5f9/94a3b8?text=${encodeURIComponent(name?.slice(0, 12) || 'Product')}` }}
             onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
             onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
             loading="lazy"

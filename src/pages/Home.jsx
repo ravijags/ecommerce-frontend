@@ -168,47 +168,6 @@ function Home({ addToCart, searchQuery }) {
         </div>
       )}
 
-      {/* CATEGORY STRIP */}
-      <div style={{
-        backgroundColor: '#fff',
-        borderBottom: '1px solid #f1f5f9',
-        position: 'sticky',
-        top: 128,
-        zIndex: 40,
-      }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
-          <div style={{
-            display: 'flex',
-            overflowX: 'auto',
-            msOverflowStyle: 'none',
-            scrollbarWidth: 'none',
-          }}>
-            {categories.map((cat, i) => (
-              <button
-                key={i}
-                onClick={() => setCategory(cat.slug)}
-                style={{
-                  flexShrink: 0,
-                  padding: '14px 16px',
-                  fontSize: 12,
-                  fontWeight: category === cat.slug ? 700 : 500,
-                  color: category === cat.slug ? '#0f172a' : '#94a3b8',
-                  backgroundColor: 'transparent',
-                  border: 'none',
-                  borderBottom: category === cat.slug ? '2px solid #C9A84C' : '2px solid transparent',
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                  outline: 'none',
-                  transition: 'color 0.15s',
-                }}
-              >
-                {cat.name}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
       {/* PRODUCTS */}
       <div
         id="products-section"
@@ -298,7 +257,7 @@ function Home({ addToCart, searchQuery }) {
                       id={product._id}
                       name={product.name}
                       price={product.price}
-                      image={product.image}
+                      image={product.image || product.thumbnail}
                       rating={product.rating}
                       discount={product.discount}
                       originalPrice={product.originalPrice}
