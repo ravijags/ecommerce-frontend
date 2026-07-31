@@ -1,18 +1,17 @@
 import { Link } from 'react-router-dom'
 import { ShoppingCart, Heart, Star } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { useState } from 'react'
 
 function ProductCard({ name, price, image, onAddToCart, id, rating, discount, originalPrice, brand }) {
   const [wishlist, setWishlist] = useState(false)
   const [added, setAdded] = useState(false)
-  const [hovered, setHovered] = useState(false)
 
   const imageUrl = (image && image.startsWith('http'))
     ? image
-    : 'https://dummyjson.com/image/400x300'
+    : `https://placehold.co/400x400/f8fafc/94a3b8?text=${encodeURIComponent(name?.slice(0,10) || 'Product')}`
 
-  const handleAddToCart = (e) => {
-    e.preventDefault()
+  const handleAddToCart = () => {
     onAddToCart()
     setAdded(true)
     setTimeout(() => setAdded(false), 1500)
@@ -20,162 +19,117 @@ function ProductCard({ name, price, image, onAddToCart, id, rating, discount, or
 
   return (
     <div
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        backgroundColor: '#fff',
-        borderRadius: 16,
-        overflow: 'hidden',
-        border: '1px solid #f1f5f9',
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
-        transition: 'transform 0.2s, box-shadow 0.2s',
-        transform: hovered ? 'translateY(-3px)' : 'translateY(0)',
-        boxShadow: hovered ? '0 12px 40px rgba(0,0,0,0.1)' : '0 1px 4px rgba(0,0,0,0.04)',
+      className="bg-white rounded-2xl overflow-hidden flex flex-col h-full group"
+      style={{ border: '1px solid #f1f5f9', transition: 'box-shadow 0.2s, transform 0.2s' }}
+      onMouseEnter={e => {
+        e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.08)'
+        e.currentTarget.style.transform = 'translateY(-2px)'
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.boxShadow = 'none'
+        e.currentTarget.style.transform = 'translateY(0)'
       }}
     >
       {/* Image */}
-      <Link
-        to={`/products/${id}`}
-        style={{ display: 'block', position: 'relative', flexShrink: 0 }}
-      >
-        <div style={{
-          height: 200,
-          overflow: 'hidden',
-          backgroundColor: '#f8fafc',
-          position: 'relative'
-        }}>
+      <Link to={`/products/${id}`} className="block relative flex-shrink-0" style={{ height: '200px' }}>
+        <div className="w-full h-full overflow-hidden" style={{ backgroundColor: '#f8fafc' }}>
           <img
             src={imageUrl}
             alt={name}
+            className="w-full h-full object-contain p-2"
+            style={{ transition: 'transform 0.4s' }}
+            onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
+            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
             loading="lazy"
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              transition: 'transform 0.4s',
-              transform: hovered ? 'scale(1.06)' : 'scale(1)'
-            }}
           />
         </div>
 
-        {/* Discount badge */}
+        {/* Discount */}
         {discount > 0 && (
-          <div style={{
-            position: 'absolute',
-            top: 10,
-            left: 10,
-            backgroundColor: '#ef4444',
-            color: '#fff',
-            fontSize: 10,
-            fontWeight: 700,
-            padding: '3px 8px',
-            borderRadius: 6,
-          }}>
+          <div
+            className="absolute top-2.5 left-2.5 text-white font-bold rounded-lg px-2 py-0.5"
+            style={{ backgroundColor: '#ef4444', fontSize: 10 }}
+          >
             {Math.round(discount)}% OFF
           </div>
         )}
 
         {/* Wishlist */}
         <button
-          onClick={e => { e.preventDefault(); setWishlist(!wishlist) }}
+          className="absolute top-2.5 right-2.5 bg-white rounded-full p-1.5 shadow-sm cursor-pointer"
           style={{
-            position: 'absolute',
-            top: 10,
-            right: 10,
-            backgroundColor: '#fff',
-            border: 'none',
-            borderRadius: '50%',
-            width: 30,
-            height: 30,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
-            opacity: hovered ? 1 : 0,
+            opacity: wishlist ? 1 : 0,
             transition: 'opacity 0.2s',
+            border: 'none'
           }}
+          onClick={e => {
+            e.preventDefault()
+            setWishlist(!wishlist)
+          }}
+          onMouseEnter={e => e.currentTarget.parentElement.parentElement.querySelector('.wishlist-btn') && null}
         >
           <Heart
             size={13}
+            style={{ color: wishlist ? '#ef4444' : '#94a3b8' }}
             fill={wishlist ? '#ef4444' : 'none'}
-            stroke={wishlist ? '#ef4444' : '#94a3b8'}
           />
         </button>
       </Link>
 
       {/* Info */}
-      <div style={{
-        padding: '12px 14px 14px',
-        display: 'flex',
-        flexDirection: 'column',
-        flex: 1,
-      }}>
+      <div className="p-3 flex flex-col flex-1">
 
         {/* Brand */}
         {brand && (
-          <p style={{
-            color: '#C9A84C',
-            fontSize: 9,
-            fontWeight: 700,
-            textTransform: 'uppercase',
-            letterSpacing: '0.12em',
-            marginBottom: 5,
-          }}>
+          <p
+            className="font-bold uppercase mb-1"
+            style={{ color: '#C9A84C', fontSize: 9, letterSpacing: '0.12em' }}
+          >
             {brand}
           </p>
         )}
 
         {/* Name */}
-        <Link to={`/products/${id}`} style={{ textDecoration: 'none' }}>
-          <h3 style={{
-            color: '#0f172a',
-            fontSize: 13,
-            fontWeight: 600,
-            lineHeight: 1.4,
-            marginBottom: 8,
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
-            minHeight: '2.6em',
-          }}>
+        <Link to={`/products/${id}`} className="flex-shrink-0">
+          <h3
+            className="font-semibold leading-snug mb-2"
+            style={{
+              color: '#0f172a',
+              fontSize: 13,
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+              minHeight: '2.4rem'
+            }}
+          >
             {name}
           </h3>
         </Link>
 
         {/* Rating */}
         {rating > 0 && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-            <div style={{
-              backgroundColor: '#16a34a',
-              color: '#fff',
-              fontSize: 9,
-              fontWeight: 700,
-              padding: '2px 6px',
-              borderRadius: 4,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 3,
-            }}>
-              {rating.toFixed(1)}
-              <Star size={7} fill="#fff" stroke="none" />
+          <div className="flex items-center gap-1.5 mb-2">
+            <div
+              className="flex items-center gap-0.5 text-white px-1.5 py-0.5 rounded"
+              style={{ backgroundColor: '#16a34a', fontSize: 9 }}
+            >
+              <span className="font-bold">{rating.toFixed(1)}</span>
+              <Star size={7} fill="white" stroke="none" />
             </div>
           </div>
         )}
 
-        {/* Spacer */}
-        <div style={{ flex: 1 }} />
+        {/* Push to bottom */}
+        <div className="flex-1" />
 
         {/* Price */}
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 12 }}>
-          <span style={{ color: '#0f172a', fontSize: 15, fontWeight: 800 }}>
+        <div className="flex items-baseline gap-1.5 mb-3">
+          <span className="font-black" style={{ color: '#0f172a', fontSize: 14 }}>
             ₹{price?.toLocaleString('en-IN')}
           </span>
           {originalPrice > price && (
-            <span style={{ color: '#cbd5e1', fontSize: 11, textDecoration: 'line-through' }}>
+            <span className="line-through" style={{ color: '#cbd5e1', fontSize: 11 }}>
               ₹{originalPrice?.toLocaleString('en-IN')}
             </span>
           )}
@@ -184,24 +138,13 @@ function ProductCard({ name, price, image, onAddToCart, id, rating, discount, or
         {/* Button */}
         <button
           onClick={handleAddToCart}
+          className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl font-bold uppercase cursor-pointer flex-shrink-0 transition-all duration-200"
           style={{
-            width: '100%',
             backgroundColor: added ? '#C9A84C' : '#0f172a',
             color: added ? '#0f172a' : '#fff',
-            border: 'none',
-            borderRadius: 10,
-            padding: '10px 0',
             fontSize: 11,
-            fontWeight: 700,
-            textTransform: 'uppercase',
-            letterSpacing: '0.06em',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 6,
-            transition: 'background-color 0.2s, color 0.2s',
-            flexShrink: 0,
+            letterSpacing: '0.05em',
+            border: 'none'
           }}
         >
           <ShoppingCart size={12} />

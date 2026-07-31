@@ -282,7 +282,7 @@ function Home({ addToCart, searchQuery }) {
             {/* Grid */}
             <div style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
               gap: 16,
             }}>
               {paginated.map((product, i) => (

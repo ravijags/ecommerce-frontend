@@ -29,7 +29,7 @@ export default function AdminLayout({ children }) {
         width: 220, flexShrink: 0, background: '#0f172a',
         display: 'flex', flexDirection: 'column',
         position: 'sticky', top: 0, height: '100vh'
-      }}>
+      }} className="admin-sidebar">
         {/* Logo */}
         <div style={{ padding: '20px 20px 16px', borderBottom: '1px solid #1e293b' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -120,10 +120,15 @@ export default function AdminLayout({ children }) {
           </div>
         </div>
 
-        <main style={{ flex: 1, padding: 32 }}>
+        <main style={{ flex: 1, padding: '24px 20px' }}>
           {children}
         </main>
       </div>
+      <style>{`
+        @media (max-width: 768px) {
+          .admin-sidebar { display: none !important; }
+        }
+      `}</style>
     </div>
   )
 }
