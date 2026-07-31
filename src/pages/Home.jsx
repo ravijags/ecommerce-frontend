@@ -171,7 +171,7 @@ function Home({ addToCart, searchQuery }) {
       {/* PRODUCTS */}
       <div
         id="products-section"
-        style={{ maxWidth: 1280, margin: '0 auto', padding: '32px 24px' }}
+        style={{ maxWidth: 1280, margin: '0 auto', padding: '24px 12px' }}
       >
 
         {/* Header */}
@@ -241,8 +241,8 @@ function Home({ addToCart, searchQuery }) {
             {/* Grid */}
             <div style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
-              gap: 16,
+              gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
+              gap: 10,
             }}>
               {paginated.map((product, i) => (
                 <motion.div

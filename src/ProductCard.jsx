@@ -31,7 +31,7 @@ function ProductCard({ name, price, image, onAddToCart, id, rating, discount, or
       }}
     >
       {/* Image */}
-      <Link to={`/products/${id}`} className="block relative flex-shrink-0" style={{ height: '200px' }}>
+      <Link to={`/products/${id}`} className="block relative flex-shrink-0 product-img-wrapper">
         <div className="w-full h-full overflow-hidden" style={{ backgroundColor: '#f8fafc' }}>
           <img
             src={imageUrl}
