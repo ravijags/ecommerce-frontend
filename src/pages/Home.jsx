@@ -3,28 +3,25 @@ import { useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import ProductCard from '../ProductCard'
 
-const categories = [
-  { slug: '', name: 'All' },
+const CATEGORIES = [
   { slug: 'smartphones', name: 'Smartphones' },
   { slug: 'laptops', name: 'Laptops' },
   { slug: 'mobile-accessories', name: 'Audio' },
-  { slug: 'mens-shoes', name: "Men's Shoes" },
-  { slug: 'womens-shoes', name: "Women's Shoes" },
+  { slug: 'mens-shirts', name: 'Fashion' },
+  { slug: 'mens-shoes', name: 'Footwear' },
   { slug: 'beauty', name: 'Beauty' },
-  { slug: 'mens-watches', name: 'Watches' },
-  { slug: 'fragrances', name: 'Fragrances' },
   { slug: 'skin-care', name: 'Skin Care' },
-  { slug: 'groceries', name: 'Grocery' },
-  { slug: 'sports-accessories', name: 'Sports' },
+  { slug: 'fragrances', name: 'Fragrances' },
+  { slug: 'mens-watches', name: 'Watches' },
   { slug: 'furniture', name: 'Furniture' },
+  { slug: 'groceries', name: 'Groceries' },
+  { slug: 'sports-accessories', name: 'Sports' },
   { slug: 'sunglasses', name: 'Sunglasses' },
-  { slug: 'womens-dresses', name: 'Dresses' },
-  { slug: 'mens-shirts', name: "Men's Fashion" },
   { slug: 'tablets', name: 'Tablets' },
   { slug: 'kitchen-accessories', name: 'Kitchen' },
 ]
 
-const sortOptions = [
+const SORT_OPTIONS = [
   { value: 'default', label: 'Recommended' },
   { value: 'price-low', label: 'Price: Low to High' },
   { value: 'price-high', label: 'Price: High to Low' },
@@ -32,43 +29,45 @@ const sortOptions = [
   { value: 'discount', label: 'Best Discount' },
 ]
 
-function Home({ addToCart, searchQuery }) {
+const PER_PAGE = 20
+
+export default function Home({ addToCart, searchQuery }) {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
-  const [searchParams] = useSearchParams()
   const [category, setCategory] = useState('')
-
-  useEffect(() => {
-    const cat = searchParams.get('category')
-    if (cat) { setCategory(cat); setTimeout(() => window.scrollTo({ top: 380, behavior: 'smooth' }), 100) }
-  }, [searchParams])
   const [sort, setSort] = useState('default')
   const [page, setPage] = useState(1)
-  const PER_PAGE = 20
+  const [searchParams] = useSearchParams()
   const shuffleRef = useRef(null)
 
+  // Sync category from URL (when header nav links are clicked)
+  useEffect(() => {
+    const cat = searchParams.get('category') || ''
+    setCategory(cat)
+    if (cat) setTimeout(() => document.getElementById('products-section')?.scrollIntoView({ behavior: 'smooth' }), 100)
+  }, [searchParams])
+
+  // Fetch all products once
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL}/api/products?limit=500`)
+      .then(r => r.json())
+      .then(d => { setProducts(d.products || []); setLoading(false) })
+      .catch(() => setLoading(false))
+  }, [])
+
+  // Shuffle once
   if (products.length > 0 && !shuffleRef.current) {
     shuffleRef.current = [...products].sort(() => Math.random() - 0.5)
   }
+  const base = shuffleRef.current || products
 
-  const shuffledProducts = shuffleRef.current || products
-
-  useEffect(() => {
-    window.scrollTo(0, 0)
-    fetch(`${import.meta.env.VITE_API_URL}/api/products?limit=500`)
-      .then(res => res.json())
-      .then(data => {
-        setProducts(data.products || [])
-        setLoading(false)
-      })
-  }, [])
-
+  // Reset page on filter change
   useEffect(() => { setPage(1) }, [category, searchQuery, sort])
 
-  const filtered = shuffledProducts.filter(p => {
-    const matchSearch = !searchQuery ||
-      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.brand?.toLowerCase().includes(searchQuery.toLowerCase())
+  // Filter + sort
+  const filtered = base.filter(p => {
+    const q = searchQuery?.toLowerCase() || ''
+    const matchSearch = !q || p.name.toLowerCase().includes(q) || p.brand?.toLowerCase().includes(q)
     const matchCat = !category || p.category === category
     return matchSearch && matchCat
   })
@@ -83,82 +82,44 @@ function Home({ addToCart, searchQuery }) {
 
   const paginated = sorted.slice(0, page * PER_PAGE)
   const hasMore = paginated.length < sorted.length
+  const activeLabel = CATEGORIES.find(c => c.slug === category)?.name || 'All Products'
 
-  if (loading) {
-    return (
-      <div style={{
-        position: 'fixed', inset: 0,
-        display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center',
-        backgroundColor: '#fff', gap: 12
-      }}>
-        <div style={{
-          width: 40, height: 40,
-          border: '3px solid #C9A84C',
-          borderTopColor: 'transparent',
-          borderRadius: '50%',
-          animation: 'spin 0.8s linear infinite'
-        }} />
-        <p style={{ color: '#C9A84C', fontSize: 11, fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase' }}>
-          Loading PREMIA...
-        </p>
-        <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
-      </div>
-    )
-  }
+  // Loading screen
+  if (loading) return (
+    <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#fff', gap: 14 }}>
+      <div style={{ width: 40, height: 40, border: '3px solid #C9A84C', borderTopColor: 'transparent', borderRadius: '50%' }} className="spin" />
+      <p style={{ color: '#C9A84C', fontSize: 11, fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase' }}>Loading PREMIA...</p>
+    </div>
+  )
 
   return (
-    <div style={{ backgroundColor: '#f8fafc', minHeight: '100vh', paddingBottom: 72 }}>
+    <div style={{ background: '#f8fafc', minHeight: '100vh' }} className="mobile-page-padding">
 
-      {/* HERO */}
+      {/* ── HERO ── only when browsing all */}
       {!searchQuery && !category && (
-        <div style={{ backgroundColor: '#0f172a', padding: '64px 0' }}>
-          <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <p style={{
-                color: '#C9A84C', fontSize: 11, fontWeight: 700,
-                letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 16
-              }}>
+        <div style={{ background: '#0f172a' }}>
+          <div style={{ maxWidth: 1280, margin: '0 auto', padding: '56px 20px 64px' }}>
+            <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+              <p style={{ color: '#C9A84C', fontSize: 11, fontWeight: 700, letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 14 }}>
                 Curated for the Discerning
               </p>
-              <h1 style={{
-                color: '#fff', fontWeight: 900, lineHeight: 1.02,
-                letterSpacing: '-2px', marginBottom: 20,
-                fontSize: 'clamp(32px, 5vw, 60px)'
-              }}>
+              <h1 style={{ color: '#fff', fontWeight: 900, lineHeight: 1.05, letterSpacing: '-1.5px', marginBottom: 18, fontSize: 'clamp(28px, 5vw, 60px)' }}>
                 The New Standard<br />
                 <span style={{ color: '#C9A84C' }}>of Shopping.</span>
               </h1>
-              <p style={{
-                color: '#475569', fontSize: 15, lineHeight: 1.7,
-                maxWidth: 400, marginBottom: 32
-              }}>
-                194+ premium products from top brands worldwide.
-                Every item handpicked. Every price unbeatable.
+              <p style={{ color: '#475569', fontSize: 15, lineHeight: 1.7, maxWidth: 380, marginBottom: 28 }}>
+                194+ premium products from top brands worldwide. Every item handpicked. Every price unbeatable.
               </p>
               <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                 <button
                   onClick={() => document.getElementById('products-section')?.scrollIntoView({ behavior: 'smooth' })}
-                  style={{
-                    backgroundColor: '#C9A84C', color: '#0f172a',
-                    border: 'none', borderRadius: 12, padding: '12px 28px',
-                    fontSize: 12, fontWeight: 700, letterSpacing: '0.08em',
-                    textTransform: 'uppercase', cursor: 'pointer'
-                  }}
+                  style={{ background: '#C9A84C', color: '#0f172a', border: 'none', borderRadius: 12, padding: '12px 28px', fontSize: 12, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer' }}
                 >
                   Explore Now
                 </button>
                 <button
                   onClick={() => setCategory('smartphones')}
-                  style={{
-                    backgroundColor: 'transparent', color: '#64748b',
-                    border: '1px solid #1e293b', borderRadius: 12,
-                    padding: '12px 28px', fontSize: 12, fontWeight: 600, cursor: 'pointer'
-                  }}
+                  style={{ background: 'transparent', color: '#64748b', border: '1px solid #1e293b', borderRadius: 12, padding: '12px 24px', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
                 >
                   Shop Electronics
                 </button>
@@ -168,88 +129,55 @@ function Home({ addToCart, searchQuery }) {
         </div>
       )}
 
-      {/* PRODUCTS */}
-      <div
-        id="products-section"
-        style={{ maxWidth: 1280, margin: '0 auto', padding: '24px 12px' }}
-      >
+      {/* ── PRODUCTS SECTION ── */}
+      <div id="products-section" style={{ maxWidth: 1280, margin: '0 auto', padding: '20px 12px 32px' }}>
 
-        {/* Header */}
-        <div style={{
-          display: 'flex', alignItems: 'center',
-          justifyContent: 'space-between', marginBottom: 24
-        }}>
-          <h2 style={{
-            color: '#0f172a', fontSize: 18,
-            fontWeight: 800, letterSpacing: '-0.3px'
-          }}>
-            {searchQuery
-              ? `"${searchQuery}"`
-              : category
-                ? categories.find(c => c.slug === category)?.name
-                : 'All Products'
-            }
-            <span style={{ color: '#94a3b8', fontSize: 14, fontWeight: 400, marginLeft: 8 }}>
-              ({sorted.length})
-            </span>
+        {/* Row: title + sort */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, gap: 12 }}>
+          <h2 style={{ color: '#0f172a', fontSize: 17, fontWeight: 800, letterSpacing: '-0.3px', margin: 0 }}>
+            {searchQuery ? `"${searchQuery}"` : activeLabel}
+            <span style={{ color: '#94a3b8', fontSize: 13, fontWeight: 400, marginLeft: 8 }}>({sorted.length})</span>
           </h2>
-
           <select
-            value={sort}
-            onChange={e => setSort(e.target.value)}
-            style={{
-              backgroundColor: '#fff',
-              border: '1px solid #e2e8f0',
-              color: '#0f172a',
-              fontSize: 12,
-              padding: '8px 12px',
-              borderRadius: 10,
-              cursor: 'pointer',
-              outline: 'none',
-            }}
+            value={sort} onChange={e => setSort(e.target.value)}
+            style={{ background: '#fff', border: '1px solid #e2e8f0', color: '#0f172a', fontSize: 12, padding: '8px 10px', borderRadius: 10, cursor: 'pointer', outline: 'none', flexShrink: 0 }}
           >
-            {sortOptions.map(opt => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
+            {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
         </div>
 
-        {/* Empty */}
-        {sorted.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '80px 0' }}>
-            <p style={{ fontSize: 48, marginBottom: 16 }}>🔍</p>
-            <p style={{ color: '#0f172a', fontSize: 18, fontWeight: 700, marginBottom: 8 }}>
-              No products found
-            </p>
-            <p style={{ color: '#94a3b8', fontSize: 14, marginBottom: 24 }}>
-              Try a different search or category
-            </p>
+        {/* Active category chip */}
+        {category && (
+          <div style={{ marginBottom: 14 }}>
             <button
               onClick={() => setCategory('')}
-              style={{
-                backgroundColor: '#0f172a', color: '#fff',
-                border: 'none', borderRadius: 12,
-                padding: '12px 24px', fontSize: 13,
-                fontWeight: 600, cursor: 'pointer'
-              }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 12px', background: '#0f172a', color: '#fff', border: 'none', borderRadius: 20, fontSize: 11, fontWeight: 600, cursor: 'pointer' }}
             >
+              {activeLabel} <span style={{ fontSize: 13 }}>×</span>
+            </button>
+          </div>
+        )}
+
+        {/* Empty state */}
+        {sorted.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '80px 0' }}>
+            <p style={{ fontSize: 40, marginBottom: 16 }}>🔍</p>
+            <p style={{ color: '#0f172a', fontSize: 16, fontWeight: 700, marginBottom: 8 }}>No products found</p>
+            <p style={{ color: '#94a3b8', fontSize: 13, marginBottom: 24 }}>Try a different search or category</p>
+            <button onClick={() => { setCategory(''); }} style={{ background: '#0f172a', color: '#fff', border: 'none', borderRadius: 12, padding: '11px 24px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
               View All Products
             </button>
           </div>
         ) : (
           <>
-            {/* Grid */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
-              gap: 10,
-            }}>
+            {/* GRID — responsive via CSS class */}
+            <div className="product-grid">
               {paginated.map((product, i) => (
                 <motion.div
                   key={product._id}
-                  initial={{ opacity: 0, y: 12 }}
+                  initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.2, delay: Math.min(i * 0.025, 0.25) }}
+                  transition={{ duration: 0.18, delay: Math.min(i * 0.02, 0.3) }}
                   style={{ display: 'flex' }}
                 >
                   <div style={{ width: '100%' }}>
@@ -257,7 +185,7 @@ function Home({ addToCart, searchQuery }) {
                       id={product._id}
                       name={product.name}
                       price={product.price}
-                      image={product.image || product.thumbnail || product.images?.[0]}
+                      image={product.image || product.thumbnail || (product.images && product.images[0])}
                       rating={product.rating}
                       discount={product.discount}
                       originalPrice={product.originalPrice}
@@ -271,16 +199,10 @@ function Home({ addToCart, searchQuery }) {
 
             {/* Load more */}
             {hasMore && (
-              <div style={{ textAlign: 'center', marginTop: 40 }}>
+              <div style={{ textAlign: 'center', marginTop: 36 }}>
                 <button
                   onClick={() => setPage(p => p + 1)}
-                  style={{
-                    backgroundColor: '#0f172a', color: '#fff',
-                    border: 'none', borderRadius: 12,
-                    padding: '12px 32px', fontSize: 13,
-                    fontWeight: 700, cursor: 'pointer',
-                    letterSpacing: '0.05em'
-                  }}
+                  style={{ background: '#0f172a', color: '#fff', border: 'none', borderRadius: 12, padding: '12px 32px', fontSize: 13, fontWeight: 700, cursor: 'pointer', letterSpacing: '0.04em' }}
                 >
                   Load More · {sorted.length - paginated.length} remaining
                 </button>
@@ -288,11 +210,7 @@ function Home({ addToCart, searchQuery }) {
             )}
           </>
         )}
-
       </div>
-
     </div>
   )
 }
-
-export default Home

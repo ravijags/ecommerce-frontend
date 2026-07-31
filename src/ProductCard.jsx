@@ -1,28 +1,46 @@
 import { Link } from 'react-router-dom'
 import { ShoppingCart, Heart, Star } from 'lucide-react'
-import { motion } from 'framer-motion'
 import { useState } from 'react'
 
 function ProductCard({ name, price, image, onAddToCart, id, rating, discount, originalPrice, brand }) {
   const [wishlist, setWishlist] = useState(false)
   const [added, setAdded] = useState(false)
 
-  const imageUrl = (image && image.startsWith('http'))
-    ? image
-    : `https://placehold.co/400x400/f1f5f9/94a3b8?text=${encodeURIComponent(name?.slice(0, 12) || 'Product')}`
+  // Try every possible image field
+  const rawImage = image
+  const imageUrl = (rawImage && rawImage.startsWith('http'))
+    ? rawImage
+    : `https://placehold.co/400x300/f1f5f9/94a3b8?text=${encodeURIComponent(name?.slice(0, 14) || 'Product')}`
 
-  const handleAddToCart = () => {
+  const handleAddToCart = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
     onAddToCart()
     setAdded(true)
     setTimeout(() => setAdded(false), 1500)
   }
 
+  const handleWishlist = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setWishlist(w => !w)
+  }
+
   return (
     <div
-      className="bg-white rounded-2xl overflow-hidden flex flex-col h-full group"
-      style={{ border: '1px solid #f1f5f9', transition: 'box-shadow 0.2s, transform 0.2s' }}
+      style={{
+        background: '#fff',
+        borderRadius: 16,
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+        border: '1px solid #f1f5f9',
+        transition: 'box-shadow 0.2s, transform 0.2s',
+        cursor: 'pointer',
+      }}
       onMouseEnter={e => {
-        e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.08)'
+        e.currentTarget.style.boxShadow = '0 8px 30px rgba(0,0,0,0.09)'
         e.currentTarget.style.transform = 'translateY(-2px)'
       }}
       onMouseLeave={e => {
@@ -31,128 +49,136 @@ function ProductCard({ name, price, image, onAddToCart, id, rating, discount, or
       }}
     >
       {/* Image */}
-      <Link to={`/products/${id}`} className="block relative flex-shrink-0 product-img-wrapper">
-        <div className="w-full h-full overflow-hidden" style={{ backgroundColor: '#f8fafc' }}>
+      <Link to={`/products/${id}`} className="product-img-wrapper" style={{ display: 'block' }}>
+        <div style={{ width: '100%', height: '100%', background: '#f8fafc', overflow: 'hidden', position: 'relative' }}>
           <img
             src={imageUrl}
             alt={name}
-            className="w-full h-full object-contain p-2"
-            style={{ transition: 'transform 0.4s' }}
-            onError={e => { e.target.src = `https://placehold.co/400x400/f1f5f9/94a3b8?text=${encodeURIComponent(name?.slice(0, 12) || 'Product')}` }}
-            onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
+            onError={e => {
+              e.target.onerror = null
+              e.target.src = `https://placehold.co/400x300/f1f5f9/94a3b8?text=${encodeURIComponent(name?.slice(0, 14) || 'Product')}`
+            }}
+            style={{
+              width: '100%', height: '100%',
+              objectFit: 'contain', padding: 8,
+              transition: 'transform 0.35s ease',
+            }}
+            onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.06)'}
             onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
             loading="lazy"
           />
-        </div>
 
-        {/* Discount */}
-        {discount > 0 && (
-          <div
-            className="absolute top-2.5 left-2.5 text-white font-bold rounded-lg px-2 py-0.5"
-            style={{ backgroundColor: '#ef4444', fontSize: 10 }}
+          {/* Discount badge */}
+          {discount > 0 && (
+            <div style={{
+              position: 'absolute', top: 8, left: 8,
+              background: '#ef4444', color: '#fff',
+              fontSize: 9, fontWeight: 800,
+              padding: '2px 6px', borderRadius: 6,
+              letterSpacing: '0.03em',
+            }}>
+              {Math.round(discount)}% OFF
+            </div>
+          )}
+
+          {/* Wishlist */}
+          <button
+            onClick={handleWishlist}
+            style={{
+              position: 'absolute', top: 8, right: 8,
+              background: '#fff', border: 'none',
+              borderRadius: '50%', width: 28, height: 28,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+              cursor: 'pointer',
+              opacity: wishlist ? 1 : 0,
+              transition: 'opacity 0.2s',
+            }}
+            className="wishlist-btn"
           >
-            {Math.round(discount)}% OFF
-          </div>
-        )}
-
-        {/* Wishlist */}
-        <button
-          className="absolute top-2.5 right-2.5 bg-white rounded-full p-1.5 shadow-sm cursor-pointer"
-          style={{
-            opacity: wishlist ? 1 : 0,
-            transition: 'opacity 0.2s',
-            border: 'none'
-          }}
-          onClick={e => {
-            e.preventDefault()
-            setWishlist(!wishlist)
-          }}
-          onMouseEnter={e => e.currentTarget.parentElement.parentElement.querySelector('.wishlist-btn') && null}
-        >
-          <Heart
-            size={13}
-            style={{ color: wishlist ? '#ef4444' : '#94a3b8' }}
-            fill={wishlist ? '#ef4444' : 'none'}
-          />
-        </button>
+            <Heart size={12} color={wishlist ? '#ef4444' : '#94a3b8'} fill={wishlist ? '#ef4444' : 'none'} />
+          </button>
+        </div>
       </Link>
 
       {/* Info */}
-      <div className="p-3 flex flex-col flex-1">
+      <div style={{ padding: '10px 12px 12px', display: 'flex', flexDirection: 'column', flex: 1 }}>
 
         {/* Brand */}
         {brand && (
-          <p
-            className="font-bold uppercase mb-1"
-            style={{ color: '#C9A84C', fontSize: 9, letterSpacing: '0.12em' }}
-          >
+          <p style={{ color: '#C9A84C', fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 3 }}>
             {brand}
           </p>
         )}
 
         {/* Name */}
-        <Link to={`/products/${id}`} className="flex-shrink-0">
-          <h3
-            className="font-semibold leading-snug mb-2"
-            style={{
-              color: '#0f172a',
-              fontSize: 13,
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-              minHeight: '2.4rem'
-            }}
-          >
+        <Link to={`/products/${id}`}>
+          <h3 style={{
+            color: '#0f172a', fontSize: 13, fontWeight: 600,
+            lineHeight: 1.35, marginBottom: 6,
+            display: '-webkit-box', WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical', overflow: 'hidden',
+            minHeight: '2.4em',
+          }}>
             {name}
           </h3>
         </Link>
 
         {/* Rating */}
         {rating > 0 && (
-          <div className="flex items-center gap-1.5 mb-2">
-            <div
-              className="flex items-center gap-0.5 text-white px-1.5 py-0.5 rounded"
-              style={{ backgroundColor: '#16a34a', fontSize: 9 }}
-            >
-              <span className="font-bold">{rating.toFixed(1)}</span>
-              <Star size={7} fill="white" stroke="none" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 6 }}>
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 3,
+              background: '#16a34a', color: '#fff',
+              fontSize: 9, fontWeight: 700,
+              padding: '2px 6px', borderRadius: 4,
+            }}>
+              {rating.toFixed(1)} <Star size={7} fill="white" stroke="none" />
             </div>
           </div>
         )}
 
-        {/* Push to bottom */}
-        <div className="flex-1" />
+        {/* Spacer */}
+        <div style={{ flex: 1 }} />
 
         {/* Price */}
-        <div className="flex items-baseline gap-1.5 mb-3">
-          <span className="font-black" style={{ color: '#0f172a', fontSize: 14 }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 10 }}>
+          <span style={{ color: '#0f172a', fontSize: 15, fontWeight: 800 }}>
             ₹{price?.toLocaleString('en-IN')}
           </span>
           {originalPrice > price && (
-            <span className="line-through" style={{ color: '#cbd5e1', fontSize: 11 }}>
+            <span style={{ color: '#cbd5e1', fontSize: 11, textDecoration: 'line-through' }}>
               ₹{originalPrice?.toLocaleString('en-IN')}
             </span>
           )}
         </div>
 
-        {/* Button */}
+        {/* Add to Cart */}
         <button
           onClick={handleAddToCart}
-          className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl font-bold uppercase cursor-pointer flex-shrink-0 transition-all duration-200"
           style={{
-            backgroundColor: added ? '#C9A84C' : '#0f172a',
+            width: '100%', padding: '9px 0',
+            background: added ? '#C9A84C' : '#0f172a',
             color: added ? '#0f172a' : '#fff',
-            fontSize: 11,
-            letterSpacing: '0.05em',
-            border: 'none'
+            border: 'none', borderRadius: 10,
+            fontSize: 11, fontWeight: 700,
+            letterSpacing: '0.04em', textTransform: 'uppercase',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+            transition: 'background 0.2s, color 0.2s',
+            cursor: 'pointer',
           }}
         >
           <ShoppingCart size={12} />
           {added ? 'Added!' : 'Add to Cart'}
         </button>
-
       </div>
+
+      <style>{`
+        .wishlist-btn { opacity: 0 !important; }
+        div:hover > * > .wishlist-btn,
+        div:hover .wishlist-btn { opacity: 1 !important; }
+        @media (hover: none) { .wishlist-btn { display: none !important; } }
+      `}</style>
     </div>
   )
 }
