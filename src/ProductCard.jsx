@@ -84,6 +84,7 @@ function ProductCard({ name, price, image, onAddToCart, id, rating, discount, or
           {/* Wishlist */}
           <button
             onClick={handleWishlist}
+            className="wishlist-btn"
             style={{
               position: 'absolute', top: 8, right: 8,
               background: '#fff', border: 'none',
@@ -91,10 +92,8 @@ function ProductCard({ name, price, image, onAddToCart, id, rating, discount, or
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
               cursor: 'pointer',
-              opacity: wishlist ? 1 : 0,
               transition: 'opacity 0.2s',
             }}
-            className="wishlist-btn"
           >
             <Heart size={12} color={wishlist ? '#ef4444' : '#94a3b8'} fill={wishlist ? '#ef4444' : 'none'} />
           </button>
@@ -174,10 +173,14 @@ function ProductCard({ name, price, image, onAddToCart, id, rating, discount, or
       </div>
 
       <style>{`
-        .wishlist-btn { opacity: 0 !important; }
-        div:hover > * > .wishlist-btn,
-        div:hover .wishlist-btn { opacity: 1 !important; }
-        @media (hover: none) { .wishlist-btn { display: none !important; } }
+        .wishlist-btn { opacity: 0; }
+        .wishlist-btn:focus { opacity: 1; }
+        @media (hover: hover) {
+          div:hover .wishlist-btn { opacity: 1; }
+        }
+        @media (hover: none) {
+          .wishlist-btn { display: none; }
+        }
       `}</style>
     </div>
   )

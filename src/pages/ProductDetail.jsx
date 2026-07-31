@@ -268,9 +268,9 @@ function ProductDetail({ addToCart }) {
 
       {/* Description */}
       {product.description && (
-        <div className="mt-12 pt-8" style={{ borderTop: '1px solid #e2e8f0' }}>
+        <div className="mt-10 pt-8" style={{ borderTop: '1px solid #e2e8f0', maxWidth: 700 }}>
           <h2 className="text-lg font-black mb-3" style={{ color: '#0f172a' }}>Product Description</h2>
-          <p className="leading-relaxed" style={{ color: '#475569' }}>{product.description}</p>
+          <p style={{ color: '#475569', lineHeight: 1.8, fontSize: 14 }}>{product.description}</p>
         </div>
       )}
 
