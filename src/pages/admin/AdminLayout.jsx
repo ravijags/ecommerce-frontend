@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, ShoppingBag, Package, LogOut, ExternalLink, TrendingUp, Users } from 'lucide-react'
+import { LayoutDashboard, ShoppingBag, Package, LogOut, ExternalLink } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const NAV = [
@@ -18,95 +18,109 @@ export default function AdminLayout({ children }) {
     navigate('/login')
   }
 
-  const isActive = (to, exact) => exact ? location.pathname === to : location.pathname.startsWith(to)
+  const isActive = (to, exact) =>
+    exact ? location.pathname === to : location.pathname === to
 
   return (
-    <div className="flex min-h-screen" style={{ background: '#f1f5f9' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: '#f1f5f9' }}>
 
       {/* Sidebar */}
-      <aside className="w-64 flex-shrink-0 flex flex-col sticky top-0 h-screen" style={{ background: '#0f172a' }}>
-
-        {/* Logo area */}
-        <div className="px-6 py-5 border-b" style={{ borderColor: '#1e293b' }}>
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-lg" style={{ background: '#C9A84C', color: '#0f172a' }}>P</div>
+      <aside style={{
+        width: 220, flexShrink: 0, background: '#0f172a',
+        display: 'flex', flexDirection: 'column',
+        position: 'sticky', top: 0, height: '100vh'
+      }}>
+        {/* Logo */}
+        <div style={{ padding: '20px 20px 16px', borderBottom: '1px solid #1e293b' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{
+              width: 34, height: 34, borderRadius: 10, background: '#C9A84C',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontWeight: 900, fontSize: 16, color: '#0f172a'
+            }}>P</div>
             <div>
-              <p className="font-black text-sm leading-none" style={{ color: '#fff' }}>PREMIA</p>
-              <p className="text-xs mt-0.5" style={{ color: '#475569' }}>Admin Panel</p>
+              <div style={{ fontWeight: 900, fontSize: 13, color: '#fff', lineHeight: 1 }}>PREMIA</div>
+              <div style={{ fontSize: 10, color: '#475569', marginTop: 2 }}>Admin Panel</div>
             </div>
           </div>
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 px-3 py-4 space-y-1">
-          <p className="text-xs font-bold uppercase tracking-widest px-3 mb-3" style={{ color: '#334155' }}>Main Menu</p>
+        <nav style={{ flex: 1, padding: '12px 10px' }}>
+          <div style={{ fontSize: 9, fontWeight: 700, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.12em', padding: '8px 10px 10px' }}>
+            Main Menu
+          </div>
           {NAV.map(({ to, icon: Icon, label, exact }) => {
             const active = isActive(to, exact)
             return (
-              <Link
-                key={to}
-                to={to}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all"
-                style={{
-                  background: active ? '#C9A84C18' : 'transparent',
-                  color: active ? '#C9A84C' : '#64748b',
-                  borderLeft: active ? '3px solid #C9A84C' : '3px solid transparent',
-                }}
-              >
-                <Icon size={18} />
+              <Link key={to} to={to} style={{
+                display: 'flex', alignItems: 'center', gap: 10,
+                padding: '9px 10px', borderRadius: 8, marginBottom: 2,
+                textDecoration: 'none', fontSize: 13, fontWeight: 500,
+                background: active ? 'rgba(201,168,76,0.12)' : 'transparent',
+                color: active ? '#C9A84C' : '#64748b',
+                borderLeft: `3px solid ${active ? '#C9A84C' : 'transparent'}`,
+                transition: 'all 0.15s'
+              }}>
+                <Icon size={16} />
                 {label}
               </Link>
             )
           })}
         </nav>
 
-        {/* Bottom actions */}
-        <div className="px-3 py-4 border-t space-y-1" style={{ borderColor: '#1e293b' }}>
-          <Link
-            to="/"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all"
-            style={{ color: '#64748b' }}
-            onMouseEnter={e => e.currentTarget.style.color = '#94a3b8'}
-            onMouseLeave={e => e.currentTarget.style.color = '#64748b'}
-          >
-            <ExternalLink size={16} />
-            View Store
+        {/* Bottom */}
+        <div style={{ padding: '12px 10px', borderTop: '1px solid #1e293b' }}>
+          <Link to="/" style={{
+            display: 'flex', alignItems: 'center', gap: 10,
+            padding: '9px 10px', borderRadius: 8, marginBottom: 2,
+            textDecoration: 'none', fontSize: 13, fontWeight: 500, color: '#64748b'
+          }}>
+            <ExternalLink size={15} /> View Store
           </Link>
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all w-full"
-            style={{ color: '#64748b' }}
-            onMouseEnter={e => e.currentTarget.style.color = '#ef4444'}
-            onMouseLeave={e => e.currentTarget.style.color = '#64748b'}
-          >
-            <LogOut size={16} />
-            Logout
+          <button onClick={handleLogout} style={{
+            display: 'flex', alignItems: 'center', gap: 10,
+            padding: '9px 10px', borderRadius: 8, width: '100%',
+            border: 'none', background: 'transparent', cursor: 'pointer',
+            fontSize: 13, fontWeight: 500, color: '#64748b'
+          }}>
+            <LogOut size={15} /> Logout
           </button>
         </div>
       </aside>
 
-      {/* Main content */}
-      <div className="flex-1 flex flex-col min-h-screen">
-        {/* Top bar */}
-        <div className="bg-white border-b px-8 py-4 flex items-center justify-between" style={{ borderColor: '#e2e8f0' }}>
+      {/* Content */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        {/* Topbar */}
+        <div style={{
+          background: '#fff', borderBottom: '1px solid #e2e8f0',
+          padding: '14px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+        }}>
           <div>
-            <h1 className="text-lg font-black" style={{ color: '#0f172a' }}>
+            <div style={{ fontWeight: 900, fontSize: 16, color: '#0f172a' }}>
               {location.pathname === '/admin' && 'Dashboard'}
               {location.pathname === '/admin/orders' && 'Orders'}
               {location.pathname === '/admin/products' && 'Products'}
-            </h1>
-            <p className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>
-              PREMIA Admin · {new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}
-            </p>
+            </div>
+            <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>
+              {new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+            </div>
           </div>
-          <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background: '#f8fafc', border: '1px solid #e2e8f0' }}>
-            <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black" style={{ background: '#C9A84C', color: '#0f172a' }}>A</div>
-            <span className="text-sm font-semibold" style={{ color: '#0f172a' }}>Admin</span>
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 8,
+            padding: '6px 12px', borderRadius: 10,
+            background: '#f8fafc', border: '1px solid #e2e8f0'
+          }}>
+            <div style={{
+              width: 28, height: 28, borderRadius: '50%', background: '#C9A84C',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontWeight: 900, fontSize: 12, color: '#0f172a'
+            }}>A</div>
+            <span style={{ fontSize: 13, fontWeight: 600, color: '#0f172a' }}>Admin</span>
           </div>
         </div>
 
-        {/* Page content */}
-        <main className="flex-1 p-8">
+        <main style={{ flex: 1, padding: 32 }}>
           {children}
         </main>
       </div>

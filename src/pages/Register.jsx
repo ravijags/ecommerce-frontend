@@ -1,18 +1,16 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { Eye, EyeOff, ArrowRight, Check } from 'lucide-react'
-import { motion } from 'framer-motion'
 import toast from 'react-hot-toast'
-import PremiaLogo from '../components/PremiaLogo'
 
-const perks = [
+const PERKS = [
   'Access to 194+ premium products',
-  'Exclusive member discounts',
-  'Order tracking & history',
-  'Priority customer support', 
+  'Exclusive member discounts & offers',
+  'Order tracking & full history',
+  'Priority customer support',
 ]
 
-function Register() {
+export default function Register() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -20,205 +18,156 @@ function Register() {
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
 
+  const strength = password.length === 0 ? 0 : password.length < 4 ? 1 : password.length < 7 ? 2 : password.length < 10 ? 3 : 4
+  const strengthColor = ['#e2e8f0', '#ef4444', '#f59e0b', '#22c55e', '#16a34a'][strength]
+
   const handleRegister = async () => {
-    if (!name || !email || !password) {
-      toast.error('Please fill in all fields')
-      return
-    }
-    if (password.length < 6) {
-      toast.error('Password must be at least 6 characters')
-      return
-    }
+    if (!name || !email || !password) { toast.error('Please fill in all fields'); return }
+    if (password.length < 6) { toast.error('Password must be at least 6 characters'); return }
     setLoading(true)
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/register`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password }),
       })
-      const data = await response.json()
-      if (!response.ok) {
-        toast.error(data.message || 'Registration failed!')
-        setLoading(false)
-        return
-      }
+      const data = await res.json()
+      if (!res.ok) { toast.error(data.message || 'Registration failed'); setLoading(false); return }
       toast.success('Account created! Please sign in.')
       navigate('/login')
-    } catch {
-      toast.error('Something went wrong!')
-      setLoading(false)
-    }
-  }
-
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') handleRegister()
+    } catch { toast.error('Something went wrong'); setLoading(false) }
   }
 
   const inputStyle = {
-    borderColor: '#e2e8f0',
-    background: '#fff',
-    color: '#0f172a',
+    width: '100%', padding: '12px 14px', borderRadius: 10,
+    border: '1.5px solid #e2e8f0', fontSize: 14, color: '#0f172a',
+    background: '#f8fafc', outline: 'none', boxSizing: 'border-box', transition: 'border 0.15s'
   }
 
   return (
-    <div className="min-h-screen flex" style={{ background: '#f8fafc' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', fontFamily: 'Inter, sans-serif' }}>
 
-      {/* Left – brand */}
-      <motion.div
-        initial={{ opacity: 0, x: -30 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.5 }}
-        className="hidden lg:flex lg:w-1/2 flex-col justify-between p-16"
-        style={{ background: '#0f172a' }}
-      >
-        <PremiaLogo variant="dark" size="lg" />
+      {/* Left panel */}
+      <div style={{
+        width: '50%', background: '#0f172a',
+        display: 'none', flexDirection: 'column',
+        justifyContent: 'space-between', padding: '48px 56px',
+      }} className="auth-left">
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ width: 44, height: 44, borderRadius: 12, background: '#C9A84C', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 20, color: '#0f172a' }}>P</div>
+          <div>
+            <div style={{ fontWeight: 900, fontSize: 18, color: '#fff', lineHeight: 1 }}>PREMIA</div>
+            <div style={{ fontSize: 10, color: '#475569', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Premium Shopping</div>
+          </div>
+        </div>
 
         <div>
-          <p className="text-4xl font-black leading-tight mb-4" style={{ color: '#fff' }}>
+          <h1 style={{ fontSize: 44, fontWeight: 900, color: '#fff', lineHeight: 1.15, margin: '0 0 12px' }}>
             Join PREMIA.<br />
             <span style={{ color: '#C9A84C' }}>Shop smarter.</span>
+          </h1>
+          <p style={{ fontSize: 14, color: '#64748b', lineHeight: 1.6, marginBottom: 36 }}>
+            Create your account and unlock<br />member-only benefits.
           </p>
-          <p className="mb-10" style={{ color: '#94a3b8' }}>
-            Create your account and unlock member-only benefits.
-          </p>
-
-          <div className="space-y-4">
-            {perks.map((perk, i) => (
-              <motion.div
-                key={perk}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 * i + 0.3 }}
-                className="flex items-center gap-3"
-              >
-                <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: '#C9A84C' }}>
-                  <Check size={11} strokeWidth={3} color="#0f172a" />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {PERKS.map(perk => (
+              <div key={perk} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ width: 22, height: 22, borderRadius: '50%', background: '#C9A84C', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Check size={12} strokeWidth={3} color="#0f172a" />
                 </div>
-                <span className="text-sm" style={{ color: '#cbd5e1' }}>{perk}</span>
-              </motion.div>
+                <span style={{ fontSize: 13, color: '#94a3b8' }}>{perk}</span>
+              </div>
             ))}
           </div>
         </div>
 
-        <p className="text-xs" style={{ color: '#334155' }}>
+        <p style={{ fontSize: 11, color: '#334155' }}>
           By creating an account you agree to our Terms of Service and Privacy Policy.
         </p>
-      </motion.div>
+      </div>
 
-      {/* Right – form */}
-      <motion.div
-        initial={{ opacity: 0, x: 30 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full lg:w-1/2 flex items-center justify-center p-8"
-      >
-        <div className="w-full max-w-md">
+      {/* Right form panel */}
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px', background: '#f8fafc' }}>
+        <div style={{
+          width: '100%', maxWidth: 420,
+          background: '#fff', borderRadius: 20,
+          padding: '40px 40px', boxShadow: '0 4px 24px rgba(0,0,0,0.07)',
+          border: '1px solid #e2e8f0',
+        }}>
 
-          <div className="flex justify-center mb-10 lg:hidden">
-            <PremiaLogo variant="light" size="lg" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 32 }} className="auth-mobile-logo">
+            <div style={{ width: 36, height: 36, borderRadius: 10, background: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 16, color: '#C9A84C' }}>P</div>
+            <span style={{ fontWeight: 900, fontSize: 16, color: '#0f172a' }}>PREMIA</span>
           </div>
 
-          <h1 className="text-3xl font-black mb-2" style={{ color: '#0f172a' }}>Create account</h1>
-          <p className="mb-8" style={{ color: '#64748b' }}>Join thousands of PREMIA members</p>
+          <h2 style={{ fontSize: 26, fontWeight: 900, color: '#0f172a', margin: '0 0 6px' }}>Create account</h2>
+          <p style={{ fontSize: 14, color: '#64748b', margin: '0 0 28px' }}>Join thousands of PREMIA members</p>
 
-          <div className="space-y-5">
-
-            <div>
-              <label className="block text-sm font-semibold mb-1.5" style={{ color: '#0f172a' }}>Full name</label>
-              <input
-                type="text"
-                placeholder="Ravi Jags"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                onKeyDown={handleKeyDown}
-                className="w-full px-4 py-3 rounded-xl border-2 text-sm outline-none transition-all"
+          {[
+            { label: 'Full name', value: name, set: setName, type: 'text', placeholder: 'Ravi Jags' },
+            { label: 'Email address', value: email, set: setEmail, type: 'email', placeholder: 'you@example.com' },
+          ].map(({ label, value, set, type, placeholder }) => (
+            <div key={label} style={{ marginBottom: 16 }}>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</label>
+              <input type={type} placeholder={placeholder} value={value}
+                onChange={e => set(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleRegister()}
                 style={inputStyle}
                 onFocus={e => e.target.style.borderColor = '#C9A84C'}
                 onBlur={e => e.target.style.borderColor = '#e2e8f0'}
               />
             </div>
+          ))}
 
-            <div>
-              <label className="block text-sm font-semibold mb-1.5" style={{ color: '#0f172a' }}>Email address</label>
-              <input
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                onKeyDown={handleKeyDown}
-                className="w-full px-4 py-3 rounded-xl border-2 text-sm outline-none transition-all"
-                style={inputStyle}
+          <div style={{ marginBottom: 24 }}>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Password</label>
+            <div style={{ position: 'relative' }}>
+              <input type={showPassword ? 'text' : 'password'} placeholder="Min. 6 characters" value={password}
+                onChange={e => setPassword(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleRegister()}
+                style={{ ...inputStyle, paddingRight: 44 }}
                 onFocus={e => e.target.style.borderColor = '#C9A84C'}
                 onBlur={e => e.target.style.borderColor = '#e2e8f0'}
               />
+              <button onClick={() => setShowPassword(!showPassword)} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', display: 'flex' }}>
+                {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+              </button>
             </div>
-
-            <div>
-              <label className="block text-sm font-semibold mb-1.5" style={{ color: '#0f172a' }}>Password</label>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Min 6 characters"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  className="w-full px-4 py-3 pr-12 rounded-xl border-2 text-sm outline-none transition-all"
-                  style={inputStyle}
-                  onFocus={e => e.target.style.borderColor = '#C9A84C'}
-                  onBlur={e => e.target.style.borderColor = '#e2e8f0'}
-                />
-                <button
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2"
-                  style={{ color: '#94a3b8' }}
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
+            {password.length > 0 && (
+              <div style={{ display: 'flex', gap: 4, marginTop: 8 }}>
+                {[1,2,3,4].map(i => (
+                  <div key={i} style={{ flex: 1, height: 3, borderRadius: 2, background: strength >= i ? strengthColor : '#e2e8f0', transition: 'background 0.2s' }} />
+                ))}
               </div>
-              {password.length > 0 && (
-                <div className="flex gap-1 mt-2">
-                  {[1,2,3,4].map(i => (
-                    <div key={i} className="h-1 flex-1 rounded-full transition-all" style={{
-                      background: password.length >= i * 2
-                        ? (password.length >= 8 ? '#22c55e' : '#C9A84C')
-                        : '#e2e8f0'
-                    }} />
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <motion.button
-              whileTap={{ scale: 0.98 }}
-              onClick={handleRegister}
-              disabled={loading}
-              className="w-full py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all"
-              style={{
-                background: loading ? '#94a3b8' : '#0f172a',
-                color: '#fff',
-                cursor: loading ? 'not-allowed' : 'pointer',
-              }}
-            >
-              {loading ? (
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <>Create account <ArrowRight size={16} /></>
-              )}
-            </motion.button>
-
+            )}
           </div>
 
-          <p className="text-center text-sm mt-8" style={{ color: '#64748b' }}>
-            Already have an account?{' '}
-            <Link to="/login" className="font-bold" style={{ color: '#C9A84C' }}>
-              Sign in
-            </Link>
-          </p>
+          <button onClick={handleRegister} disabled={loading} style={{
+            width: '100%', padding: '13px', borderRadius: 10, border: 'none',
+            background: loading ? '#94a3b8' : '#0f172a', color: '#fff',
+            fontSize: 14, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+          }}>
+            {loading
+              ? <div style={{ width: 18, height: 18, borderRadius: '50%', border: '2px solid #fff', borderTopColor: 'transparent', animation: 'spin 0.7s linear infinite' }} />
+              : <><span>Create account</span><ArrowRight size={16} /></>}
+          </button>
 
+          <p style={{ textAlign: 'center', fontSize: 13, color: '#64748b', margin: '20px 0 0' }}>
+            Already have an account?{' '}
+            <Link to="/login" style={{ color: '#C9A84C', fontWeight: 700, textDecoration: 'none' }}>Sign in</Link>
+          </p>
         </div>
-      </motion.div>
+      </div>
+
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @media (min-width: 768px) {
+          .auth-left { display: flex !important; }
+          .auth-mobile-logo { display: none !important; }
+        }
+      `}</style>
     </div>
   )
 }
-
-export default Register

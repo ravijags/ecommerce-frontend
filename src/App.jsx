@@ -15,45 +15,73 @@ import ProductDetail from './pages/ProductDetail'
 import Footer from './components/Footer'
 
 function App() {
-  const [cartItems, setCartItems] = useState([])
-  const [searchQuery, setSearchQuery] = useState('')
   const location = useLocation()
   const isAdmin = location.pathname.startsWith('/admin')
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/register'
+  const [cartItems, setCartItems] = useState([])
+  const [searchQuery, setSearchQuery] = useState('')
 
+  // Load cart from MongoDB on app start
   useEffect(() => {
     const token = localStorage.getItem('token')
     if (!token) return
-    fetch(`${import.meta.env.VITE_API_URL}/api/cart`, { headers: { authorization: token } })
+
+    fetch(`${import.meta.env.VITE_API_URL}/api/cart`, {
+      headers: { authorization: token }
+    })
       .then(res => res.json())
       .then(data => {
-        if (data.cart?.items) {
-          setCartItems(data.cart.items.filter(i => i.product).map(i => ({
-            _id: i.product._id, name: i.product.name, price: i.product.price,
-            image: i.product.image, description: i.product.description, quantity: i.quantity,
-          })))
+        if (data.cart && data.cart.items) {
+          // Convert MongoDB cart to our format
+          const items = data.cart.items
+            .filter(item => item.product)
+            .map(item => ({
+              _id: item.product._id,
+              name: item.product.name,
+              price: item.product.price,
+              image: item.product.image,
+              description: item.product.description,
+              quantity: item.quantity,
+            }))
+          setCartItems(items)
         }
       })
   }, [])
 
   const addToCart = async (product) => {
     const token = localStorage.getItem('token')
+
     if (token) {
+      // Save to MongoDB
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/cart`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/cart`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', authorization: token },
+          headers: {
+            'Content-Type': 'application/json',
+            authorization: token,
+          },
           body: JSON.stringify({ productId: product._id, quantity: 1 }),
         })
-        if (res.ok) {
+
+        if (response.ok) {
           setCartItems(prev => {
-            const exists = prev.find(i => i._id === product._id)
-            if (exists) return prev.map(i => i._id === product._id ? { ...i, quantity: i.quantity + 1 } : i)
+            const exists = prev.find(item => item._id === product._id)
+            if (exists) {
+              return prev.map(item =>
+                item._id === product._id
+                  ? { ...item, quantity: item.quantity + 1 }
+                  : item
+              )
+            }
             return [...prev, { ...product, quantity: 1 }]
           })
           toast.success(`${product.name} added to cart!`)
         }
-      } catch { toast.error('Failed to add to cart!') }
+      } catch (error) {
+        toast.error('Failed to add to cart!')
+      }
     } else {
+      // Not logged in - use React state only
       setCartItems(prev => [...prev, { ...product, quantity: 1 }])
       toast.success(`${product.name} added to cart!`)
     }
@@ -61,8 +89,8 @@ function App() {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      <Toaster position="top-right" toastOptions={{ style: { fontFamily: 'Inter, sans-serif', fontSize: 13 } }} />
-      {!isAdmin && <Header cartCount={cartItems.length} onSearch={setSearchQuery} />}
+      <Toaster position="top-right" />
+      {!isAdmin && !isAuthPage && <Header cartCount={cartItems.length} onSearch={setSearchQuery} />}
       <Routes>
         <Route path="/" element={<Home addToCart={addToCart} searchQuery={searchQuery} />} />
         <Route path="/login" element={<Login />} />
@@ -75,7 +103,7 @@ function App() {
         <Route path="/admin/products" element={<AdminProducts />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
-      {!isAdmin && <Footer />}
+      {!isAdmin && !isAuthPage && <Footer />}
     </div>
   )
 }

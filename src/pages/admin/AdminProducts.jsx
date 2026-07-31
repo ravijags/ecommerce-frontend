@@ -1,45 +1,42 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Trash2, X, Upload, Search } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { Plus, Trash2, X, Upload } from 'lucide-react'
 import toast from 'react-hot-toast'
 import AdminLayout from './AdminLayout'
 
-const EMPTY = { name: '', description: '', price: '', stock: '', category: '' }
+const EMPTY = { name: '', category: '', price: '', stock: '', description: '' }
 
-export default function AdminProducts() {
+function AdminProducts() {
   const [products, setProducts] = useState([])
-  const [filtered, setFiltered] = useState([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState(EMPTY)
   const [imageFile, setImageFile] = useState(null)
   const [submitting, setSubmitting] = useState(false)
-  const [search, setSearch] = useState('')
   const navigate = useNavigate()
 
   useEffect(() => { fetchProducts() }, [])
-  useEffect(() => {
-    setFiltered(search ? products.filter(p => p.name.toLowerCase().includes(search.toLowerCase()) || p.category?.toLowerCase().includes(search.toLowerCase())) : products)
-  }, [search, products])
 
   const fetchProducts = () => {
     const token = localStorage.getItem('token')
     if (!token) { navigate('/login'); return }
     fetch(`${import.meta.env.VITE_API_URL}/api/products`, { headers: { authorization: token } })
-      .then(r => r.json()).then(d => { setProducts(d.products || []); setLoading(false) })
+      .then(r => r.json())
+      .then(d => { setProducts(d.products || []); setLoading(false) })
       .catch(() => setLoading(false))
   }
 
   const handleSubmit = async () => {
-    if (!form.name || !form.price || !form.stock) { toast.error('Fill in required fields'); return }
+    if (!form.name || !form.price || !form.stock) { toast.error('Fill required fields'); return }
     const token = localStorage.getItem('token')
     setSubmitting(true)
     try {
       const data = new FormData()
       Object.entries(form).forEach(([k, v]) => data.append(k, v))
       if (imageFile) data.append('image', imageFile)
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/products`, { method: 'POST', headers: { authorization: token }, body: data })
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/products`, {
+        method: 'POST', headers: { authorization: token }, body: data
+      })
       if (res.ok) { toast.success('Product created!'); setShowForm(false); setForm(EMPTY); setImageFile(null); fetchProducts() }
       else toast.error('Failed to create')
     } catch { toast.error('Something went wrong') }
@@ -49,131 +46,144 @@ export default function AdminProducts() {
   const deleteProduct = async (id) => {
     if (!window.confirm('Delete this product?')) return
     const token = localStorage.getItem('token')
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/products/${id}`, { method: 'DELETE', headers: { authorization: token } })
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/products/${id}`, {
+      method: 'DELETE', headers: { authorization: token }
+    })
     if (res.ok) { toast.success('Deleted'); setProducts(p => p.filter(x => x._id !== id)) }
     else toast.error('Failed to delete')
   }
 
-  const inp = "w-full px-3 py-2.5 rounded-xl border text-sm outline-none transition-all bg-slate-50"
-
-  if (loading) return <AdminLayout><div className="flex items-center justify-center h-64"><div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: '#C9A84C', borderTopColor: 'transparent' }} /></div></AdminLayout>
+  if (loading) return (
+    <AdminLayout>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 300 }}>
+        <div style={{ width: 32, height: 32, borderRadius: '50%', border: '3px solid #C9A84C', borderTopColor: 'transparent', animation: 'spin 0.8s linear infinite' }} />
+      </div>
+    </AdminLayout>
+  )
 
   return (
     <AdminLayout>
-      {/* Toolbar */}
-      <div className="flex gap-3 mb-6">
-        <div className="flex items-center gap-2 flex-1 px-4 py-2.5 rounded-xl bg-white" style={{ border: '1px solid #e2e8f0' }}>
-          <Search size={16} style={{ color: '#94a3b8' }} />
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search products..." className="flex-1 text-sm outline-none" style={{ color: '#0f172a' }} />
+      {/* Header row */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+        <div>
+          <h2 style={{ fontSize: 20, fontWeight: 800, color: '#0f172a', margin: 0 }}>Products</h2>
+          <p style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>{products.length} items in catalogue</p>
         </div>
-        <motion.button whileTap={{ scale: 0.97 }} onClick={() => setShowForm(!showForm)}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm"
-          style={{ background: showForm ? '#f1f5f9' : '#0f172a', color: showForm ? '#0f172a' : '#fff', cursor: 'pointer' }}>
-          {showForm ? <><X size={15} /> Cancel</> : <><Plus size={15} /> Add Product</>}
-        </motion.button>
+        <button onClick={() => setShowForm(!showForm)} style={{
+          display: 'flex', alignItems: 'center', gap: 6,
+          padding: '9px 18px', borderRadius: 10, border: 'none',
+          background: showForm ? '#f1f5f9' : '#0f172a',
+          color: showForm ? '#0f172a' : '#fff',
+          fontSize: 13, fontWeight: 600, cursor: 'pointer'
+        }}>
+          {showForm ? <><X size={14} /> Cancel</> : <><Plus size={14} /> Add Product</>}
+        </button>
       </div>
 
       {/* Add form */}
-      <AnimatePresence>
-        {showForm && (
-          <motion.div initial={{ opacity: 0, y: -8, height: 0 }} animate={{ opacity: 1, y: 0, height: 'auto' }} exit={{ opacity: 0, y: -8, height: 0 }}
-            className="rounded-2xl p-6 mb-6 bg-white overflow-hidden" style={{ border: '1px solid #e2e8f0' }}>
-            <h3 className="font-black mb-5 text-sm uppercase tracking-wider" style={{ color: '#94a3b8' }}>New Product</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {[
-                { key: 'name', label: 'Product name *', placeholder: 'iPhone 15 Pro', type: 'text' },
-                { key: 'category', label: 'Category', placeholder: 'Electronics', type: 'text' },
-                { key: 'price', label: 'Price (₹) *', placeholder: '99999', type: 'number' },
-                { key: 'stock', label: 'Stock *', placeholder: '50', type: 'number' },
-              ].map(f => (
-                <div key={f.key}>
-                  <label className="block text-xs font-semibold mb-1.5" style={{ color: '#475569' }}>{f.label}</label>
-                  <input type={f.type} placeholder={f.placeholder} value={form[f.key]} onChange={e => setForm({ ...form, [f.key]: e.target.value })}
-                    className={inp} style={{ borderColor: '#e2e8f0', color: '#0f172a' }}
-                    onFocus={e => e.target.style.borderColor = '#C9A84C'} onBlur={e => e.target.style.borderColor = '#e2e8f0'} />
-                </div>
-              ))}
-              <div className="md:col-span-2">
-                <label className="block text-xs font-semibold mb-1.5" style={{ color: '#475569' }}>Description</label>
-                <textarea placeholder="Product description..." value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={2}
-                  className={inp} style={{ borderColor: '#e2e8f0', color: '#0f172a', resize: 'vertical' }}
-                  onFocus={e => e.target.style.borderColor = '#C9A84C'} onBlur={e => e.target.style.borderColor = '#e2e8f0'} />
+      {showForm && (
+        <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 16, padding: 24, marginBottom: 20 }}>
+          <h3 style={{ fontSize: 13, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 20 }}>New Product</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            {[
+              { key: 'name', label: 'Product name *', placeholder: 'iPhone 15 Pro', type: 'text' },
+              { key: 'category', label: 'Category', placeholder: 'Electronics', type: 'text' },
+              { key: 'price', label: 'Price (₹) *', placeholder: '99999', type: 'number' },
+              { key: 'stock', label: 'Stock *', placeholder: '50', type: 'number' },
+            ].map(f => (
+              <div key={f.key}>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#475569', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{f.label}</label>
+                <input type={f.type} placeholder={f.placeholder} value={form[f.key]} onChange={e => setForm({ ...form, [f.key]: e.target.value })}
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1.5px solid #e2e8f0', fontSize: 13, color: '#0f172a', background: '#f8fafc', outline: 'none', boxSizing: 'border-box' }}
+                  onFocus={e => e.target.style.borderColor = '#C9A84C'}
+                  onBlur={e => e.target.style.borderColor = '#e2e8f0'} />
               </div>
-              <div className="md:col-span-2">
-                <label className="block text-xs font-semibold mb-1.5" style={{ color: '#475569' }}>Product Image</label>
-                <div onClick={() => document.getElementById('img-upload').click()} className="rounded-xl border-2 border-dashed p-5 text-center cursor-pointer transition-all"
-                  style={{ borderColor: imageFile ? '#C9A84C' : '#e2e8f0', background: '#f8fafc' }}>
-                  <input id="img-upload" type="file" accept="image/*" className="hidden" onChange={e => setImageFile(e.target.files[0])} />
-                  <Upload size={20} className="mx-auto mb-1.5" style={{ color: '#94a3b8' }} />
-                  <p className="text-sm" style={{ color: '#64748b' }}>{imageFile ? imageFile.name : 'Click to upload image'}</p>
-                </div>
+            ))}
+            <div style={{ gridColumn: '1 / -1' }}>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#475569', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Description</label>
+              <textarea placeholder="Product description..." value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={3}
+                style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1.5px solid #e2e8f0', fontSize: 13, color: '#0f172a', background: '#f8fafc', outline: 'none', resize: 'vertical', boxSizing: 'border-box' }}
+                onFocus={e => e.target.style.borderColor = '#C9A84C'}
+                onBlur={e => e.target.style.borderColor = '#e2e8f0'} />
+            </div>
+            <div style={{ gridColumn: '1 / -1' }}>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#475569', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Product Image</label>
+              <div onClick={() => document.getElementById('img-upload').click()}
+                style={{ border: '2px dashed', borderColor: imageFile ? '#C9A84C' : '#e2e8f0', borderRadius: 10, padding: '20px', textAlign: 'center', cursor: 'pointer', background: '#f8fafc' }}>
+                <input id="img-upload" type="file" accept="image/*" style={{ display: 'none' }} onChange={e => setImageFile(e.target.files[0])} />
+                <Upload size={20} style={{ color: '#94a3b8', margin: '0 auto 6px' }} />
+                <p style={{ fontSize: 13, color: '#64748b' }}>{imageFile ? imageFile.name : 'Click to upload image'}</p>
               </div>
             </div>
-            <div className="flex gap-3 mt-5">
-              <motion.button whileTap={{ scale: 0.97 }} onClick={handleSubmit} disabled={submitting}
-                className="px-6 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2"
-                style={{ background: '#0f172a', color: '#fff', cursor: submitting ? 'not-allowed' : 'pointer', opacity: submitting ? 0.7 : 1 }}>
-                {submitting ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Plus size={15} />}
-                {submitting ? 'Creating...' : 'Create Product'}
-              </motion.button>
-              <button onClick={() => setShowForm(false)} className="px-6 py-2.5 rounded-xl font-semibold text-sm" style={{ background: '#f1f5f9', color: '#64748b', cursor: 'pointer' }}>
-                Cancel
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Table */}
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="rounded-2xl overflow-hidden bg-white" style={{ border: '1px solid #e2e8f0' }}>
-        <div className="px-5 py-4 border-b flex items-center justify-between" style={{ borderColor: '#f1f5f9' }}>
-          <span className="text-sm font-semibold" style={{ color: '#64748b' }}>{filtered.length} products</span>
+          </div>
+          <div style={{ display: 'flex', gap: 12, marginTop: 20 }}>
+            <button onClick={handleSubmit} disabled={submitting}
+              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 20px', borderRadius: 10, border: 'none', background: '#0f172a', color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', opacity: submitting ? 0.7 : 1 }}>
+              {submitting ? 'Creating...' : <><Plus size={14} /> Create Product</>}
+            </button>
+            <button onClick={() => setShowForm(false)}
+              style={{ padding: '10px 20px', borderRadius: 10, border: 'none', background: '#f1f5f9', color: '#64748b', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+              Cancel
+            </button>
+          </div>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full">
+      )}
+
+      {/* Products table */}
+      <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 16, overflow: 'hidden' }}>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
                 {['Image', 'Product', 'Category', 'Price', 'Stock', ''].map(h => (
-                  <th key={h} className="px-5 py-4 text-left text-xs font-bold uppercase tracking-wider" style={{ color: '#64748b' }}>{h}</th>
+                  <th key={h} style={{ padding: '14px 20px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y" style={{ borderColor: '#f1f5f9' }}>
-              {filtered.map((product, i) => (
-                <motion.tr key={product._id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.02 }} className="hover:bg-slate-50 transition-colors">
-                  <td className="px-5 py-3.5">
-                    <div className="w-12 h-12 rounded-xl overflow-hidden" style={{ background: '#f1f5f9' }}>
-                      <img src={product.image?.startsWith('http') ? product.image : 'https://placehold.co/50x50'} alt={product.name} className="w-full h-full object-cover" />
+            <tbody>
+              {products.map(product => (
+                <tr key={product._id} style={{ borderBottom: '1px solid #f1f5f9' }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                  <td style={{ padding: '14px 20px' }}>
+                    <div style={{ width: 44, height: 44, borderRadius: 10, background: '#f1f5f9', overflow: 'hidden' }}>
+                      <img src={product.image?.startsWith('http') ? product.image : 'https://placehold.co/44x44'} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     </div>
                   </td>
-                  <td className="px-5 py-3.5">
-                    <p className="text-sm font-semibold line-clamp-1" style={{ color: '#0f172a' }}>{product.name}</p>
-                    {product.brand && <p className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>{product.brand}</p>}
+                  <td style={{ padding: '14px 20px' }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: '#0f172a', maxWidth: 260, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{product.name}</div>
+                    {product.brand && <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>{product.brand}</div>}
                   </td>
-                  <td className="px-5 py-3.5">
-                    <span className="text-xs px-2 py-1 rounded-lg capitalize font-medium" style={{ background: '#f1f5f9', color: '#475569' }}>{product.category}</span>
+                  <td style={{ padding: '14px 20px' }}>
+                    <span style={{ fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 20, background: '#f1f5f9', color: '#475569', textTransform: 'capitalize' }}>
+                      {product.category?.replace(/-/g, ' ')}
+                    </span>
                   </td>
-                  <td className="px-5 py-3.5">
-                    <span className="text-sm font-bold" style={{ color: '#0f172a' }}>₹{product.price?.toLocaleString()}</span>
+                  <td style={{ padding: '14px 20px', fontSize: 14, fontWeight: 700, color: '#0f172a' }}>
+                    ₹{product.price?.toLocaleString()}
                   </td>
-                  <td className="px-5 py-3.5">
-                    <span className="text-sm font-semibold" style={{ color: product.stock < 10 ? '#ef4444' : '#22c55e' }}>{product.stock}</span>
+                  <td style={{ padding: '14px 20px', fontSize: 13, fontWeight: 600, color: product.stock < 10 ? '#dc2626' : '#16a34a' }}>
+                    {product.stock}
                   </td>
-                  <td className="px-5 py-3.5">
-                    <motion.button whileTap={{ scale: 0.9 }} onClick={() => deleteProduct(product._id)}
-                      className="p-2 rounded-xl transition-all" style={{ color: '#94a3b8' }}
-                      onMouseEnter={e => { e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.background = '#fef2f2' }}
-                      onMouseLeave={e => { e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.background = 'transparent' }}>
+                  <td style={{ padding: '14px 20px' }}>
+                    <button onClick={() => deleteProduct(product._id)}
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, borderRadius: 8, border: 'none', background: 'transparent', color: '#94a3b8', cursor: 'pointer', transition: 'all 0.15s' }}
+                      onMouseEnter={e => { e.currentTarget.style.background = '#fee2e2'; e.currentTarget.style.color = '#dc2626' }}
+                      onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#94a3b8' }}>
                       <Trash2 size={15} />
-                    </motion.button>
+                    </button>
                   </td>
-                </motion.tr>
+                </tr>
               ))}
+              {products.length === 0 && (
+                <tr><td colSpan={6} style={{ padding: '48px 20px', textAlign: 'center', color: '#94a3b8', fontSize: 13 }}>No products yet</td></tr>
+              )}
             </tbody>
           </table>
-          {filtered.length === 0 && <div className="py-16 text-center text-sm" style={{ color: '#94a3b8' }}>No products found</div>}
         </div>
-      </motion.div>
+      </div>
     </AdminLayout>
   )
 }
+
+export default AdminProducts
