@@ -108,7 +108,7 @@ function Home({ addToCart, searchQuery }) {
   }
 
   return (
-    <div style={{ backgroundColor: '#f8fafc', minHeight: '100vh' }}>
+    <div style={{ backgroundColor: '#f8fafc', minHeight: '100vh', paddingBottom: 72 }}>
 
       {/* HERO */}
       {!searchQuery && !category && (

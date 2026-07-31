@@ -1,21 +1,25 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { Package, ChevronRight, Clock, CheckCircle, Truck, XCircle, ShoppingBag } from 'lucide-react'
+import { Package, ChevronRight, Clock, CheckCircle, Truck, XCircle, ShoppingBag, ArrowLeft } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 const STATUS_CONFIG = {
-  pending:    { icon: Clock,         color: '#f59e0b', bg: '#fef3c7', label: 'Pending' },
-  processing: { icon: Package,       color: '#3b82f6', bg: '#dbeafe', label: 'Processing' },
-  shipped:    { icon: Truck,         color: '#8b5cf6', bg: '#ede9fe', label: 'Shipped' },
-  delivered:  { icon: CheckCircle,   color: '#22c55e', bg: '#dcfce7', label: 'Delivered' },
-  cancelled:  { icon: XCircle,       color: '#ef4444', bg: '#fee2e2', label: 'Cancelled' },
+  pending:    { icon: Clock,       color: '#d97706', bg: '#fef3c7', label: 'Pending' },
+  processing: { icon: Package,     color: '#2563eb', bg: '#dbeafe', label: 'Processing' },
+  shipped:    { icon: Truck,       color: '#7c3aed', bg: '#ede9fe', label: 'Shipped' },
+  delivered:  { icon: CheckCircle, color: '#16a34a', bg: '#dcfce7', label: 'Delivered' },
+  cancelled:  { icon: XCircle,     color: '#dc2626', bg: '#fee2e2', label: 'Cancelled' },
 }
 
 function StatusBadge({ status }) {
   const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.pending
   const Icon = cfg.icon
   return (
-    <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold" style={{ background: cfg.bg, color: cfg.color }}>
+    <span style={{
+      display: 'inline-flex', alignItems: 'center', gap: 5,
+      padding: '4px 10px', borderRadius: 20, fontSize: 11,
+      fontWeight: 700, background: cfg.bg, color: cfg.color
+    }}>
       <Icon size={11} />
       {cfg.label}
     </span>
@@ -31,68 +35,59 @@ function Orders() {
     const token = localStorage.getItem('token')
     if (!token) { navigate('/login'); return }
     fetch(`${import.meta.env.VITE_API_URL}/api/orders`, { headers: { authorization: token } })
-      .then(res => res.json())
-      .then(data => { setOrders(data.order || []); setLoading(false) })
+      .then(r => r.json())
+      .then(d => { setOrders(d.order || []); setLoading(false) })
       .catch(() => setLoading(false))
   }, [])
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: '#C9A84C', borderTopColor: 'transparent' }} />
-      </div>
-    )
-  }
+  if (loading) return (
+    <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ width: 32, height: 32, borderRadius: '50%', border: '3px solid #C9A84C', borderTopColor: 'transparent', animation: 'spin 0.8s linear infinite' }} />
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </div>
+  )
 
   return (
-    <main className="max-w-3xl mx-auto px-4 py-8">
+    <main style={{ maxWidth: 680, margin: '0 auto', padding: '24px 16px 80px', fontFamily: 'Inter, sans-serif' }}>
 
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-black" style={{ color: '#0f172a' }}>My Orders</h1>
-        <Link to="/" className="text-sm font-semibold flex items-center gap-1" style={{ color: '#C9A84C' }}>
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+        <h1 style={{ fontSize: 22, fontWeight: 900, color: '#0f172a', margin: 0 }}>My Orders</h1>
+        <Link to="/" style={{ fontSize: 13, fontWeight: 600, color: '#C9A84C', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4 }}>
           Shop more <ChevronRight size={14} />
         </Link>
       </div>
 
+      {/* Empty */}
       {orders.length === 0 ? (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="rounded-2xl p-16 text-center"
-          style={{ background: '#fff', border: '1px solid #e2e8f0' }}
-        >
-          <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-5" style={{ background: '#f1f5f9' }}>
-            <ShoppingBag size={36} style={{ color: '#cbd5e1' }} />
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+          style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 20, padding: '60px 24px', textAlign: 'center' }}>
+          <div style={{ width: 80, height: 80, borderRadius: '50%', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+            <ShoppingBag size={34} color="#cbd5e1" />
           </div>
-          <h2 className="text-xl font-black mb-2" style={{ color: '#0f172a' }}>No orders yet</h2>
-          <p className="mb-8" style={{ color: '#64748b' }}>Your order history will appear here once you shop.</p>
-          <Link to="/" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm" style={{ background: '#0f172a', color: '#fff' }}>
-            Start Shopping
+          <h2 style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', margin: '0 0 8px' }}>No orders yet</h2>
+          <p style={{ fontSize: 14, color: '#64748b', margin: '0 0 28px' }}>Your order history will appear here.</p>
+          <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '12px 24px', borderRadius: 12, background: '#0f172a', color: '#fff', fontSize: 14, fontWeight: 700, textDecoration: 'none' }}>
+            <ArrowLeft size={15} /> Start Shopping
           </Link>
         </motion.div>
       ) : (
-        <div className="space-y-4">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {orders.map((order, i) => (
-            <motion.div
-              key={order._id}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
-              className="rounded-2xl overflow-hidden"
-              style={{ background: '#fff', border: '1px solid #e2e8f0' }}
-            >
+            <motion.div key={order._id}
+              initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}
+              style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 16, overflow: 'hidden' }}>
+
               {/* Order header */}
-              <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid #f1f5f9' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', padding: '14px 16px', borderBottom: '1px solid #f1f5f9' }}>
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wider mb-0.5" style={{ color: '#94a3b8' }}>
-                    Order ID
-                  </p>
-                  <p className="text-sm font-mono font-bold" style={{ color: '#0f172a' }}>
+                  <p style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 3px' }}>Order ID</p>
+                  <p style={{ fontSize: 13, fontWeight: 700, fontFamily: 'monospace', color: '#0f172a', margin: 0 }}>
                     #{order._id.slice(-8).toUpperCase()}
                   </p>
                 </div>
-                <div className="text-right">
-                  <p className="text-xs mb-1" style={{ color: '#94a3b8' }}>
+                <div style={{ textAlign: 'right' }}>
+                  <p style={{ fontSize: 11, color: '#94a3b8', margin: '0 0 5px' }}>
                     {new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                   </p>
                   <StatusBadge status={order.status} />
@@ -100,38 +95,40 @@ function Orders() {
               </div>
 
               {/* Items */}
-              <div className="px-5 py-3 space-y-2">
+              <div style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {order.items.map((item, idx) => (
-                  <div key={idx} className="flex justify-between items-center text-sm">
-                    <span className="flex items-center gap-2" style={{ color: '#475569' }}>
-                      <Package size={13} style={{ color: '#94a3b8' }} />
-                      {item.product ? item.product.name : 'Product'}
-                      <span className="font-medium" style={{ color: '#94a3b8' }}>×{item.quantity}</span>
+                  <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#475569', minWidth: 0 }}>
+                      <Package size={13} color="#94a3b8" style={{ flexShrink: 0 }} />
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {item.product ? item.product.name : 'Product'}
+                      </span>
+                      <span style={{ color: '#94a3b8', fontWeight: 500, flexShrink: 0 }}>×{item.quantity}</span>
                     </span>
-                    <span className="font-semibold" style={{ color: '#0f172a' }}>₹{item.price?.toLocaleString()}</span>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', flexShrink: 0, marginLeft: 8 }}>
+                      ₹{item.price?.toLocaleString()}
+                    </span>
                   </div>
                 ))}
               </div>
 
               {/* Footer */}
-              <div className="flex items-center justify-between px-5 py-4" style={{ background: '#f8fafc', borderTop: '1px solid #f1f5f9' }}>
-                <div className="flex items-center gap-2">
-                  <span
-                    className="text-xs px-2 py-0.5 rounded-full font-semibold"
-                    style={{
-                      background: order.paymentStatus === 'paid' ? '#dcfce7' : '#fef3c7',
-                      color: order.paymentStatus === 'paid' ? '#15803d' : '#92400e',
-                    }}
-                  >
-                    {order.paymentStatus === 'paid' ? '✓ Paid' : 'Pending Payment'}
-                  </span>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs mb-0.5" style={{ color: '#94a3b8' }}>Total</p>
-                  <p className="text-lg font-black" style={{ color: '#0f172a' }}>₹{order.totalAmount?.toLocaleString()}</p>
+              <div style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '12px 16px', background: '#f8fafc', borderTop: '1px solid #f1f5f9'
+              }}>
+                <span style={{
+                  fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 20,
+                  background: order.paymentStatus === 'paid' ? '#dcfce7' : '#fef3c7',
+                  color: order.paymentStatus === 'paid' ? '#15803d' : '#92400e'
+                }}>
+                  {order.paymentStatus === 'paid' ? '✓ Paid' : 'Pending Payment'}
+                </span>
+                <div style={{ textAlign: 'right' }}>
+                  <p style={{ fontSize: 10, color: '#94a3b8', margin: '0 0 2px' }}>Total</p>
+                  <p style={{ fontSize: 17, fontWeight: 900, color: '#0f172a', margin: 0 }}>₹{order.totalAmount?.toLocaleString()}</p>
                 </div>
               </div>
-
             </motion.div>
           ))}
         </div>

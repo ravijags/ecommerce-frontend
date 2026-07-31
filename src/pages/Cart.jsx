@@ -106,7 +106,7 @@ export default function Cart({ cartItems, setCartItems }) {
 
   // ── CART WITH ITEMS ──
   return (
-    <main style={{ maxWidth: 1100, margin: '0 auto', padding: '32px 24px', fontFamily: 'Inter, sans-serif' }}>
+    <main style={{ maxWidth: 1100, margin: '0 auto', padding: '24px 16px 80px', fontFamily: 'Inter, sans-serif' }}>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28 }}>
         <h1 style={{ fontSize: 24, fontWeight: 900, color: '#0f172a', margin: 0 }}>My Cart</h1>
@@ -115,7 +115,10 @@ export default function Cart({ cartItems, setCartItems }) {
         </span>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 24, alignItems: 'start' }}>
+      <div className="cart-grid" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 20, alignItems: 'start' }}>
+        <style>{`
+          @media (min-width: 768px) { .cart-grid { grid-template-columns: 1fr 340px !important; } }
+        `}</style>
 
         {/* Items */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
