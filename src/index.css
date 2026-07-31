@@ -6,16 +6,31 @@
   box-sizing: border-box;
 }
 
-body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background-color: #f8fafc;
-  color: #0f172a;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+:root {
+  --navy: #0f172a;
+  --gold: #C9A84C;
+  --gold-light: #e8c96a;
+  --white: #ffffff;
+  --bg: #f8fafc;
+  --text: #0f172a;
+  --text-secondary: #64748b;
+  --border: #e2e8f0;
+  --success: #22c55e;
+  --danger: #ef4444;
 }
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 a {
@@ -33,9 +48,6 @@ img {
   display: block;
 }
 
-/* =====================
-   SCROLLBAR
-===================== */
 ::-webkit-scrollbar {
   width: 4px;
   height: 4px;
@@ -46,160 +58,15 @@ img {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #e2e8f0;
+  background: #cbd5e1;
   border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #cbd5e1;
+  background: #94a3b8;
 }
 
-/* Hide scrollbar utility */
-.hide-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-
-.hide-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-/* =====================
-   SELECTION
-===================== */
 ::selection {
   background: #C9A84C;
   color: #0f172a;
-}
-
-/* =====================
-   MOBILE FIXES
-===================== */
-@media (max-width: 640px) {
-  #products-section {
-    padding: 16px 12px !important;
-  }
-
-  .product-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 10px !important;
-  }
-}
-
-/* =====================
-   TABLET FIXES
-===================== */
-@media (min-width: 641px) and (max-width: 1024px) {
-  .product-grid {
-    grid-template-columns: repeat(3, 1fr) !important;
-  }
-}
-
-/* =====================
-   ANIMATIONS
-===================== */
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
-/* =====================
-   SKELETON LOADING
-===================== */
-.skeleton {
-  background: linear-gradient(
-    90deg,
-    #f1f5f9 25%,
-    #e2e8f0 50%,
-    #f1f5f9 75%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-  border-radius: 8px;
-}
-
-/* =====================
-   BOTTOM NAV SPACING
-   (so content doesnt
-   hide behind mobile nav)
-===================== */
-@media (max-width: 1024px) {
-  main, #root > div > div:last-of-type {
-    padding-bottom: 64px;
-  }
-}
-
-/* =====================
-   CATEGORY STRIP
-   HIDE SCROLLBAR
-===================== */
-.category-strip {
-  display: flex;
-  overflow-x: auto;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.category-strip::-webkit-scrollbar {
-  display: none;
-}
-
-/* =====================
-   SMOOTH IMAGE LOAD
-===================== */
-img {
-  opacity: 1;
-  transition: opacity 0.3s;
-}
-
-img[loading] {
-  opacity: 0;
-}
-
-/* =====================
-   FOCUS STYLES
-===================== */
-button:focus-visible,
-a:focus-visible,
-input:focus-visible,
-select:focus-visible {
-  outline: 2px solid #C9A84C;
-  outline-offset: 2px;
-}
-
-button:focus:not(:focus-visible),
-a:focus:not(:focus-visible),
-input:focus:not(:focus-visible),
-select:focus:not(:focus-visible) {
-  outline: none;
-}
-
-/* =====================
-   INPUT RESET
-===================== */
-input, textarea, select {
-  font-family: 'Inter', system-ui, sans-serif;
-  font-size: 14px;
-}
-
-input::placeholder,
-textarea::placeholder {
-  color: #94a3b8;
-}
-
-/* =====================
-   TOAST OVERRIDE
-===================== */
-.react-hot-toast {
-  font-family: 'Inter', system-ui, sans-serif !important;
-  font-size: 13px !important;
 }

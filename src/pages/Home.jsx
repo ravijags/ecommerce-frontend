@@ -257,7 +257,7 @@ function Home({ addToCart, searchQuery }) {
                       id={product._id}
                       name={product.name}
                       price={product.price}
-                      image={product.image || product.thumbnail}
+                      image={product.image || product.thumbnail || product.images?.[0]}
                       rating={product.rating}
                       discount={product.discount}
                       originalPrice={product.originalPrice}

@@ -32,20 +32,23 @@ function App() {
       .then(res => res.json())
       .then(data => {
         if (data.cart && data.cart.items) {
-          // Convert MongoDB cart to our format
           const items = data.cart.items
             .filter(item => item.product)
             .map(item => ({
               _id: item.product._id,
               name: item.product.name,
               price: item.product.price,
-              image: item.product.image,
+              originalPrice: item.product.originalPrice,
+              discount: item.product.discount,
+              brand: item.product.brand,
+              image: item.product.image || item.product.thumbnail,
               description: item.product.description,
               quantity: item.quantity,
             }))
           setCartItems(items)
         }
       })
+      .catch(() => {})
   }, [])
 
   const addToCart = async (product) => {
@@ -54,6 +57,11 @@ function App() {
     // Always update UI immediately
     setCartItems(prev => {
       const exists = prev.find(item => item._id === product._id)
+      const cartProduct = {
+        ...product,
+        image: product.image || product.thumbnail || product.images?.[0],
+        quantity: 1
+      }
       if (exists) {
         return prev.map(item =>
           item._id === product._id
@@ -61,7 +69,7 @@ function App() {
             : item
         )
       }
-      return [...prev, { ...product, quantity: 1 }]
+      return [...prev, cartProduct]
     })
     toast.success(`${product.name} added to cart!`)
 
