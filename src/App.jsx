@@ -14,7 +14,7 @@ import AdminProducts from './pages/admin/AdminProducts'
 import ProductDetail from './pages/ProductDetail'
 import Footer from './components/Footer'
 
-function AppInner() {
+function App() {
   const [cartItems, setCartItems] = useState([])
   const [searchQuery, setSearchQuery] = useState('')
   const location = useLocation()
@@ -80,6 +80,4 @@ function AppInner() {
   )
 }
 
-export default function App() {
-  return <AppInner />
-}
+export default App
