@@ -106,7 +106,7 @@ export default function Cart({ cartItems, setCartItems }) {
 
   // ── CART WITH ITEMS ──
   return (
-    <main style={{ maxWidth: 1100, margin: '0 auto', padding: '24px 16px 80px', fontFamily: 'Inter, sans-serif' }}>
+    <main style={{ maxWidth: 1100, margin: '0 auto', padding: '24px 16px 80px', fontFamily: 'Inter, sans-serif', boxSizing: 'border-box', width: '100%' }}>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28 }}>
         <h1 style={{ fontSize: 24, fontWeight: 900, color: '#0f172a', margin: 0 }}>My Cart</h1>
@@ -168,9 +168,9 @@ export default function Cart({ cartItems, setCartItems }) {
         {/* Summary */}
         <div style={{
           background: '#fff', borderRadius: 16,
-          border: '1px solid #e2e8f0', padding: '24px 20px',
+          border: '1px solid #e2e8f0', padding: '20px 16px',
           position: 'sticky', top: 24,
-          minWidth: 0, overflow: 'hidden',
+          width: '100%', boxSizing: 'border-box',
         }}>
           <p style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 16px' }}>Order Summary</p>
 

@@ -76,7 +76,7 @@ export default function AdminUsers() {
       </div>
 
       {/* Stats row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, marginBottom: 24 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 24 }} className="users-stats-grid">
         {[
           { label: 'Total Users', value: users.length, color: '#3b82f6', bg: '#dbeafe' },
           { label: 'This Month', value: users.filter(u => { const d = new Date(u.createdAt); const now = new Date(); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear() }).length, color: '#16a34a', bg: '#dcfce7' },
@@ -91,6 +91,7 @@ export default function AdminUsers() {
 
       {/* Users table */}
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+        className="users-table-wrap"
         style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 16, overflow: 'hidden' }}>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -163,6 +164,54 @@ export default function AdminUsers() {
           </table>
         </div>
       </motion.div>
+
+      {/* Mobile cards */}
+      <div className="users-cards-wrap" style={{ display: 'none', flexDirection: 'column', gap: 10 }}>
+        {filtered.map((user, i) => {
+          const color = COLORS[i % COLORS.length]
+          const isAdmin = user.role === 'admin'
+          return (
+            <div key={user._id} style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 14, padding: 16 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ width: 42, height: 42, borderRadius: '50%', background: color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 800, color: '#fff', flexShrink: 0 }}>
+                    {getInitials(user.name)}
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: '#0f172a' }}>{user.name || 'Unknown'}</div>
+                    <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>{user.email}</div>
+                  </div>
+                </div>
+                <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 20, background: isAdmin ? '#ede9fe' : '#f1f5f9', color: isAdmin ? '#7c3aed' : '#64748b' }}>
+                  {user.role || 'user'}
+                </span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 12, paddingTop: 12, borderTop: '1px solid #f1f5f9' }}>
+                <span style={{ fontSize: 11, color: '#94a3b8' }}>
+                  Joined: {user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
+                </span>
+                {!isAdmin && (
+                  <button onClick={() => deleteUser(user._id)}
+                    style={{ fontSize: 12, color: '#ef4444', background: '#fee2e2', border: 'none', borderRadius: 8, padding: '5px 12px', cursor: 'pointer', fontWeight: 600 }}>
+                    Delete
+                  </button>
+                )}
+              </div>
+            </div>
+          )
+        })}
+        {filtered.length === 0 && (
+          <div style={{ textAlign: 'center', padding: 40, color: '#94a3b8', fontSize: 13 }}>No users found</div>
+        )}
+      </div>
+
+      <style>{`
+        @media (max-width: 640px) {
+          .users-stats-grid { grid-template-columns: 1fr 1fr !important; }
+          .users-table-wrap { display: none !important; }
+          .users-cards-wrap { display: flex !important; }
+        }
+      `}</style>
     </AdminLayout>
   )
 }

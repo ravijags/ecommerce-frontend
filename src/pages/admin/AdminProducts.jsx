@@ -130,7 +130,7 @@ function AdminProducts() {
       )}
 
       {/* Products table */}
-      <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 16, overflow: 'hidden' }}>
+      <div className="products-table-desktop" style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 16, overflow: 'hidden' }}>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
@@ -182,6 +182,40 @@ function AdminProducts() {
           </table>
         </div>
       </div>
+
+      {/* Mobile product cards */}
+      <div className="products-cards-wrap" style={{ display: 'none', flexDirection: 'column', gap: 10 }}>
+        {products.map(product => (
+          <div key={product._id} style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 14, padding: 14, display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+            <div style={{ width: 52, height: 52, borderRadius: 10, background: '#f1f5f9', overflow: 'hidden', flexShrink: 0 }}>
+              <img src={product.image?.startsWith('http') ? product.image : 'https://placehold.co/52x52'} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{product.name}</div>
+              {product.brand && <div style={{ fontSize: 11, color: '#94a3b8', marginBottom: 4 }}>{product.brand}</div>}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: 14, fontWeight: 800, color: '#0f172a' }}>₹{product.price?.toLocaleString()}</span>
+                <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 20, background: '#f1f5f9', color: '#64748b', textTransform: 'capitalize' }}>{product.category?.replace(/-/g,' ')}</span>
+                <span style={{ fontSize: 12, fontWeight: 600, color: product.stock < 10 ? '#dc2626' : '#16a34a' }}>Stock: {product.stock}</span>
+              </div>
+            </div>
+            <button onClick={() => deleteProduct(product._id)}
+              style={{ width: 32, height: 32, borderRadius: 8, border: 'none', background: '#fee2e2', color: '#dc2626', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <Trash2 size={14} />
+            </button>
+          </div>
+        ))}
+        {products.length === 0 && (
+          <div style={{ textAlign: 'center', padding: 40, color: '#94a3b8', fontSize: 13 }}>No products yet</div>
+        )}
+      </div>
+
+      <style>{`
+        @media (max-width: 640px) {
+          .products-table-desktop { display: none !important; }
+          .products-cards-wrap { display: flex !important; }
+        }
+      `}</style>
     </AdminLayout>
   )
 }
