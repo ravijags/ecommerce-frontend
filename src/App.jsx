@@ -11,6 +11,7 @@ import NotFound from './pages/NotFound'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminOrders from './pages/admin/AdminOrders'
 import AdminProducts from './pages/admin/AdminProducts'
+import AdminUsers from './pages/admin/AdminUsers'
 import ProductDetail from './pages/ProductDetail'
 import Footer from './components/Footer'
 
@@ -101,6 +102,7 @@ function App() {
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/admin/orders" element={<AdminOrders />} />
         <Route path="/admin/products" element={<AdminProducts />} />
+        <Route path="/admin/users" element={<AdminUsers />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       {!isAdmin && !isAuthPage && <Footer />}
