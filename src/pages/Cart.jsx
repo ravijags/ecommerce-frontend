@@ -106,7 +106,7 @@ export default function Cart({ cartItems, setCartItems }) {
 
   // ── CART WITH ITEMS ──
   return (
-    <main style={{ maxWidth: 1100, margin: '0 auto', padding: '24px 16px 80px', fontFamily: 'Inter, sans-serif', boxSizing: 'border-box', width: '100%' }}>
+    <main style={{ maxWidth: 1100, margin: '0 auto', padding: '24px 16px 80px', fontFamily: 'Inter, sans-serif', boxSizing: 'border-box', width: '100%', overflow: 'hidden' }}>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28 }}>
         <h1 style={{ fontSize: 24, fontWeight: 900, color: '#0f172a', margin: 0 }}>My Cart</h1>
@@ -115,51 +115,57 @@ export default function Cart({ cartItems, setCartItems }) {
         </span>
       </div>
 
-      <div className="cart-grid" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 20, alignItems: 'start' }}>
+      <div className="cart-grid" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 16, alignItems: 'start', width: '100%' }}>
         <style>{`
-          @media (min-width: 768px) { .cart-grid { grid-template-columns: 1fr 340px !important; } }
+          .cart-grid { width: 100%; box-sizing: border-box; overflow: hidden; }
+          .cart-grid > * { min-width: 0; max-width: 100%; box-sizing: border-box; }
+          @media (min-width: 768px) { .cart-grid { grid-template-columns: 1fr 320px !important; gap: 24px !important; } }
+          .cart-summary-row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+          .cart-summary-row span:last-child { text-align: right; flex-shrink: 0; }
         `}</style>
 
         {/* Items */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {cartItems.map((item, index) => (
             <div key={`${item._id}-${index}`} style={{
-              display: 'flex', gap: 16, padding: 20,
+              display: 'flex', gap: 12, padding: '14px 12px',
               background: '#fff', borderRadius: 16,
               border: '1px solid #e2e8f0',
+              boxSizing: 'border-box', width: '100%',
+              position: 'relative',
             }}>
               <Link to={`/products/${item._id}`}>
-                <div style={{ width: 88, height: 88, borderRadius: 12, background: '#f8fafc', overflow: 'hidden', flexShrink: 0 }}>
-                  <img src={item.image?.startsWith('http') ? item.image : 'https://placehold.co/88x88'} alt={item.name}
+                <div style={{ width: 76, height: 76, borderRadius: 12, background: '#f8fafc', overflow: 'hidden', flexShrink: 0 }}>
+                  <img src={item.image?.startsWith('http') ? item.image : 'https://placehold.co/76x76'} alt={item.name}
                     style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 6 }} />
                 </div>
               </Link>
 
-              <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ flex: 1, minWidth: 0, paddingRight: 32 }}>
                 <Link to={`/products/${item._id}`} style={{ textDecoration: 'none' }}>
                   <p style={{ fontSize: 14, fontWeight: 600, color: '#0f172a', margin: '0 0 4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</p>
                 </Link>
-                {item.brand && <p style={{ fontSize: 11, color: '#94a3b8', margin: '0 0 10px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{item.brand}</p>}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <span style={{ fontSize: 17, fontWeight: 800, color: '#0f172a' }}>₹{item.price?.toLocaleString()}</span>
+                {item.brand && <p style={{ fontSize: 11, color: '#94a3b8', margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{item.brand}</p>}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: 16, fontWeight: 800, color: '#0f172a' }}>₹{item.price?.toLocaleString()}</span>
                   {item.originalPrice > item.price && (
-                    <span style={{ fontSize: 13, color: '#94a3b8', textDecoration: 'line-through' }}>₹{item.originalPrice?.toLocaleString()}</span>
+                    <span style={{ fontSize: 12, color: '#94a3b8', textDecoration: 'line-through' }}>₹{item.originalPrice?.toLocaleString()}</span>
                   )}
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 6 }}>
-                  <Package size={12} color="#22c55e" />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 5 }}>
+                  <Package size={11} color="#22c55e" />
                   <span style={{ fontSize: 11, color: '#22c55e', fontWeight: 600 }}>Free delivery</span>
                 </div>
               </div>
 
               <button onClick={() => removeFromCart(index)} style={{
-                alignSelf: 'flex-start', padding: 8, borderRadius: 8,
+                position: 'absolute', top: 12, right: 12,
+                padding: 6, borderRadius: 8,
                 border: 'none', background: 'transparent', cursor: 'pointer', color: '#94a3b8',
-                transition: 'all 0.15s',
               }}
                 onMouseEnter={e => { e.currentTarget.style.background = '#fef2f2'; e.currentTarget.style.color = '#ef4444' }}
                 onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#94a3b8' }}>
-                <Trash2 size={16} />
+                <Trash2 size={15} />
               </button>
             </div>
           ))}
@@ -168,34 +174,35 @@ export default function Cart({ cartItems, setCartItems }) {
         {/* Summary */}
         <div style={{
           background: '#fff', borderRadius: 16,
-          border: '1px solid #e2e8f0', padding: '20px 16px',
+          border: '1px solid #e2e8f0', padding: '18px 14px',
           position: 'sticky', top: 24,
-          width: '100%', boxSizing: 'border-box',
+          boxSizing: 'border-box', width: '100%',
+          minWidth: 0, overflow: 'hidden',
         }}>
-          <p style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 16px' }}>Order Summary</p>
+          <p style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 14px' }}>Order Summary</p>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 16, paddingBottom: 16, borderBottom: '1px solid #f1f5f9' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: '#64748b' }}>
-              <span>Subtotal ({cartItems.length} items)</span>
-              <span style={{ fontWeight: 500, color: '#0f172a' }}>₹{totalOriginal.toLocaleString()}</span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 14, paddingBottom: 14, borderBottom: '1px solid #f1f5f9' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: '#64748b', gap: 8 }}>
+              <span style={{ flexShrink: 0 }}>Subtotal ({cartItems.length} items)</span>
+              <span style={{ fontWeight: 500, color: '#0f172a', textAlign: 'right' }}>₹{totalOriginal.toLocaleString('en-IN')}</span>
             </div>
             {saved > 0 && (
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
-                <span style={{ color: '#64748b' }}>Discount</span>
-                <span style={{ fontWeight: 600, color: '#22c55e' }}>− ₹{saved.toLocaleString()}</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, gap: 8 }}>
+                <span style={{ color: '#64748b', flexShrink: 0 }}>Discount</span>
+                <span style={{ fontWeight: 600, color: '#22c55e', textAlign: 'right' }}>− ₹{saved.toLocaleString('en-IN')}</span>
               </div>
             )}
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
-              <span style={{ color: '#64748b' }}>Delivery</span>
-              <span style={{ fontWeight: 600, color: delivery === 0 ? '#22c55e' : '#0f172a' }}>{delivery === 0 ? 'FREE' : `₹${delivery}`}</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, gap: 8 }}>
+              <span style={{ color: '#64748b', flexShrink: 0 }}>Delivery</span>
+              <span style={{ fontWeight: 600, color: delivery === 0 ? '#22c55e' : '#0f172a', textAlign: 'right' }}>{delivery === 0 ? 'FREE' : `₹${delivery}`}</span>
             </div>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-            <span style={{ fontSize: 15, fontWeight: 700, color: '#0f172a' }}>Total</span>
-            <span style={{ fontSize: 22, fontWeight: 900, color: '#0f172a' }}>₹{(totalPrice + delivery).toLocaleString()}</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4, gap: 8 }}>
+            <span style={{ fontSize: 15, fontWeight: 700, color: '#0f172a', flexShrink: 0 }}>Total</span>
+            <span style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', textAlign: 'right' }}>₹{(totalPrice + delivery).toLocaleString('en-IN')}</span>
           </div>
-          {saved > 0 && <p style={{ fontSize: 12, fontWeight: 600, color: '#22c55e', margin: '-12px 0 16px', textAlign: 'right' }}>You save ₹{saved.toLocaleString()}</p>}
+          {saved > 0 && <p style={{ fontSize: 12, fontWeight: 600, color: '#22c55e', margin: '0 0 16px', textAlign: 'right' }}>You save ₹{saved.toLocaleString('en-IN')}</p>}
 
           <button onClick={handleCheckout} style={{
             width: '100%', padding: '14px', borderRadius: 12, border: 'none',
