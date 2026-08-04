@@ -168,8 +168,9 @@ export default function Cart({ cartItems, setCartItems }) {
         {/* Summary */}
         <div style={{
           background: '#fff', borderRadius: 16,
-          border: '1px solid #e2e8f0', padding: 24,
+          border: '1px solid #e2e8f0', padding: '24px 20px',
           position: 'sticky', top: 24,
+          minWidth: 0, overflow: 'hidden',
         }}>
           <p style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 16px' }}>Order Summary</p>
 
