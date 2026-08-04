@@ -79,7 +79,7 @@ export default function AdminUsers() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, marginBottom: 24 }}>
         {[
           { label: 'Total Users', value: users.length, color: '#3b82f6', bg: '#dbeafe' },
-          { label: 'This Month', value: users.filter(u => new Date(u.createdAt) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)).length, color: '#16a34a', bg: '#dcfce7' },
+          { label: 'This Month', value: users.filter(u => { const d = new Date(u.createdAt); const now = new Date(); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear() }).length, color: '#16a34a', bg: '#dcfce7' },
           { label: 'Admins', value: users.filter(u => u.role === 'admin').length, color: '#7c3aed', bg: '#ede9fe' },
         ].map(({ label, value, color, bg }) => (
           <div key={label} style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 14, padding: '16px 20px' }}>

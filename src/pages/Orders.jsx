@@ -101,7 +101,7 @@ function Orders() {
                     <span style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#475569', minWidth: 0 }}>
                       <Package size={13} color="#94a3b8" style={{ flexShrink: 0 }} />
                       <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {item.product?.name || `Item #${String(idx + 1).padStart(3, '0')}`}
+                        {item.product?.name || 'Product (unavailable)'}
                       </span>
                       <span style={{ color: '#94a3b8', fontWeight: 500, flexShrink: 0 }}>×{item.quantity}</span>
                     </span>
