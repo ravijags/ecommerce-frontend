@@ -113,7 +113,7 @@ export default function Account() {
         {!editMode && <p style={{ fontSize: 14, color: '#64748b', margin: '8px 0 0' }}>{user?.name}</p>}
         {editMode && (
           <div style={{ display: 'flex', gap: 10 }}>
-            <input value={name} onChange={e => setName(e.target.value)}
+            <input id="account-name" name="name" value={name} onChange={e => setName(e.target.value)}
               style={{ flex: 1, padding: '10px 14px', borderRadius: 10, border: '1.5px solid #e2e8f0', fontSize: 14, color: '#0f172a', outline: 'none', boxSizing: 'border-box' }}
               onFocus={e => e.target.style.borderColor = '#C9A84C'}
               onBlur={e => e.target.style.borderColor = '#e2e8f0'}

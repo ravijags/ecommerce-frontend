@@ -17,9 +17,9 @@ import AdminProducts from './pages/admin/AdminProducts'
 import AdminUsers from './pages/admin/AdminUsers'
 import ProductDetail from './pages/ProductDetail'
 import Footer from './components/Footer'
+import { getWishlist, addToWishlistStore, removeFromWishlistStore } from './wishlistStore'
 
 const API = import.meta.env.VITE_API_URL
-const WISHLIST_KEY = 'premia_wishlist'
 
 function PageWrapper({ children }) {
   return (
@@ -40,25 +40,11 @@ function App() {
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register'
 
   const [cartItems, setCartItems] = useState([])
+  const [wishlistItems, setWishlistItems] = useState(getWishlist) // read from localStorage immediately
   const [rawSearch, setRawSearch] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
 
-  // ── WISHLIST ── localStorage is single source of truth for persistence
-  const [wishlistItems, setWishlistItems] = useState(() => {
-    try {
-      const saved = localStorage.getItem(WISHLIST_KEY)
-      return saved ? JSON.parse(saved) : []
-    } catch {
-      return []
-    }
-  })
-
-  // Every time wishlistItems changes, save to localStorage
-  useEffect(() => {
-    localStorage.setItem(WISHLIST_KEY, JSON.stringify(wishlistItems))
-  }, [wishlistItems])
-
-  // Debounce search
+  // Debounce search 300ms
   useEffect(() => {
     const timer = setTimeout(() => setSearchQuery(rawSearch), 300)
     return () => clearTimeout(timer)
@@ -88,14 +74,14 @@ function App() {
       .catch(() => {})
   }, [])
 
-  // Load wishlist from backend — ONLY merge, never wipe localStorage
+  // Load wishlist from backend and MERGE with localStorage
   useEffect(() => {
     const token = localStorage.getItem('token')
     if (!token) return
     fetch(`${API}/api/wishlist`, { headers: { authorization: token } })
-      .then(r => { if (!r.ok) throw new Error('no wishlist route') ; return r.json() })
+      .then(r => r.ok ? r.json() : null)
       .then(data => {
-        if (!data.wishlist?.items?.length) return // backend empty — keep localStorage
+        if (!data?.wishlist?.items?.length) return
         const serverItems = data.wishlist.items.filter(i => i.product).map(i => ({
           _id: i.product._id,
           name: i.product.name,
@@ -107,17 +93,19 @@ function App() {
           rating: i.product.rating,
           category: i.product.category,
         }))
-        // Merge: server items + any local-only items not yet synced
-        setWishlistItems(prev => {
-          const serverIds = new Set(serverItems.map(i => i._id))
-          const localOnly = prev.filter(i => !serverIds.has(i._id))
-          return [...serverItems, ...localOnly]
-        })
+        // Merge server + local, server wins on duplicates
+        const localItems = getWishlist()
+        const serverIds = new Set(serverItems.map(i => i._id))
+        const localOnly = localItems.filter(i => !serverIds.has(i._id))
+        const merged = [...serverItems, ...localOnly]
+        setWishlistItems(merged)
+        // Save merged back to localStorage
+        import('./wishlistStore').then(m => m.saveWishlist(merged))
       })
-      .catch(() => {}) // backend down — localStorage already showing
+      .catch(() => {})
   }, [])
 
-  // ── ADD TO CART ──
+  // ADD TO CART
   const addToCart = useCallback(async (product) => {
     const token = localStorage.getItem('token')
     setCartItems(prev => {
@@ -128,42 +116,25 @@ function App() {
     })
     toast.success(`${product.name} added to cart!`)
     if (token) {
-      try {
-        await fetch(`${API}/api/cart`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', authorization: token },
-          body: JSON.stringify({ productId: product._id, quantity: 1 }),
-        })
-      } catch {}
+      fetch(`${API}/api/cart`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', authorization: token },
+        body: JSON.stringify({ productId: product._id, quantity: 1 }),
+      }).catch(() => {})
     }
   }, [])
 
-  // ── ADD TO WISHLIST ──
-  const addToWishlist = (product) => {
-    const token = localStorage.getItem('token')
-    const item = {
-      _id: product._id,
-      name: product.name,
-      price: product.price,
-      originalPrice: product.originalPrice,
-      discount: product.discount,
-      brand: product.brand,
-      image: product.image || product.thumbnail || product.images?.[0],
-      rating: product.rating,
-      category: product.category,
+  // ADD TO WISHLIST — uses external store, no React state race conditions
+  const addToWishlist = useCallback((product) => {
+    const { added, items } = addToWishlistStore(product)
+    if (!added) {
+      toast('Already in wishlist ❤️', { duration: 1500 })
+      return
     }
-
-    setWishlistItems(prev => {
-      if (prev.some(p => p._id === item._id)) {
-        toast('Already in wishlist ❤️', { duration: 1500 })
-        return prev
-      }
-      toast.success('Added to wishlist!')
-      const updated = [...prev, item]
-      try { localStorage.setItem(WISHLIST_KEY, JSON.stringify(updated)) } catch (err) { console.error('LS write failed:', err) }
-      return updated
-    })
-
+    setWishlistItems(items)
+    toast.success('Added to wishlist!')
+    // Background backend sync
+    const token = localStorage.getItem('token')
     if (token) {
       fetch(`${API}/api/wishlist`, {
         method: 'POST',
@@ -171,24 +142,21 @@ function App() {
         body: JSON.stringify({ productId: product._id }),
       }).catch(() => {})
     }
-  }
+  }, [])
 
-  // ── REMOVE FROM WISHLIST ──
-  const removeFromWishlist = (productId) => {
-    const token = localStorage.getItem('token')
-    setWishlistItems(prev => {
-      const updated = prev.filter(p => p._id !== productId)
-      try { localStorage.setItem(WISHLIST_KEY, JSON.stringify(updated)) } catch {}
-      return updated
-    })
+  // REMOVE FROM WISHLIST
+  const removeFromWishlist = useCallback((productId) => {
+    const updated = removeFromWishlistStore(productId)
+    setWishlistItems(updated)
     toast.success('Removed from wishlist')
+    const token = localStorage.getItem('token')
     if (token) {
       fetch(`${API}/api/wishlist/${productId}`, {
         method: 'DELETE',
         headers: { authorization: token },
       }).catch(() => {})
     }
-  }
+  }, [])
 
   return (
     <div className="bg-gray-50 min-h-screen">

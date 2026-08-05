@@ -141,7 +141,7 @@ export default function Footer() {
               <p style={{ fontSize: 13, color: '#475569', margin: 0 }}>Exclusive deals, new arrivals and style tips.</p>
             </div>
             <div style={{ display: 'flex', gap: 10, width: '100%', maxWidth: 420 }}>
-              <input type="email" placeholder="Enter your email" style={{
+              <input id="newsletter-email" name="newsletter" type="email" placeholder="Enter your email" style={{
                 flex: 1, padding: '11px 14px', borderRadius: 10,
                 border: '1px solid #1e1e1e', background: '#111',
                 color: '#fff', fontSize: 13, outline: 'none',
