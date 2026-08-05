@@ -31,7 +31,7 @@ const SORT_OPTIONS = [
 
 const PER_PAGE = 20
 
-export default function Home({ addToCart, searchQuery }) {
+export default function Home({ addToCart, addToWishlist, searchQuery }) {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [category, setCategory] = useState('')
@@ -217,6 +217,7 @@ export default function Home({ addToCart, searchQuery }) {
                       originalPrice={product.originalPrice}
                       brand={product.brand}
                       onAddToCart={() => addToCart(product)}
+                      onAddToWishlist={() => addToWishlist && addToWishlist(product)}
                     />
                   </div>
                 </motion.div>

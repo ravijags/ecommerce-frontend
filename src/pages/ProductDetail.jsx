@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 import ProductCard from '../ProductCard'
 
-export default function ProductDetail({ addToCart }) {
+export default function ProductDetail({ addToCart, addToWishlist }) {
   const [product, setProduct] = useState(null)
   const [related, setRelated] = useState([])
   const [loading, setLoading] = useState(true)
@@ -367,6 +367,7 @@ export default function ProductDetail({ addToCart }) {
                 image={p.image || p.thumbnail || p.images?.[0]}
                 rating={p.rating} discount={p.discount} originalPrice={p.originalPrice}
                 brand={p.brand} onAddToCart={() => addToCart(p)}
+                onAddToWishlist={() => addToWishlist && addToWishlist(p)}
               />
             ))}
           </div>

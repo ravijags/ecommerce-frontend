@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { ShoppingCart, Heart, Star } from 'lucide-react'
 import { useState } from 'react'
 
-function ProductCard({ name, price, image, onAddToCart, id, rating, discount, originalPrice, brand }) {
+function ProductCard({ name, price, image, onAddToCart, onAddToWishlist, id, rating, discount, originalPrice, brand }) {
   const [wishlist, setWishlist] = useState(false)
   const [added, setAdded] = useState(false)
 
@@ -23,7 +23,12 @@ function ProductCard({ name, price, image, onAddToCart, id, rating, discount, or
   const handleWishlist = (e) => {
     e.preventDefault()
     e.stopPropagation()
-    setWishlist(w => !w)
+    if (!wishlist) {
+      setWishlist(true)
+      if (onAddToWishlist) onAddToWishlist()
+    } else {
+      setWishlist(false)
+    }
   }
 
   return (
