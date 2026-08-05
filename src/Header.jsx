@@ -16,6 +16,12 @@ function Header({ cartCount, wishlistCount, onSearch }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
 
+  const POPULAR = ['iPhone', 'Samsung', 'Nike', 'Rolex', 'Apple Watch', 'Laptop', 'Perfume', 'Sneakers']
+  const suggestions = searchQuery.length > 1
+    ? POPULAR.filter(s => s.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 5)
+    : POPULAR.slice(0, 6)
+  const showSuggestions = searchFocused && suggestions.length > 0
+
   const handleLogout = () => {
     localStorage.removeItem('token')
     toast.success('Logged out!')
@@ -116,55 +122,46 @@ function Header({ cartCount, wishlistCount, onSearch }) {
             </Link>
 
             {/* Search - desktop */}
-            <div style={{ flex: 1, maxWidth: 560 }} className="desktop-search">
+            <div style={{ flex: 1, maxWidth: 560, position: 'relative' }} className="desktop-search">
               <div style={{
-                display: 'flex',
-                alignItems: 'center',
+                display: 'flex', alignItems: 'center',
                 backgroundColor: searchFocused ? '#fff' : '#f8fafc',
                 border: searchFocused ? '2px solid #0f172a' : '2px solid #f1f5f9',
-                borderRadius: 12,
+                borderRadius: showSuggestions ? '12px 12px 0 0' : 12,
                 transition: 'all 0.15s',
                 boxShadow: searchFocused ? '0 0 0 4px rgba(15,23,42,0.06)' : 'none'
               }}>
                 <Search size={15} color="#94a3b8" style={{ marginLeft: 14, flexShrink: 0 }} />
                 <input
-                  id="site-search"
-                  name="search"
-                  type="text"
+                  id="site-search" name="search" type="text"
                   placeholder="Search Apple, Nike, Samsung..."
                   value={searchQuery}
                   onChange={handleSearch}
                   onFocus={() => setSearchFocused(true)}
-                  onBlur={() => setSearchFocused(false)}
-                  style={{
-                    flex: 1,
-                    padding: '10px 12px',
-                    fontSize: 13,
-                    border: 'none',
-                    outline: 'none',
-                    backgroundColor: 'transparent',
-                    color: '#0f172a',
-                    fontFamily: 'Inter, system-ui'
-                  }}
+                  onBlur={() => setTimeout(() => setSearchFocused(false), 150)}
+                  style={{ flex: 1, padding: '10px 12px', fontSize: 13, border: 'none', outline: 'none', backgroundColor: 'transparent', color: '#0f172a', fontFamily: 'Inter, system-ui' }}
                 />
                 {searchQuery && (
-                  <button
-                    onClick={clearSearch}
-                    style={{
-                      marginRight: 10,
-                      padding: 4,
-                      borderRadius: '50%',
-                      border: 'none',
-                      backgroundColor: '#f1f5f9',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center'
-                    }}
-                  >
+                  <button onClick={clearSearch} style={{ marginRight: 10, padding: 4, borderRadius: '50%', border: 'none', backgroundColor: '#f1f5f9', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
                     <X size={11} color="#64748b" />
                   </button>
                 )}
               </div>
+              {/* Suggestions dropdown */}
+              {showSuggestions && (
+                <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#fff', border: '2px solid #0f172a', borderTop: 'none', borderRadius: '0 0 12px 12px', zIndex: 100, boxShadow: '0 8px 24px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
+                  {!searchQuery && <div style={{ padding: '8px 14px 4px', fontSize: 10, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Popular Searches</div>}
+                  {suggestions.map(s => (
+                    <button key={s} onMouseDown={() => { setSearchQuery(s); if (onSearch) onSearch(s) }}
+                      style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '10px 14px', border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 13, color: '#0f172a', textAlign: 'left' }}
+                      onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                      <Search size={12} color="#94a3b8" />
+                      <span>{s}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Right icons */}

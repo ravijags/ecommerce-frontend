@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Trash2, X, Upload } from 'lucide-react'
+import { Plus, Trash2, X, Upload, Edit2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import AdminLayout from './AdminLayout'
 
@@ -10,6 +10,7 @@ function AdminProducts() {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
+  const [editProduct, setEditProduct] = useState(null) // null = add, product = edit
   const [form, setForm] = useState(EMPTY)
   const [imageFile, setImageFile] = useState(null)
   const [submitting, setSubmitting] = useState(false)
@@ -26,6 +27,19 @@ function AdminProducts() {
       .catch(() => setLoading(false))
   }
 
+  const openEdit = (product) => {
+    setEditProduct(product)
+    setForm({ name: product.name || '', category: product.category || '', price: product.price || '', stock: product.stock || '', description: product.description || '' })
+    setShowForm(true)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const openAdd = () => {
+    setEditProduct(null)
+    setForm(EMPTY)
+    setShowForm(true)
+  }
+
   const handleSubmit = async () => {
     if (!form.name || !form.price || !form.stock) { toast.error('Fill required fields'); return }
     const token = localStorage.getItem('token')
@@ -34,11 +48,23 @@ function AdminProducts() {
       const data = new FormData()
       Object.entries(form).forEach(([k, v]) => data.append(k, v))
       if (imageFile) data.append('image', imageFile)
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/products`, {
-        method: 'POST', headers: { authorization: token }, body: data
-      })
-      if (res.ok) { toast.success('Product created!'); setShowForm(false); setForm(EMPTY); setImageFile(null); fetchProducts() }
-      else toast.error('Failed to create')
+
+      let res
+      if (editProduct) {
+        // Edit existing product
+        res = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/products/${editProduct._id}`, {
+          method: 'PUT', headers: { authorization: token }, body: data
+        })
+        if (res.ok) { toast.success('Product updated!'); setShowForm(false); setEditProduct(null); setForm(EMPTY); setImageFile(null); fetchProducts() }
+        else toast.error('Failed to update')
+      } else {
+        // Add new product
+        res = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/products`, {
+          method: 'POST', headers: { authorization: token }, body: data
+        })
+        if (res.ok) { toast.success('Product created!'); setShowForm(false); setForm(EMPTY); setImageFile(null); fetchProducts() }
+        else toast.error('Failed to create')
+      }
     } catch { toast.error('Something went wrong') }
     finally { setSubmitting(false) }
   }
@@ -69,7 +95,7 @@ function AdminProducts() {
           <h2 style={{ fontSize: 20, fontWeight: 800, color: '#0f172a', margin: 0 }}>Products</h2>
           <p style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>{products.length} items in catalogue</p>
         </div>
-        <button onClick={() => setShowForm(!showForm)} style={{
+        <button onClick={() => showForm ? (setShowForm(false), setEditProduct(null)) : openAdd()} style={{
           display: 'flex', alignItems: 'center', gap: 6,
           padding: '9px 18px', borderRadius: 10, border: 'none',
           background: showForm ? '#f1f5f9' : '#0f172a',
@@ -83,7 +109,9 @@ function AdminProducts() {
       {/* Add form */}
       {showForm && (
         <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 16, padding: 24, marginBottom: 20 }}>
-          <h3 style={{ fontSize: 13, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 20 }}>New Product</h3>
+          <h3 style={{ fontSize: 13, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 20 }}>
+            {editProduct ? `Editing: ${editProduct.name}` : 'New Product'}
+          </h3>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
             {[
               { key: 'name', label: 'Product name *', placeholder: 'iPhone 15 Pro', type: 'text' },
@@ -119,7 +147,7 @@ function AdminProducts() {
           <div style={{ display: 'flex', gap: 12, marginTop: 20 }}>
             <button onClick={handleSubmit} disabled={submitting}
               style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 20px', borderRadius: 10, border: 'none', background: '#0f172a', color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', opacity: submitting ? 0.7 : 1 }}>
-              {submitting ? 'Creating...' : <><Plus size={14} /> Create Product</>}
+              {submitting ? 'Saving...' : editProduct ? <><Edit2 size={14} /> Update Product</> : <><Plus size={14} /> Create Product</>}
             </button>
             <button onClick={() => setShowForm(false)}
               style={{ padding: '10px 20px', borderRadius: 10, border: 'none', background: '#f1f5f9', color: '#64748b', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
@@ -166,12 +194,20 @@ function AdminProducts() {
                     {product.stock}
                   </td>
                   <td style={{ padding: '14px 20px' }}>
-                    <button onClick={() => deleteProduct(product._id)}
-                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, borderRadius: 8, border: 'none', background: 'transparent', color: '#94a3b8', cursor: 'pointer', transition: 'all 0.15s' }}
-                      onMouseEnter={e => { e.currentTarget.style.background = '#fee2e2'; e.currentTarget.style.color = '#dc2626' }}
-                      onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#94a3b8' }}>
-                      <Trash2 size={15} />
-                    </button>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      <button onClick={() => openEdit(product)}
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, borderRadius: 8, border: 'none', background: 'transparent', color: '#94a3b8', cursor: 'pointer', transition: 'all 0.15s' }}
+                        onMouseEnter={e => { e.currentTarget.style.background = '#dbeafe'; e.currentTarget.style.color = '#2563eb' }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#94a3b8' }}>
+                        <Edit2 size={14} />
+                      </button>
+                      <button onClick={() => deleteProduct(product._id)}
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, borderRadius: 8, border: 'none', background: 'transparent', color: '#94a3b8', cursor: 'pointer', transition: 'all 0.15s' }}
+                        onMouseEnter={e => { e.currentTarget.style.background = '#fee2e2'; e.currentTarget.style.color = '#dc2626' }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#94a3b8' }}>
+                        <Trash2 size={15} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
