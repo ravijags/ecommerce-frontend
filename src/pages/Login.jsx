@@ -113,7 +113,7 @@ export default function Login() {
           <div style={{ marginBottom: 16 }}>
             <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Email address</label>
             <input
-              type="email" placeholder="you@example.com" value={email}
+              id="email" name="email" type="email" placeholder="you@example.com" autoComplete="email" value={email}
               onChange={e => setEmail(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleLogin()}
               style={{ width: '100%', padding: '12px 14px', borderRadius: 10, border: '1.5px solid #e2e8f0', fontSize: 14, color: '#0f172a', background: '#f8fafc', outline: 'none', boxSizing: 'border-box', transition: 'border 0.15s' }}
@@ -130,7 +130,7 @@ export default function Login() {
             </div>
             <div style={{ position: 'relative' }}>
               <input
-                type={showPassword ? 'text' : 'password'} placeholder="••••••••" value={password}
+                id="password" name="password" type={showPassword ? 'text' : 'password'} placeholder="••••••••" autoComplete="current-password" value={password}
                 onChange={e => setPassword(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleLogin()}
                 style={{ width: '100%', padding: '12px 44px 12px 14px', borderRadius: 10, border: '1.5px solid #e2e8f0', fontSize: 14, color: '#0f172a', background: '#f8fafc', outline: 'none', boxSizing: 'border-box', transition: 'border 0.15s' }}

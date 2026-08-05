@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import toast, { Toaster } from 'react-hot-toast'
@@ -53,13 +53,8 @@ function App() {
     }
   })
 
-  // Every time wishlistItems changes, save to localStorage immediately
-  const isFirstRender = useRef(true)
+  // Every time wishlistItems changes, save to localStorage
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false
-      return
-    }
     localStorage.setItem(WISHLIST_KEY, JSON.stringify(wishlistItems))
   }, [wishlistItems])
 
@@ -144,7 +139,7 @@ function App() {
   }, [])
 
   // ── ADD TO WISHLIST ──
-  const addToWishlist = useCallback((product) => {
+  const addToWishlist = (product) => {
     const token = localStorage.getItem('token')
     const item = {
       _id: product._id,
@@ -164,10 +159,11 @@ function App() {
         return prev
       }
       toast.success('Added to wishlist!')
-      return [...prev, item]
+      const updated = [...prev, item]
+      try { localStorage.setItem(WISHLIST_KEY, JSON.stringify(updated)) } catch (err) { console.error('LS write failed:', err) }
+      return updated
     })
 
-    // background backend sync
     if (token) {
       fetch(`${API}/api/wishlist`, {
         method: 'POST',
@@ -175,12 +171,16 @@ function App() {
         body: JSON.stringify({ productId: product._id }),
       }).catch(() => {})
     }
-  }, [])
+  }
 
   // ── REMOVE FROM WISHLIST ──
-  const removeFromWishlist = useCallback((productId) => {
+  const removeFromWishlist = (productId) => {
     const token = localStorage.getItem('token')
-    setWishlistItems(prev => prev.filter(p => p._id !== productId))
+    setWishlistItems(prev => {
+      const updated = prev.filter(p => p._id !== productId)
+      try { localStorage.setItem(WISHLIST_KEY, JSON.stringify(updated)) } catch {}
+      return updated
+    })
     toast.success('Removed from wishlist')
     if (token) {
       fetch(`${API}/api/wishlist/${productId}`, {
@@ -188,7 +188,7 @@ function App() {
         headers: { authorization: token },
       }).catch(() => {})
     }
-  }, [])
+  }
 
   return (
     <div className="bg-gray-50 min-h-screen">

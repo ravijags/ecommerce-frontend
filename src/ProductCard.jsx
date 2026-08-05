@@ -28,6 +28,7 @@ function ProductCard({ name, price, image, onAddToCart, onAddToWishlist, id, rat
       if (onAddToWishlist) onAddToWishlist()
     } else {
       setWishlist(false)
+      if (onRemoveFromWishlist) onRemoveFromWishlist()
     }
   }
 
