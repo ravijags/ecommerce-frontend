@@ -178,13 +178,10 @@ function ProductCard({ name, price, image, onAddToCart, onAddToWishlist, id, rat
       </div>
 
       <style>{`
-        .wishlist-btn { opacity: 0; }
-        .wishlist-btn:focus { opacity: 1; }
+        .wishlist-btn { opacity: 1; }
         @media (hover: hover) {
+          .wishlist-btn { opacity: 0; }
           div:hover .wishlist-btn { opacity: 1; }
-        }
-        @media (hover: none) {
-          .wishlist-btn { display: none; }
         }
       `}</style>
     </div>
