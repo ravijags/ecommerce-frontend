@@ -270,7 +270,10 @@ export default function ProductDetail({ addToCart, addToWishlist }) {
               <ShoppingCart size={16} />
               {addedToCart ? '✓ Added to Cart!' : product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
             </motion.button>
-            <button onClick={() => setWishlisted(w => !w)} style={{
+            <button onClick={() => {
+              setWishlisted(w => !w)
+              if (!wishlisted && addToWishlist) addToWishlist(product)
+            }} style={{
               padding: '13px 16px', borderRadius: 12,
               border: `2px solid ${wishlisted ? '#ef4444' : '#e2e8f0'}`,
               background: wishlisted ? '#fef2f2' : '#fff',
