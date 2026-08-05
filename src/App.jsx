@@ -74,15 +74,16 @@ function App() {
       .catch(() => {})
   }, [])
 
-  // Load wishlist from backend and MERGE with localStorage
+  // Load wishlist from backend — ALWAYS use backend as truth when logged in
   useEffect(() => {
     const token = localStorage.getItem('token')
     if (!token) return
     fetch(`${API}/api/wishlist`, { headers: { authorization: token } })
       .then(r => r.ok ? r.json() : null)
       .then(data => {
-        if (!data?.wishlist?.items?.length) return
-        const serverItems = data.wishlist.items.filter(i => i.product).map(i => ({
+        if (!data?.wishlist) return // network error — keep localStorage
+        // Backend responded — use it as truth (even if empty, respects deletions)
+        const serverItems = (data.wishlist.items || []).filter(i => i.product).map(i => ({
           _id: i.product._id,
           name: i.product.name,
           price: i.product.price,
@@ -93,16 +94,10 @@ function App() {
           rating: i.product.rating,
           category: i.product.category,
         }))
-        // Merge server + local, server wins on duplicates
-        const localItems = getWishlist()
-        const serverIds = new Set(serverItems.map(i => i._id))
-        const localOnly = localItems.filter(i => !serverIds.has(i._id))
-        const merged = [...serverItems, ...localOnly]
-        setWishlistItems(merged)
-        // Save merged back to localStorage
-        import('./wishlistStore').then(m => m.saveWishlist(merged))
+        setWishlistItems(serverItems)
+        import('./wishlistStore').then(m => m.saveWishlist(serverItems))
       })
-      .catch(() => {})
+      .catch(() => {}) // network error — keep localStorage as fallback
   }, [])
 
   // ADD TO CART
