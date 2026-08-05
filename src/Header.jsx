@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 import PremiaLogo from './components/PremiaLogo'
 
-function Header({ cartCount, onSearch }) {
+function Header({ cartCount, wishlistCount, onSearch }) {
   const navigate = useNavigate()
   const token = localStorage.getItem('token')
   const [searchQuery, setSearchQuery] = useState('')
@@ -283,24 +283,32 @@ function Header({ cartCount, onSearch }) {
               )}
 
               {/* Wishlist */}
-              <button
+              <Link
+                to="/wishlist"
                 style={{
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
                   padding: '6px 10px',
                   borderRadius: 10,
-                  border: 'none',
-                  backgroundColor: 'transparent',
-                  cursor: 'pointer',
-                  gap: 2
+                  textDecoration: 'none',
+                  gap: 2,
+                  position: 'relative',
                 }}
                 className="nav-icon"
               >
                 <Heart size={20} color="#64748b" />
+                {wishlistCount > 0 && (
+                  <span style={{
+                    position: 'absolute', top: 2, right: 4,
+                    background: '#ef4444', color: '#fff',
+                    fontSize: 8, fontWeight: 800, borderRadius: '50%',
+                    width: 14, height: 14, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>{wishlistCount > 9 ? '9+' : wishlistCount}</span>
+                )}
                 <span style={{ fontSize: 10, color: '#94a3b8', fontWeight: 500 }}
                   className="desktop-only">Wishlist</span>
-              </button>
+              </Link>
 
               {/* Cart */}
               <Link
@@ -595,9 +603,9 @@ function Header({ cartCount, onSearch }) {
         {[
           { to: '/', icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>, label: 'Home' },
           { to: null, icon: <Search size={22} />, label: 'Search', onClick: () => setMobileSearchOpen(!mobileSearchOpen) },
-          { to: null, icon: <Heart size={22} />, label: 'Wishlist' },
+          { to: '/wishlist', icon: <Heart size={22} />, label: 'Wishlist', badge: wishlistCount },
           { to: '/cart', icon: <ShoppingCart size={22} />, label: 'Cart', badge: cartCount },
-          { to: token ? '/orders' : '/login', icon: <User size={22} />, label: token ? 'Account' : 'Login' },
+          { to: token ? '/account' : '/login', icon: <User size={22} />, label: token ? 'Account' : 'Login' },
         ].map((item, i) => (
           item.to ? (
             <Link
