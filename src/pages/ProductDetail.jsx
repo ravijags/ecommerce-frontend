@@ -4,6 +4,7 @@ import { ShoppingCart, Heart, Star, ChevronLeft, Shield, Truck, RotateCcw, Check
 import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 import ProductCard from '../ProductCard'
+import { addRecentlyViewed } from '../recentlyViewed'
 
 export default function ProductDetail({ addToCart, addToWishlist }) {
   const [product, setProduct] = useState(null)
@@ -23,6 +24,7 @@ export default function ProductDetail({ addToCart, addToWishlist }) {
       .then(d => {
         setProduct(d.product)
         setLoading(false)
+        if (d.product) addRecentlyViewed(d.product)
         if (d.product?.category) {
           fetch(`${import.meta.env.VITE_API_URL}/api/products?limit=500`)
             .then(r => r.json())

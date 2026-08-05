@@ -38,17 +38,12 @@ function ProductCard({ name, price, image, onAddToCart, onAddToWishlist, id, rat
       onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 8px 30px rgba(0,0,0,0.09)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
       onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'translateY(0)' }}
     >
-      {/* Discount badge — outside Link, top-left */}
-      {discount > 0 && (
-        <div style={{
-          position: 'absolute', top: 8, left: 8, zIndex: 10,
-          background: '#ef4444', color: '#fff',
-          fontSize: 9, fontWeight: 800, padding: '2px 6px', borderRadius: 6,
-          letterSpacing: '0.03em', pointerEvents: 'none',
-        }}>
-          {Math.round(discount)}% OFF
-        </div>
-      )}
+      {/* Discount badge */}
+          {discount > 0 && (
+            <div style={{ position: 'absolute', top: 8, left: 8, background: '#ef4444', color: '#fff', fontSize: 9, fontWeight: 800, padding: '2px 6px', borderRadius: 6, letterSpacing: '0.03em', pointerEvents: 'none' }}>
+              {Math.round(discount)}% OFF
+            </div>
+          )}
 
       {/* Wishlist button — OUTSIDE Link, top-right, high z-index */}
       <button

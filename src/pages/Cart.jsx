@@ -1,9 +1,73 @@
+import { useState as useStateCart } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Trash2, ShoppingBag, ArrowLeft, Tag, ChevronRight, Package, ShoppingCart } from 'lucide-react'
+import { Trash2, ShoppingBag, ArrowLeft, Tag, ChevronRight, Package, ShoppingCart, Check } from 'lucide-react'
 import toast from 'react-hot-toast'
+
+const VALID_COUPONS = {
+  'PREMIA10': 10,
+  'SAVE20': 20,
+  'FIRST15': 15,
+}
+
+function CouponSection({ onApply }) {
+  const [code, setCode] = useStateCart('')
+  const [applied, setApplied] = useStateCart(null)
+
+  const handleApply = () => {
+    const discount = VALID_COUPONS[code.toUpperCase()]
+    if (discount) {
+      setApplied({ code: code.toUpperCase(), discount })
+      onApply(discount)
+      toast.success(`Coupon applied! ${discount}% off`)
+    } else {
+      toast.error('Invalid coupon code')
+    }
+  }
+
+  const handleRemove = () => {
+    setApplied(null)
+    setCode('')
+    onApply(0)
+    toast('Coupon removed')
+  }
+
+  return (
+    <div style={{ marginBottom: 16, padding: '12px 0', borderTop: '1px solid #f1f5f9' }}>
+      <p style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 10px' }}>Promo Code</p>
+      {applied ? (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Check size={14} color="#16a34a" />
+            <span style={{ fontSize: 13, fontWeight: 700, color: '#16a34a' }}>{applied.code}</span>
+            <span style={{ fontSize: 12, color: '#16a34a' }}>— {applied.discount}% off applied!</span>
+          </div>
+          <button onClick={handleRemove} style={{ fontSize: 12, color: '#dc2626', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Remove</button>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', gap: 8 }}>
+          <input
+            id="coupon-code" name="coupon"
+            value={code}
+            onChange={e => setCode(e.target.value.toUpperCase())}
+            onKeyDown={e => e.key === 'Enter' && handleApply()}
+            placeholder="Enter coupon code"
+            style={{ flex: 1, padding: '10px 12px', borderRadius: 10, border: '1.5px solid #e2e8f0', fontSize: 13, color: '#0f172a', outline: 'none', letterSpacing: '0.06em', fontWeight: 600, boxSizing: 'border-box' }}
+            onFocus={e => e.target.style.borderColor = '#C9A84C'}
+            onBlur={e => e.target.style.borderColor = '#e2e8f0'}
+          />
+          <button onClick={handleApply} style={{ padding: '10px 16px', borderRadius: 10, border: 'none', background: '#0f172a', color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer', flexShrink: 0 }}>
+            Apply
+          </button>
+        </div>
+      )}
+      <p style={{ fontSize: 10, color: '#94a3b8', margin: '6px 0 0' }}>Try: PREMIA10, SAVE20, FIRST15</p>
+    </div>
+  )
+}
 
 export default function Cart({ cartItems, setCartItems }) {
   const navigate = useNavigate()
+  const [couponDiscount, setCouponDiscount] = useStateCart(0)
 
   const removeFromCart = async (index) => {
     const token = localStorage.getItem('token')
@@ -21,8 +85,11 @@ export default function Cart({ cartItems, setCartItems }) {
 
   const totalPrice = cartItems.reduce((t, i) => t + (i.price * (i.quantity || 1)), 0)
   const totalOriginal = cartItems.reduce((t, i) => t + ((i.originalPrice || i.price) * (i.quantity || 1)), 0)
-  const saved = totalOriginal - totalPrice
-  const delivery = totalPrice >= 999 ? 0 : 99
+  const savedFromDiscount = totalOriginal - totalPrice
+  const couponAmount = couponDiscount > 0 ? Math.round(totalPrice * couponDiscount / 100) : 0
+  const saved = savedFromDiscount + couponAmount
+  const finalPrice = totalPrice - couponAmount
+  const delivery = finalPrice >= 999 ? 0 : 99
 
   const handleCheckout = async () => {
     const token = localStorage.getItem('token')
@@ -33,7 +100,7 @@ export default function Cart({ cartItems, setCartItems }) {
         headers: { 'Content-Type': 'application/json', authorization: token },
         body: JSON.stringify({
           items: cartItems.map(i => ({ product: i._id, quantity: 1, price: i.price })),
-          totalAmount: totalPrice + delivery,
+          totalAmount: finalPrice + delivery,
           shippingAddress: 'Default Address',
         }),
       })
@@ -214,10 +281,16 @@ export default function Cart({ cartItems, setCartItems }) {
               <span style={{ flexShrink: 0 }}>Subtotal ({cartItems.reduce((t, i) => t + (i.quantity || 1), 0)} items)</span>
               <span style={{ fontWeight: 500, color: '#0f172a', textAlign: 'right' }}>₹{totalOriginal.toLocaleString('en-IN')}</span>
             </div>
-            {saved > 0 && (
+            {savedFromDiscount > 0 && (
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, gap: 8 }}>
-                <span style={{ color: '#64748b', flexShrink: 0 }}>Discount</span>
-                <span style={{ fontWeight: 600, color: '#22c55e', textAlign: 'right' }}>− ₹{saved.toLocaleString('en-IN')}</span>
+                <span style={{ color: '#64748b', flexShrink: 0 }}>Product Discount</span>
+                <span style={{ fontWeight: 600, color: '#22c55e', textAlign: 'right' }}>− ₹{savedFromDiscount.toLocaleString('en-IN')}</span>
+              </div>
+            )}
+            {couponAmount > 0 && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, gap: 8 }}>
+                <span style={{ color: '#64748b', flexShrink: 0 }}>Coupon ({couponDiscount}% off)</span>
+                <span style={{ fontWeight: 700, color: '#16a34a', textAlign: 'right' }}>− ₹{couponAmount.toLocaleString('en-IN')}</span>
               </div>
             )}
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, gap: 8 }}>
@@ -228,9 +301,12 @@ export default function Cart({ cartItems, setCartItems }) {
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4, gap: 8 }}>
             <span style={{ fontSize: 15, fontWeight: 700, color: '#0f172a', flexShrink: 0 }}>Total</span>
-            <span style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', textAlign: 'right' }}>₹{(totalPrice + delivery).toLocaleString('en-IN')}</span>
+            <span style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', textAlign: 'right' }}>₹{(finalPrice + delivery).toLocaleString('en-IN')}</span>
           </div>
           {saved > 0 && <p style={{ fontSize: 12, fontWeight: 600, color: '#22c55e', margin: '0 0 16px', textAlign: 'right' }}>You save ₹{saved.toLocaleString('en-IN')}</p>}
+
+          {/* Coupon code */}
+          <CouponSection onApply={(disc) => setCouponDiscount(disc)} />
 
           <button onClick={handleCheckout} style={{
             width: '100%', padding: '14px', borderRadius: 12, border: 'none',

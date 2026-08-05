@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import ProductCard from '../ProductCard'
+import { getRecentlyViewed } from '../recentlyViewed'
 
 const CATEGORIES = [
   { slug: 'smartphones', name: 'Smartphones' },
@@ -237,6 +238,30 @@ export default function Home({ addToCart, addToWishlist, searchQuery }) {
             )}
           </>
         )}
+
+        {/* Recently Viewed */}
+        {!searchQuery && !category && (() => {
+          const recent = getRecentlyViewed()
+          if (!recent.length) return null
+          return (
+            <div style={{ marginTop: 48, paddingTop: 32, borderTop: '1px solid #e2e8f0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                <h2 style={{ fontSize: 17, fontWeight: 800, color: '#0f172a', margin: 0 }}>Recently Viewed</h2>
+              </div>
+              <div className="product-grid">
+                {recent.map(p => (
+                  <ProductCard key={p._id} id={p._id} name={p.name} price={p.price}
+                    image={p.image} rating={p.rating} discount={p.discount}
+                    originalPrice={p.originalPrice} brand={p.brand}
+                    onAddToCart={() => addToCart(p)}
+                    onAddToWishlist={() => addToWishlist && addToWishlist(p)}
+                  />
+                ))}
+              </div>
+            </div>
+          )
+        })()}
+
       </div>
     </div>
   )
