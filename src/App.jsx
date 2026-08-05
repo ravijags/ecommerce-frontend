@@ -155,7 +155,34 @@ function App() {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      <Toaster position="top-right" toastOptions={{ style: { fontFamily: 'Inter, sans-serif', fontSize: 13 } }} />
+      <Toaster
+        position="bottom-center"
+        toastOptions={{
+          duration: 2000,
+          style: {
+            fontFamily: 'Inter, sans-serif',
+            fontSize: 13,
+            fontWeight: 600,
+            background: '#0f172a',
+            color: '#fff',
+            borderRadius: 12,
+            padding: '12px 18px',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.24)',
+            maxWidth: 320,
+          },
+          success: {
+            iconTheme: { primary: '#C9A84C', secondary: '#0f172a' },
+          },
+          error: {
+            iconTheme: { primary: '#ef4444', secondary: '#fff' },
+            style: {
+              background: '#fff',
+              color: '#0f172a',
+              border: '1px solid #fee2e2',
+            },
+          },
+        }}
+      />
       {!isAdmin && !isAuthPage && (
         <Header cartCount={cartItems.reduce((t, i) => t + (i.quantity || 1), 0)} wishlistCount={wishlistItems.length} onSearch={setRawSearch} />
       )}

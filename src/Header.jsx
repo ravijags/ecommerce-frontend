@@ -360,6 +360,37 @@ function Header({ cartCount, wishlistCount, onSearch }) {
                   className="desktop-only">Cart</span>
               </Link>
 
+              {/* Account — desktop only */}
+              <Link
+                to={token ? '/account' : '/login'}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  padding: '6px 10px',
+                  borderRadius: 10,
+                  textDecoration: 'none',
+                  gap: 2,
+                }}
+                className="nav-icon desktop-only"
+              >
+                {token ? (
+                  <div style={{
+                    width: 22, height: 22, borderRadius: '50%',
+                    background: '#C9A84C', display: 'flex',
+                    alignItems: 'center', justifyContent: 'center',
+                    fontSize: 10, fontWeight: 900, color: '#0f172a',
+                  }}>
+                    {(localStorage.getItem('premia_uname') || 'U')[0].toUpperCase()}
+                  </div>
+                ) : (
+                  <User size={20} color="#64748b" />
+                )}
+                <span style={{ fontSize: 10, color: '#94a3b8', fontWeight: 500 }}>
+                  {token ? 'Account' : 'Login'}
+                </span>
+              </Link>
+
             </div>
           </div>
 
