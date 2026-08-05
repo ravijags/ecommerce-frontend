@@ -84,15 +84,14 @@ function App() {
       .catch(() => {})
   }, [])
 
-  // Load wishlist from backend — overrides localStorage with server truth
-  // If backend is slow/asleep, localStorage keeps the UI populated
+  // Load wishlist from backend — only override localStorage if backend has items
   useEffect(() => {
     const token = localStorage.getItem('token')
     if (!token) return
     fetch(`${API}/api/wishlist`, { headers: { authorization: token } })
-      .then(r => r.json())
+      .then(r => { if (!r.ok) throw new Error('not ok'); return r.json() })
       .then(data => {
-        if (data.wishlist?.items) {
+        if (data.wishlist?.items && data.wishlist.items.length > 0) {
           const items = data.wishlist.items.filter(i => i.product).map(i => ({
             _id: i.product._id,
             name: i.product.name,
@@ -107,9 +106,10 @@ function App() {
           setWishlistItems(items)
           setLocalWishlist(items)
         }
+        // If backend returns empty, keep localStorage version — don't wipe it
       })
       .catch(() => {
-        // Backend unavailable — localStorage version is already showing
+        // Backend unavailable or error — localStorage version stays
       })
   }, [])
 
