@@ -128,6 +128,8 @@ function Header({ cartCount, wishlistCount, onSearch }) {
               }}>
                 <Search size={15} color="#94a3b8" style={{ marginLeft: 14, flexShrink: 0 }} />
                 <input
+                  id="site-search"
+                  name="search"
                   type="text"
                   placeholder="Search Apple, Nike, Samsung..."
                   value={searchQuery}
@@ -384,6 +386,8 @@ function Header({ cartCount, wishlistCount, onSearch }) {
                 }}>
                   <Search size={15} color="#94a3b8" style={{ marginLeft: 12 }} />
                   <input
+                    id="mobile-search"
+                    name="search"
                     type="text"
                     placeholder="Search products..."
                     value={searchQuery}
