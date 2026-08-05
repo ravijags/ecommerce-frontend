@@ -18,7 +18,6 @@ import AdminUsers from './pages/admin/AdminUsers'
 import ProductDetail from './pages/ProductDetail'
 import Footer from './components/Footer'
 
-// Page transition wrapper
 function PageWrapper({ children }) {
   return (
     <motion.div
@@ -32,24 +31,19 @@ function PageWrapper({ children }) {
   )
 }
 
+const API = import.meta.env.VITE_API_URL
+
 function App() {
   const location = useLocation()
   const isAdmin = location.pathname.startsWith('/admin')
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register'
 
   const [cartItems, setCartItems] = useState([])
-  const [wishlistItems, setWishlistItems] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('premia_wishlist') || '[]') } catch { return [] }
-  })
+  const [wishlistItems, setWishlistItems] = useState([])
   const [rawSearch, setRawSearch] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
 
-  // Persist wishlist to localStorage
-  useEffect(() => {
-    localStorage.setItem('premia_wishlist', JSON.stringify(wishlistItems))
-  }, [wishlistItems])
-
-  // Debounce search — 300ms
+  // Debounce search 300ms
   useEffect(() => {
     const timer = setTimeout(() => setSearchQuery(rawSearch), 300)
     return () => clearTimeout(timer)
@@ -59,7 +53,7 @@ function App() {
   useEffect(() => {
     const token = localStorage.getItem('token')
     if (!token) return
-    fetch(`${import.meta.env.VITE_API_URL}/api/cart`, { headers: { authorization: token } })
+    fetch(`${API}/api/cart`, { headers: { authorization: token } })
       .then(r => r.json())
       .then(data => {
         if (data.cart?.items) {
@@ -79,22 +73,43 @@ function App() {
       .catch(() => {})
   }, [])
 
+  // Load wishlist from backend on mount — synced across devices
+  useEffect(() => {
+    const token = localStorage.getItem('token')
+    if (!token) return
+    fetch(`${API}/api/wishlist`, { headers: { authorization: token } })
+      .then(r => r.json())
+      .then(data => {
+        if (data.wishlist?.items) {
+          setWishlistItems(data.wishlist.items.filter(i => i.product).map(i => ({
+            _id: i.product._id,
+            name: i.product.name,
+            price: i.product.price,
+            originalPrice: i.product.originalPrice,
+            discount: i.product.discount,
+            brand: i.product.brand,
+            image: i.product.image || i.product.thumbnail,
+            rating: i.product.rating,
+            category: i.product.category,
+          })))
+        }
+      })
+      .catch(() => {})
+  }, [])
+
+  // Add to cart — instant UI + background sync
   const addToCart = useCallback(async (product) => {
     const token = localStorage.getItem('token')
     setCartItems(prev => {
       const exists = prev.find(item => item._id === product._id)
-      const cartProduct = {
-        ...product,
-        image: product.image || product.thumbnail || product.images?.[0],
-        quantity: 1,
-      }
+      const cartProduct = { ...product, image: product.image || product.thumbnail || product.images?.[0], quantity: 1 }
       if (exists) return prev.map(item => item._id === product._id ? { ...item, quantity: item.quantity + 1 } : item)
       return [...prev, cartProduct]
     })
     toast.success(`${product.name} added to cart!`)
     if (token) {
       try {
-        await fetch(`${import.meta.env.VITE_API_URL}/api/cart`, {
+        await fetch(`${API}/api/cart`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', authorization: token },
           body: JSON.stringify({ productId: product._id, quantity: 1 }),
@@ -103,28 +118,62 @@ function App() {
     }
   }, [])
 
-  const addToWishlist = useCallback((product) => {
+  // Add to wishlist — instant UI + backend sync
+  const addToWishlist = useCallback(async (product) => {
+    const token = localStorage.getItem('token')
+
+    // Check already in wishlist
     setWishlistItems(prev => {
       if (prev.find(p => p._id === product._id)) {
-        toast.success('Already in wishlist')
+        toast('Already in wishlist', { icon: '❤️' })
         return prev
       }
       toast.success('Added to wishlist!')
-      return [...prev, product]
+      return [...prev, {
+        _id: product._id,
+        name: product.name,
+        price: product.price,
+        originalPrice: product.originalPrice,
+        discount: product.discount,
+        brand: product.brand,
+        image: product.image || product.thumbnail || product.images?.[0],
+        rating: product.rating,
+        category: product.category,
+      }]
     })
+
+    // Sync to backend
+    if (token) {
+      try {
+        await fetch(`${API}/api/wishlist`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', authorization: token },
+          body: JSON.stringify({ productId: product._id }),
+        })
+      } catch {}
+    }
+  }, [])
+
+  // Remove from wishlist — instant UI + backend sync
+  const removeFromWishlist = useCallback(async (productId) => {
+    const token = localStorage.getItem('token')
+    setWishlistItems(prev => prev.filter(p => p._id !== productId))
+    if (token) {
+      try {
+        await fetch(`${API}/api/wishlist/${productId}`, {
+          method: 'DELETE',
+          headers: { authorization: token },
+        })
+      } catch {}
+    }
   }, [])
 
   return (
     <div className="bg-gray-50 min-h-screen">
       <Toaster position="top-right" toastOptions={{ style: { fontFamily: 'Inter, sans-serif', fontSize: 13 } }} />
       {!isAdmin && !isAuthPage && (
-        <Header
-          cartCount={cartItems.length}
-          wishlistCount={wishlistItems.length}
-          onSearch={setRawSearch}
-        />
+        <Header cartCount={cartItems.length} wishlistCount={wishlistItems.length} onSearch={setRawSearch} />
       )}
-
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<PageWrapper><Home addToCart={addToCart} addToWishlist={addToWishlist} searchQuery={searchQuery} /></PageWrapper>} />
@@ -132,7 +181,7 @@ function App() {
           <Route path="/register" element={<PageWrapper><Register /></PageWrapper>} />
           <Route path="/cart" element={<PageWrapper><Cart cartItems={cartItems} setCartItems={setCartItems} /></PageWrapper>} />
           <Route path="/orders" element={<PageWrapper><Orders /></PageWrapper>} />
-          <Route path="/wishlist" element={<PageWrapper><Wishlist wishlistItems={wishlistItems} setWishlistItems={setWishlistItems} addToCart={addToCart} /></PageWrapper>} />
+          <Route path="/wishlist" element={<PageWrapper><Wishlist wishlistItems={wishlistItems} removeFromWishlist={removeFromWishlist} addToCart={addToCart} /></PageWrapper>} />
           <Route path="/account" element={<PageWrapper><Account /></PageWrapper>} />
           <Route path="/products/:id" element={<PageWrapper><ProductDetail addToCart={addToCart} addToWishlist={addToWishlist} /></PageWrapper>} />
           <Route path="/admin" element={<AdminDashboard />} />
@@ -142,7 +191,6 @@ function App() {
           <Route path="*" element={<PageWrapper><NotFound /></PageWrapper>} />
         </Routes>
       </AnimatePresence>
-
       {!isAdmin && !isAuthPage && <Footer />}
     </div>
   )

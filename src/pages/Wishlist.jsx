@@ -5,11 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 import ProductCard from '../ProductCard'
 
-export default function Wishlist({ wishlistItems, setWishlistItems, addToCart }) {
-  const removeFromWishlist = (id) => {
-    setWishlistItems(prev => prev.filter(p => p._id !== id))
-    toast.success('Removed from wishlist')
-  }
+export default function Wishlist({ wishlistItems, removeFromWishlist, addToCart }) {
 
   const moveToCart = (product) => {
     addToCart(product)
