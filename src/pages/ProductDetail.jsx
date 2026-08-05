@@ -24,7 +24,10 @@ export default function ProductDetail({ addToCart, addToWishlist }) {
       .then(d => {
         setProduct(d.product)
         setLoading(false)
-        if (d.product) addRecentlyViewed(d.product)
+        if (d.product) {
+          document.title = `${d.product.name} — PREMIA`
+          addRecentlyViewed(d.product)
+        }
         if (d.product?.category) {
           fetch(`${import.meta.env.VITE_API_URL}/api/products?limit=500`)
             .then(r => r.json())

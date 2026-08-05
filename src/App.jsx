@@ -36,6 +36,24 @@ function PageWrapper({ children }) {
 
 function App() {
   const location = useLocation()
+
+  // Update page title on every route change
+  useEffect(() => {
+    const TITLES = {
+      '/': 'PREMIA — Everything Premium. Delivered.',
+      '/login': 'Sign In — PREMIA',
+      '/register': 'Create Account — PREMIA',
+      '/cart': 'My Cart — PREMIA',
+      '/orders': 'My Orders — PREMIA',
+      '/wishlist': 'My Wishlist — PREMIA',
+      '/account': 'My Account — PREMIA',
+      '/admin': 'Dashboard — PREMIA Admin',
+      '/admin/orders': 'Orders — PREMIA Admin',
+      '/admin/products': 'Products — PREMIA Admin',
+      '/admin/users': 'Users — PREMIA Admin',
+    }
+    document.title = TITLES[location.pathname] || 'PREMIA — Everything Premium. Delivered.'
+  }, [location.pathname])
   const isAdmin = location.pathname.startsWith('/admin')
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register'
 
