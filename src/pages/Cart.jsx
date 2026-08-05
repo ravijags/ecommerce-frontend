@@ -19,8 +19,8 @@ export default function Cart({ cartItems, setCartItems }) {
     toast.success('Item removed')
   }
 
-  const totalPrice = cartItems.reduce((t, i) => t + i.price, 0)
-  const totalOriginal = cartItems.reduce((t, i) => t + (i.originalPrice || i.price), 0)
+  const totalPrice = cartItems.reduce((t, i) => t + (i.price * (i.quantity || 1)), 0)
+  const totalOriginal = cartItems.reduce((t, i) => t + ((i.originalPrice || i.price) * (i.quantity || 1)), 0)
   const saved = totalOriginal - totalPrice
   const delivery = totalPrice >= 999 ? 0 : 99
 
@@ -111,7 +111,7 @@ export default function Cart({ cartItems, setCartItems }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28 }}>
         <h1 style={{ fontSize: 24, fontWeight: 900, color: '#0f172a', margin: 0 }}>My Cart</h1>
         <span style={{ fontSize: 12, fontWeight: 600, padding: '3px 10px', borderRadius: 20, background: '#f1f5f9', color: '#64748b' }}>
-          {cartItems.length} {cartItems.length === 1 ? 'item' : 'items'}
+          {cartItems.reduce((t, i) => t + (i.quantity || 1), 0)} {cartItems.reduce((t, i) => t + (i.quantity || 1), 0) === 1 ? 'item' : 'items'}
         </span>
       </div>
 
@@ -146,15 +146,43 @@ export default function Cart({ cartItems, setCartItems }) {
                   <p style={{ fontSize: 14, fontWeight: 600, color: '#0f172a', margin: '0 0 4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</p>
                 </Link>
                 {item.brand && <p style={{ fontSize: 11, color: '#94a3b8', margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{item.brand}</p>}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: 16, fontWeight: 800, color: '#0f172a' }}>₹{item.price?.toLocaleString()}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 6 }}>
+                  <span style={{ fontSize: 16, fontWeight: 800, color: '#0f172a' }}>₹{(item.price * (item.quantity || 1))?.toLocaleString('en-IN')}</span>
+                  {item.quantity > 1 && (
+                    <span style={{ fontSize: 11, color: '#64748b' }}>₹{item.price?.toLocaleString('en-IN')} × {item.quantity}</span>
+                  )}
                   {item.originalPrice > item.price && (
-                    <span style={{ fontSize: 12, color: '#94a3b8', textDecoration: 'line-through' }}>₹{item.originalPrice?.toLocaleString()}</span>
+                    <span style={{ fontSize: 12, color: '#94a3b8', textDecoration: 'line-through' }}>₹{(item.originalPrice * (item.quantity || 1))?.toLocaleString('en-IN')}</span>
                   )}
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 5 }}>
-                  <Package size={11} color="#22c55e" />
-                  <span style={{ fontSize: 11, color: '#22c55e', fontWeight: 600 }}>Free delivery</span>
+                {/* Quantity controls */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', border: '1px solid #e2e8f0', borderRadius: 8, overflow: 'hidden' }}>
+                    <button
+                      onClick={() => {
+                        const qty = (item.quantity || 1) - 1
+                        if (qty < 1) { removeFromCart(index); return }
+                        setCartItems(prev => prev.map((ci, i) => i === index ? { ...ci, quantity: qty } : ci))
+                        const token = localStorage.getItem('token')
+                        if (token) fetch(`${import.meta.env.VITE_API_URL}/api/cart`, { method: 'POST', headers: { 'Content-Type': 'application/json', authorization: token }, body: JSON.stringify({ productId: item._id, quantity: -1 }) }).catch(() => {})
+                      }}
+                      style={{ padding: '4px 10px', border: 'none', background: '#f8fafc', cursor: 'pointer', fontSize: 14, fontWeight: 700, color: '#0f172a' }}
+                    >−</button>
+                    <span style={{ padding: '4px 10px', fontSize: 13, fontWeight: 700, color: '#0f172a', borderLeft: '1px solid #e2e8f0', borderRight: '1px solid #e2e8f0' }}>{item.quantity || 1}</span>
+                    <button
+                      onClick={() => {
+                        const qty = (item.quantity || 1) + 1
+                        setCartItems(prev => prev.map((ci, i) => i === index ? { ...ci, quantity: qty } : ci))
+                        const token = localStorage.getItem('token')
+                        if (token) fetch(`${import.meta.env.VITE_API_URL}/api/cart`, { method: 'POST', headers: { 'Content-Type': 'application/json', authorization: token }, body: JSON.stringify({ productId: item._id, quantity: 1 }) }).catch(() => {})
+                      }}
+                      style={{ padding: '4px 10px', border: 'none', background: '#f8fafc', cursor: 'pointer', fontSize: 14, fontWeight: 700, color: '#0f172a' }}
+                    >+</button>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <Package size={11} color="#22c55e" />
+                    <span style={{ fontSize: 11, color: '#22c55e', fontWeight: 600 }}>Free delivery</span>
+                  </div>
                 </div>
               </div>
 
@@ -183,7 +211,7 @@ export default function Cart({ cartItems, setCartItems }) {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 14, paddingBottom: 14, borderBottom: '1px solid #f1f5f9' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: '#64748b', gap: 8 }}>
-              <span style={{ flexShrink: 0 }}>Subtotal ({cartItems.length} items)</span>
+              <span style={{ flexShrink: 0 }}>Subtotal ({cartItems.reduce((t, i) => t + (i.quantity || 1), 0)} items)</span>
               <span style={{ fontWeight: 500, color: '#0f172a', textAlign: 'right' }}>₹{totalOriginal.toLocaleString('en-IN')}</span>
             </div>
             {saved > 0 && (

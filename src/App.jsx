@@ -162,7 +162,7 @@ function App() {
     <div className="bg-gray-50 min-h-screen">
       <Toaster position="top-right" toastOptions={{ style: { fontFamily: 'Inter, sans-serif', fontSize: 13 } }} />
       {!isAdmin && !isAuthPage && (
-        <Header cartCount={cartItems.length} wishlistCount={wishlistItems.length} onSearch={setRawSearch} />
+        <Header cartCount={cartItems.reduce((t, i) => t + (i.quantity || 1), 0)} wishlistCount={wishlistItems.length} onSearch={setRawSearch} />
       )}
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
