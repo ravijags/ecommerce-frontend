@@ -10,6 +10,7 @@ function ProductCard({ name, price, image, onAddToCart, onAddToWishlist, id, rat
     } catch { return false }
   })
   const [added, setAdded] = useState(false)
+  const [imgLoaded, setImgLoaded] = useState(false)
 
   const imageUrl = (image && image.startsWith('http'))
     ? image
@@ -80,7 +81,8 @@ function ProductCard({ name, price, image, onAddToCart, onAddToWishlist, id, rat
               e.target.onerror = null
               e.target.src = `https://placehold.co/400x300/f1f5f9/94a3b8?text=${encodeURIComponent(name?.slice(0, 14) || 'Product')}`
             }}
-            style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 8, transition: 'transform 0.35s ease' }}
+            onLoad={() => setImgLoaded(true)}
+            style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 8, transition: 'transform 0.35s ease, opacity 0.3s ease', opacity: imgLoaded ? 1 : 0 }}
             onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.06)'}
             onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
             loading="lazy"
@@ -139,8 +141,13 @@ function ProductCard({ name, price, image, onAddToCart, onAddToWishlist, id, rat
             fontSize: 11, fontWeight: 700,
             letterSpacing: '0.04em', textTransform: 'uppercase',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-            transition: 'background 0.2s, color 0.2s', cursor: 'pointer',
+            transition: 'background 0.2s, color 0.2s, transform 0.1s', cursor: 'pointer',
           }}
+          onMouseDown={e => e.currentTarget.style.transform = 'scale(0.96)'}
+          onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
+          onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+          onTouchStart={e => e.currentTarget.style.transform = 'scale(0.96)'}
+          onTouchEnd={e => e.currentTarget.style.transform = 'scale(1)'}
         >
           <ShoppingCart size={12} />
           {added ? 'Added!' : 'Add to Cart'}

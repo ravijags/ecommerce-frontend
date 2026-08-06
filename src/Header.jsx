@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   Search, ShoppingCart, Heart, User,
   Package, Settings, LogOut, X, Menu
@@ -10,6 +10,25 @@ import PremiaLogo from './components/PremiaLogo'
 
 function Header({ cartCount, wishlistCount, onSearch }) {
   const navigate = useNavigate()
+  const [scrolled, setScrolled] = useState(false)
+  const prevCartCount = useRef(cartCount)
+  const [cartBounce, setCartBounce] = useState(false)
+
+  // Header shrinks on scroll
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 60)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  // Cart icon bounces when item added
+  useEffect(() => {
+    if (cartCount > prevCartCount.current) {
+      setCartBounce(true)
+      setTimeout(() => setCartBounce(false), 600)
+    }
+    prevCartCount.current = cartCount
+  }, [cartCount])
   const token = localStorage.getItem('token')
   const [searchQuery, setSearchQuery] = useState('')
   const [searchFocused, setSearchFocused] = useState(false)
@@ -70,39 +89,52 @@ function Header({ cartCount, wishlistCount, onSearch }) {
         top: 0,
         zIndex: 50,
         backgroundColor: '#fff',
-        boxShadow: '0 1px 0 #f1f5f9'
+        boxShadow: scrolled ? '0 4px 20px rgba(0,0,0,0.08)' : '0 1px 0 #f1f5f9',
+        transition: 'box-shadow 0.3s ease',
       }}>
 
-        {/* Announcement bar */}
-        <div style={{
-          backgroundColor: '#0f172a',
-          padding: '8px 16px',
-          textAlign: 'center'
-        }}>
+        {/* Announcement bar — scrolling marquee */}
+        {!scrolled && (
+          <div style={{
+            backgroundColor: '#0f172a',
+            padding: '8px 0',
+            overflow: 'hidden',
+            whiteSpace: 'nowrap',
+          }}>
+            <motion.div
+              animate={{ x: ['0%', '-50%'] }}
+              transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
+              style={{ display: 'inline-flex', gap: 48 }}
+            >
+              {[...Array(2)].map((_, j) => (
+                <span key={j} style={{ display: 'inline-flex', gap: 48, color: '#fff', fontSize: 12, fontWeight: 500, letterSpacing: '0.05em' }}>
+                  <span>🚚 FREE SHIPPING ABOVE ₹999</span>
+                  <span style={{ color: '#C9A84C' }}>· USE CODE <strong>PREMIA10</strong> ·</span>
+                  <span>✨ NEW ARRIVALS EVERY WEEK</span>
+                  <span style={{ color: '#C9A84C' }}>· 194+ PREMIUM PRODUCTS ·</span>
+                  <span>🔒 100% SECURE PAYMENTS</span>
+                  <span style={{ color: '#C9A84C' }}>· 7-DAY EASY RETURNS ·</span>
+                </span>
+              ))}
+            </motion.div>
+          </div>
+        )}
           <p style={{
             color: '#94a3b8',
             fontSize: 11,
-            letterSpacing: '0.1em',
-            textTransform: 'uppercase',
-            fontWeight: 500
-          }}>
-            Free shipping above ₹999 &nbsp;·&nbsp; Use code{' '}
-            <span style={{ color: '#C9A84C', fontWeight: 700 }}>PREMIA10</span>
-            {' '}&nbsp;·&nbsp; New arrivals every week
-          </p>
-        </div>
-
         {/* Main header */}
         <div style={{
           borderBottom: '1px solid #f8fafc',
-          backgroundColor: '#fff'
+          backgroundColor: '#fff',
+          transition: 'all 0.3s ease',
         }}>
           <div style={{
             maxWidth: 1280,
             margin: '0 auto',
             padding: '0 20px',
-            height: 64,
+            height: scrolled ? 54 : 64,
             display: 'flex',
+            transition: 'height 0.3s ease',
             alignItems: 'center',
             gap: 16
           }}>
@@ -333,10 +365,16 @@ function Header({ cartCount, wishlistCount, onSearch }) {
                 className="nav-icon"
               >
                 <div style={{ position: 'relative' }}>
-                  <ShoppingCart size={20} color="#64748b" />
+                  <motion.div
+                    animate={cartBounce ? { y: [0, -6, 0], scale: [1, 1.2, 1] } : {}}
+                    transition={{ duration: 0.4, ease: 'easeOut' }}
+                  >
+                    <ShoppingCart size={20} color="#64748b" />
+                  </motion.div>
                   <AnimatePresence>
                     {cartCount > 0 && (
                       <motion.span
+                        key={cartCount}
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         exit={{ scale: 0 }}

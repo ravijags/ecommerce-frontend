@@ -108,18 +108,22 @@ export default function Home({ addToCart, addToWishlist, searchQuery }) {
       {!searchQuery && !category && (
         <div style={{ background: '#0f172a' }}>
           <div style={{ maxWidth: 1280, margin: '0 auto', padding: '56px 20px 64px' }}>
-            <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-              <p style={{ color: '#C9A84C', fontSize: 11, fontWeight: 700, letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 14 }}>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
+              <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.4 }}
+                style={{ color: '#C9A84C', fontSize: 11, fontWeight: 700, letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 14 }}>
                 Curated for the Discerning
-              </p>
-              <h1 style={{ color: '#fff', fontWeight: 900, lineHeight: 1.05, letterSpacing: '-1.5px', marginBottom: 18, fontSize: 'clamp(28px, 5vw, 60px)' }}>
+              </motion.p>
+              <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.5 }}
+                style={{ color: '#fff', fontWeight: 900, lineHeight: 1.05, letterSpacing: '-1.5px', marginBottom: 18, fontSize: 'clamp(28px, 5vw, 60px)' }}>
                 The New Standard<br />
                 <span style={{ color: '#C9A84C' }}>of Shopping.</span>
-              </h1>
-              <p style={{ color: '#475569', fontSize: 15, lineHeight: 1.7, maxWidth: 380, marginBottom: 28 }}>
+              </motion.h1>
+              <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35, duration: 0.4 }}
+                style={{ color: '#475569', fontSize: 15, lineHeight: 1.7, maxWidth: 380, marginBottom: 28 }}>
                 194+ premium products from top brands worldwide. Every item handpicked. Every price unbeatable.
-              </p>
-              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+              </motion.p>
+              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.4 }}
+                style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                 <button
                   onClick={() => document.getElementById('products-section')?.scrollIntoView({ behavior: 'smooth' })}
                   style={{ background: '#C9A84C', color: '#0f172a', border: 'none', borderRadius: 12, padding: '12px 28px', fontSize: 12, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer' }}
@@ -132,7 +136,7 @@ export default function Home({ addToCart, addToWishlist, searchQuery }) {
                 >
                   Shop Electronics
                 </button>
-              </div>
+              </motion.div>
             </motion.div>
           </div>
         </div>
