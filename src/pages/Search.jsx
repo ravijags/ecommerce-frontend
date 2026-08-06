@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import ProductCard from '../ProductCard'
 import SkeletonCard from '../components/SkeletonCard'
 
-const SORT_OPTIONS = [
+const SEARCH_SORT_OPTIONS = [
   { value: 'default', label: 'Relevance' },
   { value: 'price-low', label: 'Price: Low to High' },
   { value: 'price-high', label: 'Price: High to Low' },
@@ -86,7 +86,7 @@ export default function Search({ addToCart, addToWishlist }) {
           padding: '9px 14px', borderRadius: 10, border: '1px solid #e2e8f0',
           fontSize: 13, color: '#0f172a', background: '#fff', cursor: 'pointer', outline: 'none',
         }}>
-          {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+          {SEARCH_SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
 
         {(priceRange.min || priceRange.max) && (

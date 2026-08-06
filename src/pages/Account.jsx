@@ -8,8 +8,6 @@ import {
 import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 
-const API = import.meta.env.VITE_API_URL
-
 function Section({ title, children }) {
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
@@ -71,7 +69,7 @@ function PasswordModal({ onClose }) {
     setLoading(true)
     const token = localStorage.getItem('token')
     try {
-      const res = await fetch(`${API}/api/auth/change-password`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/change-password`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', authorization: token },
         body: JSON.stringify({ currentPassword: current, newPassword: next }),
@@ -116,7 +114,7 @@ function PhoneModal({ current, onClose, onSave }) {
     setLoading(true)
     const token = localStorage.getItem('token')
     try {
-      const res = await fetch(`${API}/api/auth/update-phone`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/update-phone`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', authorization: token },
         body: JSON.stringify({ phone }),
@@ -168,7 +166,7 @@ function AddressForm({ address, onSave, onClose }) {
     setLoading(true)
     const token = localStorage.getItem('token')
     try {
-      const url = address?._id ? `${API}/api/auth/addresses/${address._id}` : `${API}/api/auth/addresses`
+      const url = address?._id ? `${import.meta.env.VITE_API_URL}/api/auth/addresses/${address._id}` : `${import.meta.env.VITE_API_URL}/api/auth/addresses`
       const method = address?._id ? 'PUT' : 'POST'
       const res = await fetch(url, {
         method,
@@ -243,7 +241,7 @@ function AddressesModal({ onClose }) {
 
   useEffect(() => {
     const token = localStorage.getItem('token')
-    fetch(`${API}/api/auth/addresses`, { headers: { authorization: token } })
+    fetch(`${import.meta.env.VITE_API_URL}/api/auth/addresses`, { headers: { authorization: token } })
       .then(r => r.json()).then(d => { setAddresses(d.addresses || []); setLoading(false) })
       .catch(() => setLoading(false))
   }, [])
@@ -252,7 +250,7 @@ function AddressesModal({ onClose }) {
     if (!window.confirm('Delete this address?')) return
     const token = localStorage.getItem('token')
     try {
-      const res = await fetch(`${API}/api/auth/addresses/${id}`, { method: 'DELETE', headers: { authorization: token } })
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/addresses/${id}`, { method: 'DELETE', headers: { authorization: token } })
       const d = await res.json()
       if (res.ok) { setAddresses(d.addresses); toast.success('Address deleted') }
     } catch { toast.error('Failed') }
@@ -346,7 +344,7 @@ export default function Account() {
   useEffect(() => {
     const token = localStorage.getItem('token')
     if (!token) { navigate('/login'); return }
-    fetch(`${API}/api/auth/me`, { headers: { authorization: token } })
+    fetch(`${import.meta.env.VITE_API_URL}/api/auth/me`, { headers: { authorization: token } })
       .then(r => r.json())
       .then(d => {
         const u = d.user || d
@@ -375,7 +373,7 @@ export default function Account() {
     setSaving(true)
     const token = localStorage.getItem('token')
     try {
-      const res = await fetch(`${API}/api/auth/update`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/update`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', authorization: token },
         body: JSON.stringify({ name }),
