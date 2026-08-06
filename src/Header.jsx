@@ -119,9 +119,6 @@ function Header({ cartCount, wishlistCount, onSearch }) {
             </motion.div>
           </div>
         )}
-          <p style={{
-            color: '#94a3b8',
-            fontSize: 11,
         {/* Main header */}
         <div style={{
           borderBottom: '1px solid #f8fafc',
