@@ -221,23 +221,27 @@ export default function Orders() {
               </div>
 
               {/* Footer */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 18px', background: '#f8fafc', borderTop: '1px solid #f1f5f9', flexWrap: 'wrap', gap: 8 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 20, background: order.paymentStatus === 'paid' ? '#dcfce7' : '#fef3c7', color: order.paymentStatus === 'paid' ? '#15803d' : '#92400e' }}>
-                    {order.paymentStatus === 'paid' ? '✓ Paid' : 'Pending Payment'}
-                  </span>
-                  <button onClick={() => printInvoice(order)} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 20, border: '1px solid #e2e8f0', background: '#fff', color: '#64748b', fontSize: 11, fontWeight: 600, cursor: 'pointer' }}>
-                    <Printer size={11} /> Invoice
-                  </button>
+              <div style={{ padding: '12px 18px', background: '#f8fafc', borderTop: '1px solid #f1f5f9' }}>
+                {/* Top row: payment status + action buttons */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 20, background: order.paymentStatus === 'paid' ? '#dcfce7' : '#fef3c7', color: order.paymentStatus === 'paid' ? '#15803d' : '#92400e' }}>
+                      {order.paymentStatus === 'paid' ? '✓ Paid' : 'Pending Payment'}
+                    </span>
+                    <button onClick={() => printInvoice(order)} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 20, border: '1px solid #e2e8f0', background: '#fff', color: '#64748b', fontSize: 11, fontWeight: 600, cursor: 'pointer' }}>
+                      <Printer size={11} /> Invoice
+                    </button>
+                  </div>
                   {['pending', 'processing'].includes(order.status) && (
-                    <button onClick={() => cancelOrder(order._id)} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 20, border: '1px solid #fee2e2', background: '#fff', color: '#ef4444', fontSize: 11, fontWeight: 600, cursor: 'pointer' }}>
-                      <XCircle size={11} /> Cancel
+                    <button onClick={() => cancelOrder(order._id)} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 20, border: '1px solid #fee2e2', background: '#fff', color: '#ef4444', fontSize: 11, fontWeight: 600, cursor: 'pointer', flexShrink: 0 }}>
+                      <XCircle size={11} /> Cancel Order
                     </button>
                   )}
                 </div>
-                <div style={{ textAlign: 'right' }}>
-                  <p style={{ fontSize: 10, color: '#94a3b8', margin: '0 0 2px' }}>Total</p>
-                  <p style={{ fontSize: 18, fontWeight: 900, color: '#0f172a', margin: 0 }}>₹{order.totalAmount?.toLocaleString('en-IN')}</p>
+                {/* Bottom row: total */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: 13, color: '#64748b', fontWeight: 500 }}>Order Total</span>
+                  <span style={{ fontSize: 20, fontWeight: 900, color: '#0f172a' }}>₹{order.totalAmount?.toLocaleString('en-IN')}</span>
                 </div>
               </div>
             </motion.div>

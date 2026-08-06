@@ -1,4 +1,4 @@
-import { useState as useStateCart } from 'react'
+import { useState as useStateCart, useRef, useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Trash2, ShoppingBag, ArrowLeft, Tag, ChevronRight, Package, ShoppingCart, Check } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -61,6 +61,52 @@ function CouponSection({ onApply }) {
         </div>
       )}
       <p style={{ fontSize: 10, color: '#94a3b8', margin: '6px 0 0' }}>Try: PREMIA10, SAVE20, FIRST15</p>
+    </div>
+  )
+}
+
+// Swipeable cart item — swipe left to reveal delete on mobile
+function SwipeableCartItem({ children, onDelete }) {
+  const [swipeX, setSwipeX] = useStateCart(0)
+  const startX = useRef(null)
+  const threshold = 80
+
+  const onTouchStart = (e) => { startX.current = e.touches[0].clientX }
+  const onTouchMove = (e) => {
+    if (startX.current === null) return
+    const diff = e.touches[0].clientX - startX.current
+    if (diff < 0) setSwipeX(Math.max(diff, -threshold - 20))
+  }
+  const onTouchEnd = () => {
+    if (swipeX < -threshold / 2) setSwipeX(-threshold)
+    else setSwipeX(0)
+    startX.current = null
+  }
+
+  return (
+    <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 16 }}>
+      {/* Delete button revealed on swipe */}
+      <div style={{
+        position: 'absolute', right: 0, top: 0, bottom: 0,
+        width: threshold, background: '#ef4444',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        borderRadius: '0 16px 16px 0',
+      }}>
+        <button onClick={onDelete} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+          <Trash2 size={20} color="#fff" />
+          <span style={{ fontSize: 10, color: '#fff', fontWeight: 700 }}>Remove</span>
+        </button>
+      </div>
+      {/* Content slides left */}
+      <div
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        onClick={() => swipeX !== 0 && setSwipeX(0)}
+        style={{ transform: `translateX(${swipeX}px)`, transition: startX.current ? 'none' : 'transform 0.3s ease', willChange: 'transform' }}
+      >
+        {children}
+      </div>
     </div>
   )
 }
@@ -194,7 +240,8 @@ export default function Cart({ cartItems, setCartItems }) {
         {/* Items */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {cartItems.map((item, index) => (
-            <div key={`${item._id}-${index}`} style={{
+            <SwipeableCartItem key={`${item._id}-${index}`} onDelete={() => removeFromCart(index)}>
+            <div style={{
               display: 'flex', gap: 12, padding: '14px 12px',
               background: '#fff', borderRadius: 16,
               border: '1px solid #e2e8f0',
@@ -263,6 +310,7 @@ export default function Cart({ cartItems, setCartItems }) {
                 <Trash2 size={15} />
               </button>
             </div>
+            </SwipeableCartItem>
           ))}
         </div>
 
