@@ -104,7 +104,7 @@ export default function AdminDashboard() {
         <StatCard icon={ShoppingBag} label="Total Orders" value={orders.length} sub={`${pending} pending`} color="#3b82f6" delay={0} to="/admin/orders" />
         <StatCard icon={TrendingUp} label="Revenue" value={`₹${revenue.toLocaleString('en-IN')}`} sub="From paid orders" color="#C9A84C" delay={0.06} />
         <StatCard icon={Users} label="Customers" value={users.length} sub="Registered accounts" color="#22c55e" delay={0.12} to="/admin/users" />
-        <StatCard icon={Package} label="Products" value={products.length} sub={lowStock > 0 ? `${lowStock} low stock` : 'All stocked'} color={lowStock > 0 ? '#ef4444' : '#8b5cf6'} delay={0.18} to="/admin/products" />
+        <StatCard icon={Package} label="Products" value={products.length} sub={lowStock > 0 ? `${lowStock} low stock` : 'All stocked'} color={lowStock > 0 ? '#ef4444' : '#8b5cf6'} delay={0.18} to={lowStock > 0 ? '/admin/low-stock' : '/admin/products'} />
       </div>
 
       {/* Revenue chart + order breakdown */}
@@ -143,9 +143,9 @@ export default function AdminDashboard() {
             ))}
           </div>
           {lowStock > 0 && (
-            <div style={{ marginTop: 12, padding: '10px 12px', background: '#fef3c7', borderRadius: 10, border: '1px solid #fde68a' }}>
-              <p style={{ fontSize: 12, fontWeight: 700, color: '#92400e', margin: 0 }}>⚠️ {lowStock} product{lowStock > 1 ? 's' : ''} low on stock</p>
-            </div>
+            <Link to="/admin/low-stock" style={{ textDecoration: 'none', display: 'block', marginTop: 12, padding: '10px 12px', background: '#fef3c7', borderRadius: 10, border: '1px solid #fde68a' }}>
+              <p style={{ fontSize: 12, fontWeight: 700, color: '#92400e', margin: 0 }}>⚠️ {lowStock} product{lowStock > 1 ? 's' : ''} low on stock — Click to view</p>
+            </Link>
           )}
         </motion.div>
       </div>

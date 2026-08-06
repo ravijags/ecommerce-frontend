@@ -16,6 +16,7 @@ import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminOrders from './pages/admin/AdminOrders'
 import AdminProducts from './pages/admin/AdminProducts'
 import AdminUsers from './pages/admin/AdminUsers'
+import AdminLowStock from './pages/admin/AdminLowStock'
 import ProductDetail from './pages/ProductDetail'
 import Footer from './components/Footer'
 import BackToTop from './components/BackToTop'
@@ -223,6 +224,7 @@ function App() {
           <Route path="/admin/orders" element={<AdminOrders />} />
           <Route path="/admin/products" element={<AdminProducts />} />
           <Route path="/admin/users" element={<AdminUsers />} />
+          <Route path="/admin/low-stock" element={<AdminLowStock />} />
           <Route path="*" element={<PageWrapper><NotFound /></PageWrapper>} />
         </Routes>
       </AnimatePresence>

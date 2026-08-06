@@ -147,7 +147,9 @@ export default function ProductDetail({ addToCart, addToWishlist }) {
                   </div>
                 )}
                 <img src={unique[selectedImage]} alt={product.name}
-                  style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 20 }}
+                  style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 20, transition: 'transform 0.4s ease', cursor: 'zoom-in' }}
+                  onMouseEnter={e => e.target.style.transform = 'scale(1.12)'}
+                  onMouseLeave={e => e.target.style.transform = 'scale(1)'}
                   onError={e => { e.target.src = 'https://placehold.co/600x600/f8fafc/94a3b8?text=No+Image' }} />
               </motion.div>
             </AnimatePresence>

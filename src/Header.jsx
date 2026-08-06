@@ -546,6 +546,17 @@ function Header({ cartCount, wishlistCount, onSearch }) {
               </div>
 
               <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px' }}>
+                {token && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', background: '#f8fafc', borderRadius: 14, marginBottom: 16 }}>
+                    <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, fontWeight: 900, color: '#C9A84C', flexShrink: 0 }}>
+                      {(localStorage.getItem('premia_uname') || 'U')[0].toUpperCase()}
+                    </div>
+                    <div>
+                      <p style={{ fontSize: 14, fontWeight: 700, color: '#0f172a', margin: 0 }}>{localStorage.getItem('premia_uname') || 'User'}</p>
+                      <Link to="/account" onClick={() => setMobileMenuOpen(false)} style={{ fontSize: 11, color: '#C9A84C', fontWeight: 600, textDecoration: 'none' }}>View Account →</Link>
+                    </div>
+                  </div>
+                )}
                 {token ? (
                   <div style={{ marginBottom: 20 }}>
                     {[
