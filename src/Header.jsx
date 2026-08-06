@@ -34,6 +34,13 @@ function Header({ cartCount, wishlistCount, onSearch }) {
     if (onSearch) onSearch(e.target.value)
   }
 
+  const handleSearchSubmit = (q) => {
+    const query = q || searchQuery
+    if (!query.trim()) return
+    navigate(`/search?q=${encodeURIComponent(query.trim())}`)
+    setSearchFocused(false)
+  }
+
   const clearSearch = () => {
     setSearchQuery('')
     if (onSearch) onSearch('')
@@ -139,6 +146,7 @@ function Header({ cartCount, wishlistCount, onSearch }) {
                   onChange={handleSearch}
                   onFocus={() => setSearchFocused(true)}
                   onBlur={() => setTimeout(() => setSearchFocused(false), 150)}
+                  onKeyDown={e => e.key === 'Enter' && handleSearchSubmit()}
                   style={{ flex: 1, padding: '10px 12px', fontSize: 13, border: 'none', outline: 'none', backgroundColor: 'transparent', color: '#0f172a', fontFamily: 'Inter, system-ui' }}
                 />
                 {searchQuery && (
@@ -152,7 +160,7 @@ function Header({ cartCount, wishlistCount, onSearch }) {
                 <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#fff', border: '2px solid #0f172a', borderTop: 'none', borderRadius: '0 0 12px 12px', zIndex: 100, boxShadow: '0 8px 24px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
                   {!searchQuery && <div style={{ padding: '8px 14px 4px', fontSize: 10, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Popular Searches</div>}
                   {suggestions.map(s => (
-                    <button key={s} onMouseDown={() => { setSearchQuery(s); if (onSearch) onSearch(s) }}
+                    <button key={s} onMouseDown={() => { setSearchQuery(s); handleSearchSubmit(s) }}
                       style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '10px 14px', border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 13, color: '#0f172a', textAlign: 'left' }}
                       onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'}
                       onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>

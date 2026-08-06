@@ -10,6 +10,7 @@ import Cart from './pages/Cart'
 import Orders from './pages/Orders'
 import Wishlist from './pages/Wishlist'
 import Account from './pages/Account'
+import Search from './pages/Search'
 import NotFound from './pages/NotFound'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminOrders from './pages/admin/AdminOrders'
@@ -48,7 +49,7 @@ function App() {
       '/orders': 'My Orders — PREMIA',
       '/wishlist': 'My Wishlist — PREMIA',
       '/account': 'My Account — PREMIA',
-      '/admin': 'Dashboard — PREMIA Admin',
+      '/search': 'Search — PREMIA',
       '/admin/orders': 'Orders — PREMIA Admin',
       '/admin/products': 'Products — PREMIA Admin',
       '/admin/users': 'Users — PREMIA Admin',
@@ -212,6 +213,7 @@ function App() {
           <Route path="/register" element={<PageWrapper><Register /></PageWrapper>} />
           <Route path="/cart" element={<PageWrapper><Cart cartItems={cartItems} setCartItems={setCartItems} /></PageWrapper>} />
           <Route path="/orders" element={<PageWrapper><Orders /></PageWrapper>} />
+          <Route path="/search" element={<PageWrapper><Search addToCart={addToCart} addToWishlist={addToWishlist} /></PageWrapper>} />
           <Route path="/wishlist" element={<PageWrapper><Wishlist wishlistItems={wishlistItems} removeFromWishlist={removeFromWishlist} addToCart={addToCart} /></PageWrapper>} />
           <Route path="/account" element={<PageWrapper><Account /></PageWrapper>} />
           <Route path="/products/:id" element={<PageWrapper><ProductDetail addToCart={addToCart} addToWishlist={addToWishlist} /></PageWrapper>} />

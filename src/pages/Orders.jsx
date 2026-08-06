@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { Package, ChevronRight, Clock, CheckCircle, Truck, XCircle, ShoppingBag, ArrowLeft, Printer, ChevronDown, ChevronUp } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import toast from 'react-hot-toast'
 
 const STATUS_CONFIG = {
   pending:    { icon: Clock,       color: '#d97706', bg: '#fef3c7', label: 'Pending',    step: 0 },
@@ -82,6 +83,25 @@ export default function Orders() {
   }, [])
 
   const toggleExpand = (id) => setExpanded(prev => ({ ...prev, [id]: !prev[id] }))
+
+  const cancelOrder = async (orderId) => {
+    if (!window.confirm('Cancel this order? This cannot be undone.')) return
+    const token = localStorage.getItem('token')
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/orders/${orderId}/cancel`, {
+        method: 'PUT',
+        headers: { authorization: token },
+      })
+      if (res.ok) {
+        setOrders(prev => prev.map(o => o._id === orderId ? { ...o, status: 'cancelled' } : o))
+        toast.success('Order cancelled')
+      } else {
+        toast.error('Cannot cancel this order')
+      }
+    } catch {
+      toast.error('Something went wrong')
+    }
+  }
 
   const printInvoice = (order) => {
     const win = window.open('', '_blank')
@@ -209,6 +229,11 @@ export default function Orders() {
                   <button onClick={() => printInvoice(order)} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 20, border: '1px solid #e2e8f0', background: '#fff', color: '#64748b', fontSize: 11, fontWeight: 600, cursor: 'pointer' }}>
                     <Printer size={11} /> Invoice
                   </button>
+                  {['pending', 'processing'].includes(order.status) && (
+                    <button onClick={() => cancelOrder(order._id)} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 20, border: '1px solid #fee2e2', background: '#fff', color: '#ef4444', fontSize: 11, fontWeight: 600, cursor: 'pointer' }}>
+                      <XCircle size={11} /> Cancel
+                    </button>
+                  )}
                 </div>
                 <div style={{ textAlign: 'right' }}>
                   <p style={{ fontSize: 10, color: '#94a3b8', margin: '0 0 2px' }}>Total</p>
