@@ -16,7 +16,6 @@ import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminOrders from './pages/admin/AdminOrders'
 import AdminProducts from './pages/admin/AdminProducts'
 import AdminUsers from './pages/admin/AdminUsers'
-import AdminLowStock from './pages/admin/AdminLowStock'
 import ProductDetail from './pages/ProductDetail'
 import Footer from './components/Footer'
 import BackToTop from './components/BackToTop'
@@ -131,7 +130,7 @@ function App() {
       if (exists) return prev.map(i => i._id === product._id ? { ...i, quantity: i.quantity + 1 } : i)
       return [...prev, item]
     })
-    toast.success(`${product.name} added to cart!`)
+    if (!product._suppressToast) toast.success(`${product.name} added to cart!`)
     if (token) {
       fetch(`${API}/api/cart`, {
         method: 'POST',
@@ -162,10 +161,10 @@ function App() {
   }, [])
 
   // REMOVE FROM WISHLIST
-  const removeFromWishlist = useCallback((productId) => {
+  const removeFromWishlist = useCallback((productId, silent = false) => {
     const updated = removeFromWishlistStore(productId)
     setWishlistItems(updated)
-    toast.success('Removed from wishlist')
+    if (!silent) toast.success('Removed from wishlist')
     const token = localStorage.getItem('token')
     if (token) {
       fetch(`${API}/api/wishlist/${productId}`, {
@@ -224,7 +223,6 @@ function App() {
           <Route path="/admin/orders" element={<AdminOrders />} />
           <Route path="/admin/products" element={<AdminProducts />} />
           <Route path="/admin/users" element={<AdminUsers />} />
-          <Route path="/admin/low-stock" element={<AdminLowStock />} />
           <Route path="*" element={<PageWrapper><NotFound /></PageWrapper>} />
         </Routes>
       </AnimatePresence>

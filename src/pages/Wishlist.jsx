@@ -6,9 +6,10 @@ import toast from 'react-hot-toast'
 export default function Wishlist({ wishlistItems, removeFromWishlist, addToCart }) {
 
   const moveToCart = (product) => {
-    addToCart(product)
-    removeFromWishlist(product._id)
-    toast.success('Moved to cart!')
+    toast.dismiss()
+    addToCart({ ...product, _suppressToast: true })
+    removeFromWishlist(product._id, true) // silent
+    setTimeout(() => toast.success('Moved to cart! 🛒'), 50)
   }
 
   if (wishlistItems.length === 0) {
