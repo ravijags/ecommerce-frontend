@@ -17,6 +17,7 @@ import AdminProducts from './pages/admin/AdminProducts'
 import AdminUsers from './pages/admin/AdminUsers'
 import ProductDetail from './pages/ProductDetail'
 import Footer from './components/Footer'
+import BackToTop from './components/BackToTop'
 import { getWishlist, addToWishlistStore, removeFromWishlistStore } from './wishlistStore'
 
 const API = import.meta.env.VITE_API_URL
@@ -222,6 +223,7 @@ function App() {
         </Routes>
       </AnimatePresence>
       {!isAdmin && !isAuthPage && <Footer />}
+      <BackToTop />
     </div>
   )
 }

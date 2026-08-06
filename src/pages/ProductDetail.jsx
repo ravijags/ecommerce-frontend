@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { ShoppingCart, Heart, Star, ChevronLeft, Shield, Truck, RotateCcw, CheckCircle, Zap, Tag, Package, Clock, MapPin, CreditCard, Percent } from 'lucide-react'
+import { ShoppingCart, Heart, Star, ChevronLeft, Shield, Truck, RotateCcw, CheckCircle, Zap, Tag, Package, Clock, MapPin, CreditCard, Percent, Share2, Copy } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 import ProductCard from '../ProductCard'
@@ -310,6 +310,18 @@ export default function ProductDetail({ addToCart, addToWishlist }) {
             ))}
           </div>
 
+          {/* Share button */}
+          <button onClick={() => {
+            const url = window.location.href
+            if (navigator.share) {
+              navigator.share({ title: product.name, text: `Check out ${product.name} on PREMIA`, url })
+            } else {
+              navigator.clipboard.writeText(url).then(() => toast.success('Link copied!'))
+            }
+          }} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 10, border: '1px solid #e2e8f0', background: '#fff', color: '#64748b', fontSize: 12, fontWeight: 600, cursor: 'pointer', marginBottom: 16, width: 'fit-content' }}>
+            <Share2 size={13} /> Share this product
+          </button>
+
           {/* Protection plan */}
           <div style={{ border: '1px solid #e2e8f0', borderRadius: 12, padding: '14px 16px' }}>
             <p style={{ fontSize: 12, fontWeight: 700, color: '#0f172a', margin: '0 0 10px' }}>Add a Protection Plan</p>
@@ -362,6 +374,58 @@ export default function ProductDetail({ addToCart, addToWishlist }) {
           </div>
         </div>
       </div>
+
+      {/* Frequently Bought Together */}
+      {related.length >= 2 && (
+        <div style={{ marginTop: 48, paddingTop: 32, borderTop: '1px solid #e2e8f0' }}>
+          <h2 style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', marginBottom: 20 }}>Frequently Bought Together</h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: 20, background: '#f8fafc', borderRadius: 16, border: '1px solid #e2e8f0', flexWrap: 'wrap' }}>
+            {/* Current product */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, minWidth: 100 }}>
+              <div style={{ width: 80, height: 80, borderRadius: 12, background: '#fff', border: '1px solid #e2e8f0', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <img src={product.image || product.thumbnail} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 6 }} />
+              </div>
+              <span style={{ fontSize: 11, fontWeight: 600, color: '#0f172a', textAlign: 'center', maxWidth: 100 }}>{product.name?.slice(0, 20)}</span>
+              <span style={{ fontSize: 12, fontWeight: 800, color: '#0f172a' }}>₹{product.price?.toLocaleString('en-IN')}</span>
+            </div>
+
+            <span style={{ fontSize: 20, color: '#94a3b8', fontWeight: 300 }}>+</span>
+
+            {/* Related product */}
+            {(() => {
+              const p = related[0]
+              return (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, minWidth: 100 }}>
+                  <Link to={`/products/${p._id}`}>
+                    <div style={{ width: 80, height: 80, borderRadius: 12, background: '#fff', border: '1px solid #e2e8f0', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <img src={p.image || p.thumbnail} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 6 }} />
+                    </div>
+                  </Link>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: '#0f172a', textAlign: 'center', maxWidth: 100 }}>{p.name?.slice(0, 20)}</span>
+                  <span style={{ fontSize: 12, fontWeight: 800, color: '#0f172a' }}>₹{p.price?.toLocaleString('en-IN')}</span>
+                </div>
+              )
+            })()}
+
+            {/* Total + Add both */}
+            <div style={{ marginLeft: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 10 }}>
+              <div>
+                <p style={{ fontSize: 11, color: '#64748b', margin: '0 0 2px', textAlign: 'right' }}>Total price</p>
+                <p style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', margin: 0 }}>
+                  ₹{((product.price || 0) + (related[0]?.price || 0)).toLocaleString('en-IN')}
+                </p>
+              </div>
+              <button onClick={() => {
+                addToCart(product)
+                addToCart(related[0])
+                toast.success('Both items added to cart!')
+              }} style={{ padding: '10px 20px', borderRadius: 12, border: 'none', background: '#C9A84C', color: '#0f172a', fontSize: 13, fontWeight: 800, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                Add Both to Cart
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Customer Reviews */}
       {product.rating > 0 && (() => {

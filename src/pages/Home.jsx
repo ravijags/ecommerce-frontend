@@ -3,6 +3,7 @@ import { useSearchParams, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import ProductCard from '../ProductCard'
 import { getRecentlyViewed } from '../recentlyViewed'
+import SkeletonCard from '../components/SkeletonCard'
 
 const CATEGORIES = [
   { slug: 'smartphones', name: 'Smartphones' },
@@ -88,34 +89,15 @@ export default function Home({ addToCart, addToWishlist, searchQuery }) {
   // Loading screen
   if (loading) return (
     <div style={{ background: '#f8fafc', minHeight: '100vh', padding: '20px 12px' }}>
-      {/* Skeleton grid */}
       <div style={{ maxWidth: 1280, margin: '0 auto' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-          <div style={{ width: 140, height: 24, borderRadius: 8, background: '#e2e8f0', animation: 'shimmer 1.5s infinite' }} />
-          <div style={{ width: 120, height: 32, borderRadius: 8, background: '#e2e8f0', animation: 'shimmer 1.5s infinite' }} />
+          <div style={{ width: 140, height: 24, borderRadius: 8, background: '#e2e8f0', animation: 'skeletonPulse 1.4s ease-in-out infinite' }} />
+          <div style={{ width: 120, height: 32, borderRadius: 8, background: '#e2e8f0', animation: 'skeletonPulse 1.4s ease-in-out infinite' }} />
         </div>
         <div className="product-grid">
-          {Array.from({ length: 10 }).map((_, i) => (
-            <div key={i} style={{ background: '#fff', borderRadius: 16, overflow: 'hidden', border: '1px solid #f1f5f9' }}>
-              <div className="product-img-wrapper" style={{ background: '#f1f5f9', animation: 'shimmer 1.5s infinite' }} />
-              <div style={{ padding: '10px 12px 14px' }}>
-                <div style={{ width: '60%', height: 10, borderRadius: 4, background: '#f1f5f9', marginBottom: 8, animation: 'shimmer 1.5s infinite' }} />
-                <div style={{ width: '90%', height: 13, borderRadius: 4, background: '#f1f5f9', marginBottom: 6, animation: 'shimmer 1.5s infinite' }} />
-                <div style={{ width: '70%', height: 13, borderRadius: 4, background: '#f1f5f9', marginBottom: 12, animation: 'shimmer 1.5s infinite' }} />
-                <div style={{ width: '50%', height: 18, borderRadius: 4, background: '#f1f5f9', marginBottom: 10, animation: 'shimmer 1.5s infinite' }} />
-                <div style={{ width: '100%', height: 36, borderRadius: 10, background: '#f1f5f9', animation: 'shimmer 1.5s infinite' }} />
-              </div>
-            </div>
-          ))}
+          {Array.from({ length: 10 }).map((_, i) => <SkeletonCard key={i} />)}
         </div>
       </div>
-      <style>{`
-        @keyframes shimmer {
-          0% { background-color: #f1f5f9; }
-          50% { background-color: #e2e8f0; }
-          100% { background-color: #f1f5f9; }
-        }
-      `}</style>
     </div>
   )
 
