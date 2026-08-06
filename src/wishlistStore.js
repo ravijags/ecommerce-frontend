@@ -1,11 +1,11 @@
 // Dead simple wishlist store — works without React, without backend
 // Everything goes through here so localStorage is always in sync
 
-const KEY = 'premia_wishlist'
+const WISHLIST_KEY = 'premia_wishlist'
 
 export function getWishlist() {
   try {
-    return JSON.parse(localStorage.getItem(KEY) || '[]')
+    return JSON.parse(localStorage.getItem(WISHLIST_KEY) || '[]')
   } catch {
     return []
   }
@@ -13,7 +13,7 @@ export function getWishlist() {
 
 export function saveWishlist(items) {
   try {
-    localStorage.setItem(KEY, JSON.stringify(items))
+    localStorage.setItem(WISHLIST_KEY, JSON.stringify(items))
   } catch (e) {
     console.error('Failed to save wishlist:', e)
   }
