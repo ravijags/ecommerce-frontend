@@ -19,6 +19,7 @@ import AdminUsers from './pages/admin/AdminUsers'
 import ProductDetail from './pages/ProductDetail'
 import Footer from './components/Footer'
 import BackToTop from './components/BackToTop'
+import ProgressBar from './components/ProgressBar'
 import { getWishlist, addToWishlistStore, removeFromWishlistStore } from './wishlistStore'
 
 const API = import.meta.env.VITE_API_URL
@@ -175,6 +176,7 @@ function App() {
 
   return (
     <div className="bg-gray-50 min-h-screen">
+      <ProgressBar />
       <Toaster
         position="bottom-center"
         toastOptions={{

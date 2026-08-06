@@ -3,7 +3,12 @@ import { ShoppingCart, Heart, Star } from 'lucide-react'
 import { useState } from 'react'
 
 function ProductCard({ name, price, image, onAddToCart, onAddToWishlist, id, rating, discount, originalPrice, brand }) {
-  const [wishlisted, setWishlisted] = useState(false)
+  const [wishlisted, setWishlisted] = useState(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('premia_wishlist') || '[]')
+      return saved.some(p => p._id === id)
+    } catch { return false }
+  })
   const [added, setAdded] = useState(false)
 
   const imageUrl = (image && image.startsWith('http'))

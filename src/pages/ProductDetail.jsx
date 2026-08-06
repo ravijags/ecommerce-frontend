@@ -12,7 +12,12 @@ export default function ProductDetail({ addToCart, addToWishlist }) {
   const [loading, setLoading] = useState(true)
   const [selectedImage, setSelectedImage] = useState(0)
   const [quantity, setQuantity] = useState(1)
-  const [wishlisted, setWishlisted] = useState(false)
+  const [wishlisted, setWishlisted] = useState(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('premia_wishlist') || '[]')
+      return saved.some(p => p._id === id)
+    } catch { return false }
+  })
   const [addedToCart, setAddedToCart] = useState(false)
   const { id } = useParams()
   const navigate = useNavigate()

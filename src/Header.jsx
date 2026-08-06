@@ -429,6 +429,12 @@ function Header({ cartCount, wishlistCount, onSearch }) {
                     value={searchQuery}
                     onChange={handleSearch}
                     autoFocus
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') {
+                        handleSearchSubmit()
+                        setMobileSearchOpen(false)
+                      }
+                    }}
                     style={{
                       flex: 1,
                       padding: '10px 12px',
