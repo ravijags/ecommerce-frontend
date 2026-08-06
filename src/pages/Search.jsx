@@ -1,6 +1,6 @@
 import { useSearchParams, Link } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-import { Search, SlidersHorizontal, X } from 'lucide-react'
+import { Search as SearchIcon, SlidersHorizontal, X } from 'lucide-react'
 import { motion } from 'framer-motion'
 import ProductCard from '../ProductCard'
 import SkeletonCard from '../components/SkeletonCard'
@@ -62,7 +62,7 @@ export default function Search({ addToCart, addToWishlist }) {
       {/* Header */}
       <div style={{ marginBottom: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-          <Search size={18} color="#94a3b8" />
+          <SearchIcon size={18} color="#94a3b8" />
           <h1 style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', margin: 0 }}>
             Results for "{query}"
           </h1>
