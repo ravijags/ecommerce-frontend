@@ -1,7 +1,7 @@
 // Keeps the Render backend awake by pinging every 14 minutes
 // Render free tier sleeps after 15 min of inactivity
 
-const API = import.meta.env.VITE_API_URL
+const KEEP_ALIVE_API = import.meta.env.VITE_API_URL
 const INTERVAL = 14 * 60 * 1000 // 14 minutes
 
 export function startKeepAlive() {
@@ -12,7 +12,7 @@ export function startKeepAlive() {
 }
 
 function ping() {
-  fetch(`${API}/api/products?limit=1`)
+  fetch(`${KEEP_ALIVE_API}/api/products?limit=1`)
     .then(() => console.log('Backend alive:', new Date().toLocaleTimeString()))
     .catch(() => {}) // Silent fail
 }
