@@ -450,6 +450,7 @@ export default function Home({ addToCart, addToWishlist, searchQuery }) {
                       rating={product.rating} discount={product.discount}
                       originalPrice={product.originalPrice} brand={product.brand}
                       onAddToCart={() => addToCart(product)}
+                      isInCart={false}
                       onAddToWishlist={() => addToWishlist && addToWishlist(product)} />
                   </div>
                 </motion.div>
