@@ -186,9 +186,8 @@ function App() {
           },
           success: { iconTheme: { primary: '#C9A84C', secondary: '#0f172a' } },
           error: {
-            iconTheme: { primary: '#ef4444', secondary: '#fff' },
-            style: { background: '#fff', color: '#0f172a', border: '1px solid #fee2e2' },
-          },
+          iconTheme: { primary: '#ef4444', secondary: '#0f172a' },
+         },
         }}
       />
       {!isAdmin && !isAuthPage && (
