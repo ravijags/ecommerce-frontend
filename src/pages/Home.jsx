@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion'
 import ProductCard from '../ProductCard'
 import { getRecentlyViewed } from '../recentlyViewed'
 import SkeletonCard from '../components/SkeletonCard'
@@ -23,6 +23,16 @@ const CATEGORIES = [
   { slug: 'kitchen-accessories', name: 'Kitchen' },
 ]
 
+// Categories shown in the dynamic button — feels curated
+const FEATURED_CATS = [
+  { slug: 'mens-watches', label: 'Shop Watches' },
+  { slug: 'fragrances', label: 'Shop Fragrances' },
+  { slug: 'laptops', label: 'Shop Laptops' },
+  { slug: 'sunglasses', label: 'Shop Sunglasses' },
+  { slug: 'smartphones', label: 'Shop Phones' },
+  { slug: 'mens-shoes', label: 'Shop Footwear' },
+]
+
 const SORT_OPTIONS = [
   { value: 'default', label: 'Recommended' },
   { value: 'price-low', label: 'Price: Low to High' },
@@ -33,156 +43,197 @@ const SORT_OPTIONS = [
 
 const PER_PAGE = 20
 
-// ── Premium Hero Showcase ──────────────────────────────────────────────────
-function HeroShowcase({ images, names }) {
+// ── Animated counter ──────────────────────────────────────────────────────
+function useCounter(target, duration = 1800, decimal = false) {
+  const [val, setVal] = useState(0)
+  const [started, setStarted] = useState(false)
+  useEffect(() => {
+    if (!started) return
+    let current = 0
+    const steps = 60
+    const increment = target / steps
+    const interval = setInterval(() => {
+      current += increment
+      if (current >= target) { setVal(target); clearInterval(interval) }
+      else setVal(decimal ? parseFloat(current.toFixed(1)) : Math.floor(current))
+    }, duration / steps)
+    return () => clearInterval(interval)
+  }, [started, target, duration, decimal])
+  return [val, () => setStarted(true)]
+}
+
+// ── 3D Tilt Card ─────────────────────────────────────────────────────────
+function TiltCard({ children }) {
+  const ref = useRef(null)
+  const x = useMotionValue(0)
+  const y = useMotionValue(0)
+  const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [12, -12]), { stiffness: 200, damping: 20 })
+  const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-12, 12]), { stiffness: 200, damping: 20 })
+  const glareX = useTransform(x, [-0.5, 0.5], ['0%', '100%'])
+  const glareY = useTransform(y, [-0.5, 0.5], ['0%', '100%'])
+
+  const handleMove = (e) => {
+    const rect = ref.current?.getBoundingClientRect()
+    if (!rect) return
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY
+    x.set((clientX - rect.left) / rect.width - 0.5)
+    y.set((clientY - rect.top) / rect.height - 0.5)
+  }
+
+  const handleLeave = () => { x.set(0); y.set(0) }
+
+  return (
+    <motion.div
+      ref={ref}
+      onMouseMove={handleMove}
+      onMouseLeave={handleLeave}
+      onTouchMove={handleMove}
+      onTouchEnd={handleLeave}
+      style={{ rotateX, rotateY, transformStyle: 'preserve-3d', perspective: 800, position: 'relative' }}
+    >
+      {children}
+      {/* Dynamic glare overlay */}
+      <motion.div style={{
+        position: 'absolute', inset: 0, borderRadius: 28, pointerEvents: 'none', zIndex: 10,
+        background: useTransform([glareX, glareY], ([gx, gy]) =>
+          `radial-gradient(circle at ${gx} ${gy}, rgba(255,255,255,0.12) 0%, transparent 60%)`
+        ),
+      }} />
+    </motion.div>
+  )
+}
+
+// ── Hero Showcase ─────────────────────────────────────────────────────────
+function HeroShowcase({ images, names, onCategoryClick }) {
   const [active, setActive] = useState(0)
-  const [prev, setPrev] = useState(null)
   const timerRef = useRef(null)
 
-  const goTo = (idx) => {
-    setPrev(active)
-    setActive(idx)
-  }
+  const goTo = (idx) => setActive(idx)
 
   useEffect(() => {
     if (images.length < 2) return
     timerRef.current = setInterval(() => {
-      setActive(a => {
-        setPrev(a)
-        return (a + 1) % images.length
-      })
+      setActive(a => (a + 1) % images.length)
     }, 2800)
     return () => clearInterval(timerRef.current)
   }, [images.length])
 
-  if (!images.length) return null
+  if (!images.length) return (
+    <div style={{ width: '100%', aspectRatio: '1/1', borderRadius: 28, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(201,168,76,0.1)' }} />
+  )
 
   return (
-    <div style={{ position: 'relative', width: '100%', maxWidth: 340, margin: '0 auto' }}>
+    <div style={{ position: 'relative', width: '100%' }}>
 
-      {/* Outer glow ring */}
+      {/* Outer pulse ring */}
       <motion.div
-        animate={{ opacity: [0.4, 0.7, 0.4], scale: [1, 1.04, 1] }}
-        transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
+        animate={{ scale: [1, 1.06, 1], opacity: [0.3, 0.6, 0.3] }}
+        transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
         style={{
-          position: 'absolute', inset: -24,
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(201,168,76,0.18) 0%, transparent 70%)',
+          position: 'absolute', inset: -20, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(201,168,76,0.15) 0%, transparent 70%)',
           pointerEvents: 'none',
         }}
       />
 
-      {/* Main card */}
-      <div style={{
-        position: 'relative',
-        width: '100%',
-        aspectRatio: '1/1',
-        borderRadius: 32,
-        background: 'rgba(255,255,255,0.04)',
-        border: '1px solid rgba(201,168,76,0.2)',
-        backdropFilter: 'blur(20px)',
-        overflow: 'hidden',
-        boxShadow: '0 32px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08)',
-      }}>
+      <TiltCard>
+        {/* Main glass card */}
+        <div style={{
+          width: '100%', aspectRatio: '1/1', borderRadius: 28,
+          background: 'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+          border: '1px solid rgba(201,168,76,0.25)',
+          backdropFilter: 'blur(24px)',
+          overflow: 'hidden',
+          boxShadow: '0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04) inset, 0 1px 0 rgba(255,255,255,0.1) inset',
+          position: 'relative',
+        }}>
 
-        {/* Gold corner accents */}
-        {['topLeft','topRight','bottomLeft','bottomRight'].map(pos => (
-          <div key={pos} style={{
-            position: 'absolute',
-            width: 20, height: 20,
-            borderColor: 'rgba(201,168,76,0.5)',
-            borderStyle: 'solid',
-            borderWidth: 0,
-            ...(pos === 'topLeft'     && { top: 12, left: 12,  borderTopWidth: 2, borderLeftWidth: 2,  borderRadius: '4px 0 0 0' }),
-            ...(pos === 'topRight'    && { top: 12, right: 12, borderTopWidth: 2, borderRightWidth: 2, borderRadius: '0 4px 0 0' }),
-            ...(pos === 'bottomLeft'  && { bottom: 12, left: 12,  borderBottomWidth: 2, borderLeftWidth: 2,  borderRadius: '0 0 0 4px' }),
-            ...(pos === 'bottomRight' && { bottom: 12, right: 12, borderBottomWidth: 2, borderRightWidth: 2, borderRadius: '0 0 4px 0' }),
-          }} />
-        ))}
+          {/* Gold corner brackets */}
+          {[
+            { top: 14, left: 14, borderTop: 2, borderLeft: 2, borderRadius: '6px 0 0 0' },
+            { top: 14, right: 14, borderTop: 2, borderRight: 2, borderRadius: '0 6px 0 0' },
+            { bottom: 14, left: 14, borderBottom: 2, borderLeft: 2, borderRadius: '0 0 0 6px' },
+            { bottom: 14, right: 14, borderBottom: 2, borderRight: 2, borderRadius: '0 0 6px 0' },
+          ].map((s, i) => (
+            <div key={i} style={{ position: 'absolute', width: 22, height: 22, borderColor: 'rgba(201,168,76,0.6)', borderStyle: 'solid', borderWidth: 0, ...s }} />
+          ))}
 
-        {/* Shimmer sweep */}
-        <motion.div
-          animate={{ x: ['-100%', '200%'] }}
-          transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 1.5, ease: 'easeInOut' }}
-          style={{
-            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-            background: 'linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.06) 50%, transparent 60%)',
-            pointerEvents: 'none', zIndex: 3,
-          }}
-        />
+          {/* PREMIA watermark */}
+          <div style={{
+            position: 'absolute', top: '50%', left: '50%',
+            transform: 'translate(-50%, -50%)',
+            fontSize: 11, fontWeight: 900, letterSpacing: '0.4em',
+            color: 'rgba(201,168,76,0.06)', pointerEvents: 'none', zIndex: 0,
+            textTransform: 'uppercase', whiteSpace: 'nowrap',
+          }}>PREMIA</div>
 
-        {/* Image crossfade */}
-        <AnimatePresence mode="sync">
-          <motion.img
-            key={active}
-            src={images[active]}
-            alt=""
-            initial={{ opacity: 0, scale: 1.06 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.96 }}
-            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          {/* Shimmer sweep */}
+          <motion.div
+            animate={{ x: ['-120%', '220%'] }}
+            transition={{ duration: 2.2, repeat: Infinity, repeatDelay: 2, ease: 'easeInOut' }}
             style={{
-              position: 'absolute', inset: 0,
-              width: '100%', height: '100%',
-              objectFit: 'contain',
-              padding: 32,
-              zIndex: 1,
+              position: 'absolute', inset: 0, zIndex: 5, pointerEvents: 'none',
+              background: 'linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.09) 50%, transparent 65%)',
             }}
           />
-        </AnimatePresence>
 
-        {/* Bottom gradient + product name */}
-        <div style={{
-          position: 'absolute', bottom: 0, left: 0, right: 0,
-          background: 'linear-gradient(to top, rgba(15,23,42,0.9) 0%, transparent 100%)',
-          padding: '32px 20px 16px',
-          zIndex: 2,
-        }}>
-          <AnimatePresence mode="wait">
-            <motion.p
+          {/* Image crossfade */}
+          <AnimatePresence mode="sync">
+            <motion.img
               key={active}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.4 }}
+              src={images[active]}
+              alt=""
+              initial={{ opacity: 0, scale: 1.08, filter: 'blur(4px)' }}
+              animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, scale: 0.94, filter: 'blur(4px)' }}
+              transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
               style={{
-                color: '#fff', fontSize: 13, fontWeight: 600,
-                margin: 0, letterSpacing: '0.02em',
-                textShadow: '0 1px 4px rgba(0,0,0,0.5)',
-                whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                position: 'absolute', inset: 0,
+                width: '100%', height: '100%',
+                objectFit: 'contain', padding: '14%',
+                zIndex: 1,
+                filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.4))',
               }}
-            >
-              {names[active]}
-            </motion.p>
+              onError={e => { e.target.style.display = 'none' }}
+            />
           </AnimatePresence>
+
+          {/* Bottom gradient + name */}
+          <div style={{
+            position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 4,
+            background: 'linear-gradient(to top, rgba(10,16,32,0.92) 0%, rgba(10,16,32,0.4) 60%, transparent 100%)',
+            padding: '40px 18px 16px',
+          }}>
+            <AnimatePresence mode="wait">
+              <motion.p
+                key={active}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.35 }}
+                style={{ color: '#e2e8f0', fontSize: 12, fontWeight: 600, margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', letterSpacing: '0.02em' }}
+              >
+                {names[active]}
+              </motion.p>
+            </AnimatePresence>
+          </div>
         </div>
-      </div>
+      </TiltCard>
 
       {/* Dot indicators */}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginTop: 16 }}>
+      <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginTop: 14 }}>
         {images.map((_, i) => (
           <motion.button
             key={i}
             onClick={() => goTo(i)}
-            animate={{ width: i === active ? 20 : 6, background: i === active ? '#C9A84C' : 'rgba(255,255,255,0.25)' }}
-            transition={{ duration: 0.3 }}
+            animate={{
+              width: i === active ? 22 : 6,
+              background: i === active ? '#C9A84C' : 'rgba(255,255,255,0.2)',
+            }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
             style={{ height: 6, borderRadius: 3, border: 'none', cursor: 'pointer', padding: 0 }}
           />
-        ))}
-      </div>
-
-      {/* Side mini previews */}
-      <div style={{ position: 'absolute', right: -56, top: '50%', transform: 'translateY(-50%)', display: 'flex', flexDirection: 'column', gap: 10 }} className="hero-side-previews">
-        {images.map((img, i) => (
-          <motion.button
-            key={i}
-            onClick={() => goTo(i)}
-            animate={{ opacity: i === active ? 1 : 0.4, scale: i === active ? 1.1 : 1, borderColor: i === active ? '#C9A84C' : 'rgba(255,255,255,0.1)' }}
-            transition={{ duration: 0.3 }}
-            style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(255,255,255,0.06)', border: '1px solid', padding: 4, cursor: 'pointer' }}
-          >
-            <img src={img} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 6 }} />
-          </motion.button>
         ))}
       </div>
     </div>
@@ -191,15 +242,23 @@ function HeroShowcase({ images, names }) {
 
 // ─────────────────────────────────────────────────────────────────────────────
 export default function Home({ addToCart, addToWishlist, searchQuery }) {
-  const [products, setProducts]     = useState([])
-  const [loading, setLoading]       = useState(true)
-  const [category, setCategory]     = useState('')
-  const [sort, setSort]             = useState('default')
-  const [page, setPage]             = useState(1)
-  const [heroImages, setHeroImages] = useState([])
-  const [heroNames, setHeroNames]   = useState([])
-  const [searchParams]              = useSearchParams()
-  const shuffleRef                  = useRef(null)
+  const [products, setProducts]       = useState([])
+  const [loading, setLoading]         = useState(true)
+  const [category, setCategory]       = useState('')
+  const [sort, setSort]               = useState('default')
+  const [page, setPage]               = useState(1)
+  const [heroImages, setHeroImages]   = useState([])
+  const [heroNames, setHeroNames]     = useState([])
+  const [searchParams]                = useSearchParams()
+  const shuffleRef                    = useRef(null)
+
+  // Pick a random featured category once on mount
+  const featuredCat = useRef(FEATURED_CATS[Math.floor(Math.random() * FEATURED_CATS.length)])
+
+  // Animated counters
+  const [count1, start1] = useCounter(194)
+  const [count2, start2] = useCounter(50)
+  const [count3, start3] = useCounter(4.8, 1800, true)
 
   useEffect(() => {
     const cat = searchParams.get('category') || ''
@@ -215,8 +274,7 @@ export default function Home({ addToCart, addToWishlist, searchQuery }) {
         setProducts(all)
         setLoading(false)
 
-        // Pick 5 premium-looking products for showcase
-        const preferred = ['mens-watches', 'smartphones', 'laptops', 'fragrances', 'sunglasses', 'tablets', 'mens-shoes']
+        const preferred = ['mens-watches', 'smartphones', 'laptops', 'fragrances', 'sunglasses', 'tablets', 'mens-shoes', 'beauty']
         const pool = all.filter(p => {
           const img = p.image || p.thumbnail || (p.images && p.images[0])
           return img && img.startsWith('http') && preferred.includes(p.category)
@@ -274,44 +332,72 @@ export default function Home({ addToCart, addToWishlist, searchQuery }) {
       {/* ── HERO ── */}
       {!searchQuery && !category && (
         <div style={{
-          background: 'linear-gradient(135deg, #0f172a 0%, #1a2744 50%, #0f172a 100%)',
+          background: 'linear-gradient(135deg, #080e1f 0%, #0f172a 40%, #111827 100%)',
           position: 'relative', overflow: 'hidden',
         }}>
-          {/* Background grid */}
+          {/* Grid */}
           <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(201,168,76,0.05) 1px, transparent 0)', backgroundSize: '44px 44px', pointerEvents: 'none' }} />
 
           {/* Ambient glows */}
-          <div style={{ position: 'absolute', top: '-10%', left: '20%', width: 500, height: 500, borderRadius: '50%', background: 'radial-gradient(circle, rgba(201,168,76,0.07) 0%, transparent 65%)', pointerEvents: 'none' }} />
-          <div style={{ position: 'absolute', bottom: '-20%', right: '10%', width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 65%)', pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', top: '-10%', left: '15%', width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(circle, rgba(201,168,76,0.06) 0%, transparent 65%)', pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', bottom: '-20%', right: '5%', width: 500, height: 500, borderRadius: '50%', background: 'radial-gradient(circle, rgba(99,102,241,0.05) 0%, transparent 65%)', pointerEvents: 'none' }} />
 
-          <div style={{ maxWidth: 1280, margin: '0 auto', padding: '56px 24px 64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 48, flexWrap: 'wrap' }}>
+          {/* ── Main flex row — stacks on mobile ── */}
+          <div style={{
+            maxWidth: 1280, margin: '0 auto',
+            padding: 'clamp(40px, 6vw, 72px) clamp(20px, 4vw, 48px)',
+            display: 'flex', alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 'clamp(32px, 5vw, 64px)',
+            flexWrap: 'wrap',
+          }}>
 
-            {/* ── Left: Text ── */}
-            <div style={{ flex: '1 1 400px', minWidth: 280 }}>
+            {/* ── LEFT: Text ── */}
+            <div style={{ flex: '1 1 300px', minWidth: 260 }}>
 
               {/* Badge */}
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.1, duration: 0.5 }}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.25)', borderRadius: 100, padding: '6px 14px', marginBottom: 24 }}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 8,
+                  background: 'rgba(201,168,76,0.08)',
+                  border: '1px solid rgba(201,168,76,0.2)',
+                  borderRadius: 100, padding: '6px 14px', marginBottom: 22,
+                }}
               >
-                <motion.span animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 1.5, repeat: Infinity }} style={{ width: 6, height: 6, borderRadius: '50%', background: '#C9A84C', display: 'inline-block' }} />
-                <span style={{ color: '#C9A84C', fontSize: 11, fontWeight: 700, letterSpacing: '0.25em', textTransform: 'uppercase' }}>Curated for the Discerning</span>
+                <motion.span
+                  animate={{ scale: [1, 1.4, 1], opacity: [1, 0.6, 1] }}
+                  transition={{ duration: 1.8, repeat: Infinity }}
+                  style={{ width: 6, height: 6, borderRadius: '50%', background: '#C9A84C', display: 'inline-block', flexShrink: 0 }}
+                />
+                <span style={{ color: '#C9A84C', fontSize: 10, fontWeight: 700, letterSpacing: '0.25em', textTransform: 'uppercase' }}>
+                  Curated for the Discerning
+                </span>
               </motion.div>
 
               {/* Headline */}
               <motion.h1
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                style={{ fontWeight: 900, lineHeight: 1.05, letterSpacing: '-2px', marginBottom: 18, fontSize: 'clamp(36px, 5.5vw, 68px)', maxWidth: 580 }}
+                transition={{ delay: 0.2, duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+                style={{
+                  fontWeight: 900, lineHeight: 1.05,
+                  letterSpacing: 'clamp(-1px, -0.03em, -2px)',
+                  marginBottom: 16,
+                  fontSize: 'clamp(32px, 5.5vw, 68px)',
+                }}
               >
                 <span style={{ color: '#fff' }}>The New Standard<br />of </span>
                 <motion.span
                   animate={{ backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] }}
                   transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
-                  style={{ background: 'linear-gradient(90deg, #C9A84C, #f5d78e, #e8a020, #C9A84C)', backgroundSize: '200% auto', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}
+                  style={{
+                    background: 'linear-gradient(90deg, #C9A84C, #f5d78e, #e8a020, #C9A84C)',
+                    backgroundSize: '200% auto',
+                    WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
+                  }}
                 >
                   Shopping.
                 </motion.span>
@@ -319,10 +405,10 @@ export default function Home({ addToCart, addToWishlist, searchQuery }) {
 
               {/* Subtitle */}
               <motion.p
-                initial={{ opacity: 0, y: 16 }}
+                initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.35, duration: 0.5 }}
-                style={{ color: '#64748b', fontSize: 15, lineHeight: 1.75, maxWidth: 380, marginBottom: 36 }}
+                style={{ color: '#64748b', fontSize: 'clamp(13px, 2vw, 15px)', lineHeight: 1.75, maxWidth: 360, marginBottom: 32 }}
               >
                 194+ premium products from the world's finest brands. Every item handpicked. Every price unbeatable.
               </motion.p>
@@ -332,64 +418,96 @@ export default function Home({ addToCart, addToWishlist, searchQuery }) {
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5, duration: 0.45 }}
-                style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 48 }}
+                style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 40 }}
               >
                 <motion.button
-                  whileHover={{ scale: 1.04, boxShadow: '0 12px 32px rgba(201,168,76,0.4)' }}
-                  whileTap={{ scale: 0.97 }}
+                  whileHover={{ scale: 1.04, boxShadow: '0 16px 40px rgba(201,168,76,0.45)' }}
+                  whileTap={{ scale: 0.96 }}
                   onClick={() => document.getElementById('products-section')?.scrollIntoView({ behavior: 'smooth' })}
-                  style={{ background: '#C9A84C', color: '#0f172a', border: 'none', borderRadius: 14, padding: '14px 32px', fontSize: 13, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer', boxShadow: '0 8px 24px rgba(201,168,76,0.25)', transition: 'all 0.2s' }}
+                  style={{
+                    background: 'linear-gradient(135deg, #C9A84C, #e8b84b)',
+                    color: '#0f172a', border: 'none', borderRadius: 14,
+                    padding: 'clamp(11px, 2vw, 14px) clamp(20px, 3vw, 32px)',
+                    fontSize: 'clamp(11px, 1.5vw, 13px)', fontWeight: 800,
+                    letterSpacing: '0.08em', textTransform: 'uppercase',
+                    cursor: 'pointer',
+                    boxShadow: '0 8px 24px rgba(201,168,76,0.3)',
+                    transition: 'all 0.2s',
+                  }}
                 >
                   Explore Now →
                 </motion.button>
+
+                {/* Dynamic category button — changes every load */}
                 <motion.button
                   whileHover={{ scale: 1.04, borderColor: '#C9A84C', color: '#C9A84C' }}
-                  whileTap={{ scale: 0.97 }}
-                  onClick={() => setCategory('smartphones')}
-                  style={{ background: 'transparent', color: '#94a3b8', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 14, padding: '14px 24px', fontSize: 13, fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}
+                  whileTap={{ scale: 0.96 }}
+                  onClick={() => {
+                    setCategory(featuredCat.current.slug)
+                    setTimeout(() => document.getElementById('products-section')?.scrollIntoView({ behavior: 'smooth' }), 100)
+                  }}
+                  style={{
+                    background: 'transparent',
+                    color: '#94a3b8',
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    borderRadius: 14,
+                    padding: 'clamp(11px, 2vw, 14px) clamp(16px, 2.5vw, 24px)',
+                    fontSize: 'clamp(11px, 1.5vw, 13px)', fontWeight: 600,
+                    cursor: 'pointer', transition: 'all 0.2s',
+                  }}
                 >
-                  Shop Electronics
+                  {featuredCat.current.label} →
                 </motion.button>
               </motion.div>
 
-              {/* Stats row */}
+              {/* ── Animated Stats ── */}
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.65, duration: 0.5 }}
                 style={{ display: 'flex', gap: 0 }}
               >
                 {[
-                  { value: '194+', label: 'Products' },
-                  { value: '50K+', label: 'Customers' },
-                  { value: '4.8★', label: 'Rating' },
-                ].map(({ value, label }, i) => (
-                  <div key={label} style={{ flex: 1, paddingRight: 24, borderRight: i < 2 ? '1px solid rgba(255,255,255,0.07)' : 'none', paddingLeft: i > 0 ? 24 : 0 }}>
-                    <div style={{ fontSize: 'clamp(20px, 3vw, 28px)', fontWeight: 900, color: '#C9A84C', lineHeight: 1 }}>{value}</div>
-                    <div style={{ fontSize: 11, color: '#475569', marginTop: 5, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{label}</div>
-                  </div>
+                  { value: count1, suffix: '+', label: 'Products', onView: start1 },
+                  { value: count2, suffix: 'K+', label: 'Customers', onView: start2 },
+                  { value: count3, suffix: '★', label: 'Rating', onView: start3 },
+                ].map(({ value, suffix, label, onView }, i) => (
+                  <motion.div
+                    key={label}
+                    onViewportEnter={onView}
+                    style={{
+                      flex: 1,
+                      paddingRight: i < 2 ? 'clamp(12px, 2vw, 24px)' : 0,
+                      paddingLeft: i > 0 ? 'clamp(12px, 2vw, 24px)' : 0,
+                      borderRight: i < 2 ? '1px solid rgba(255,255,255,0.07)' : 'none',
+                    }}
+                  >
+                    <div style={{ fontSize: 'clamp(18px, 3vw, 28px)', fontWeight: 900, color: '#C9A84C', lineHeight: 1 }}>
+                      {value}{suffix}
+                    </div>
+                    <div style={{ fontSize: 10, color: '#475569', marginTop: 5, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                      {label}
+                    </div>
+                  </motion.div>
                 ))}
               </motion.div>
             </div>
 
-            {/* ── Right: Product Showcase ── */}
+            {/* ── RIGHT: 3D Showcase — always visible, responsive size ── */}
             <motion.div
-              initial={{ opacity: 0, x: 40 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-              style={{ flex: '0 0 auto', width: 'clamp(240px, 35vw, 340px)', paddingRight: 64, position: 'relative' }}
-              className="hero-showcase-wrap"
+              style={{
+                flex: '0 0 auto',
+                width: 'clamp(220px, 38vw, 320px)',
+                margin: '0 auto',
+              }}
             >
               <HeroShowcase images={heroImages} names={heroNames} />
             </motion.div>
-          </div>
 
-          <style>{`
-            @media (max-width: 700px) {
-              .hero-showcase-wrap { width: clamp(200px, 70vw, 280px) !important; padding-right: 0 !important; margin: 0 auto; }
-              .hero-side-previews { display: none !important; }
-            }
-          `}</style>
+          </div>
         </div>
       )}
 
@@ -465,7 +583,6 @@ export default function Home({ addToCart, addToWishlist, searchQuery }) {
           </>
         )}
 
-        {/* Recently Viewed */}
         {!searchQuery && !category && (() => {
           const recent = getRecentlyViewed()
           if (!recent.length) return null
