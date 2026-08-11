@@ -126,7 +126,13 @@ export default function Login() {
           <div style={{ marginBottom: 24 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
               <label style={{ fontSize: 12, fontWeight: 600, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Password</label>
-              <button style={{ fontSize: 12, color: '#C9A84C', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>Forgot password?</button>
+              {/* ← FIXED: was a plain <button> with no action, now a proper Link */}
+              <Link
+                to="/forgot-password"
+                style={{ fontSize: 12, color: '#C9A84C', fontWeight: 600, textDecoration: 'none' }}
+              >
+                Forgot password?
+              </Link>
             </div>
             <div style={{ position: 'relative' }}>
               <input
