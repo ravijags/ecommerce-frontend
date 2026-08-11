@@ -6,6 +6,8 @@ import Header from './Header'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Register from './pages/Register'
+import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
 import Cart from './pages/Cart'
 import Orders from './pages/Orders'
 import Wishlist from './pages/Wishlist'
@@ -40,12 +42,12 @@ function PageWrapper({ children }) {
 function App() {
   const location = useLocation()
 
-  // Update page title on every route change
   useEffect(() => {
     const TITLES = {
       '/': 'PREMIA — Everything Premium. Delivered.',
       '/login': 'Sign In — PREMIA',
       '/register': 'Create Account — PREMIA',
+      '/forgot-password': 'Forgot Password — PREMIA',
       '/cart': 'My Cart — PREMIA',
       '/orders': 'My Orders — PREMIA',
       '/wishlist': 'My Wishlist — PREMIA',
@@ -57,21 +59,20 @@ function App() {
     }
     document.title = TITLES[location.pathname] || 'PREMIA — Everything Premium. Delivered.'
   }, [location.pathname])
-  const isAdmin = location.pathname.startsWith('/admin')
-  const isAuthPage = location.pathname === '/login' || location.pathname === '/register'
 
-  const [cartItems, setCartItems] = useState([])
-  const [wishlistItems, setWishlistItems] = useState(getWishlist) // read from localStorage immediately
-  const [rawSearch, setRawSearch] = useState('')
-  const [searchQuery, setSearchQuery] = useState('')
+  const isAdmin    = location.pathname.startsWith('/admin')
+  const isAuthPage = ['/login', '/register', '/forgot-password'].includes(location.pathname) || location.pathname.startsWith('/reset-password')
 
-  // Debounce search 300ms
+  const [cartItems, setCartItems]       = useState([])
+  const [wishlistItems, setWishlistItems] = useState(getWishlist)
+  const [rawSearch, setRawSearch]       = useState('')
+  const [searchQuery, setSearchQuery]   = useState('')
+
   useEffect(() => {
     const timer = setTimeout(() => setSearchQuery(rawSearch), 300)
     return () => clearTimeout(timer)
   }, [rawSearch])
 
-  // Load cart from backend
   useEffect(() => {
     const token = localStorage.getItem('token')
     if (!token) return
@@ -95,15 +96,13 @@ function App() {
       .catch(() => {})
   }, [])
 
-  // Load wishlist from backend — ALWAYS use backend as truth when logged in
   useEffect(() => {
     const token = localStorage.getItem('token')
     if (!token) return
     fetch(`${API}/api/wishlist`, { headers: { authorization: token } })
       .then(r => r.ok ? r.json() : null)
       .then(data => {
-        if (!data?.wishlist) return // network error — keep localStorage
-        // Backend responded — use it as truth (even if empty, respects deletions)
+        if (!data?.wishlist) return
         const serverItems = (data.wishlist.items || []).filter(i => i.product).map(i => ({
           _id: i.product._id,
           name: i.product.name,
@@ -118,10 +117,9 @@ function App() {
         setWishlistItems(serverItems)
         import('./wishlistStore').then(m => m.saveWishlist(serverItems))
       })
-      .catch(() => {}) // network error — keep localStorage as fallback
+      .catch(() => {})
   }, [])
 
-  // ADD TO CART
   const addToCart = useCallback(async (product) => {
     const token = localStorage.getItem('token')
     setCartItems(prev => {
@@ -140,16 +138,11 @@ function App() {
     }
   }, [])
 
-  // ADD TO WISHLIST — uses external store, no React state race conditions
   const addToWishlist = useCallback((product) => {
     const { added, items } = addToWishlistStore(product)
-    if (!added) {
-      toast('Already in wishlist ❤️', { duration: 1500 })
-      return
-    }
+    if (!added) { toast('Already in wishlist ❤️', { duration: 1500 }); return }
     setWishlistItems(items)
     toast.success('Added to wishlist!')
-    // Background backend sync
     const token = localStorage.getItem('token')
     if (token) {
       fetch(`${API}/api/wishlist`, {
@@ -160,7 +153,6 @@ function App() {
     }
   }, [])
 
-  // REMOVE FROM WISHLIST
   const removeFromWishlist = useCallback((productId, silent = false) => {
     const updated = removeFromWishlistStore(productId)
     setWishlistItems(updated)
@@ -192,16 +184,10 @@ function App() {
             boxShadow: '0 8px 32px rgba(0,0,0,0.24)',
             maxWidth: 320,
           },
-          success: {
-            iconTheme: { primary: '#C9A84C', secondary: '#0f172a' },
-          },
+          success: { iconTheme: { primary: '#C9A84C', secondary: '#0f172a' } },
           error: {
             iconTheme: { primary: '#ef4444', secondary: '#fff' },
-            style: {
-              background: '#fff',
-              color: '#0f172a',
-              border: '1px solid #fee2e2',
-            },
+            style: { background: '#fff', color: '#0f172a', border: '1px solid #fee2e2' },
           },
         }}
       />
@@ -210,20 +196,22 @@ function App() {
       )}
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
-          <Route path="/" element={<PageWrapper><Home addToCart={addToCart} addToWishlist={addToWishlist} searchQuery={searchQuery} /></PageWrapper>} />
-          <Route path="/login" element={<PageWrapper><Login /></PageWrapper>} />
-          <Route path="/register" element={<PageWrapper><Register /></PageWrapper>} />
-          <Route path="/cart" element={<PageWrapper><Cart cartItems={cartItems} setCartItems={setCartItems} /></PageWrapper>} />
-          <Route path="/orders" element={<PageWrapper><Orders /></PageWrapper>} />
-          <Route path="/search" element={<PageWrapper><Search addToCart={addToCart} addToWishlist={addToWishlist} /></PageWrapper>} />
-          <Route path="/wishlist" element={<PageWrapper><Wishlist wishlistItems={wishlistItems} removeFromWishlist={removeFromWishlist} addToCart={addToCart} /></PageWrapper>} />
-          <Route path="/account" element={<PageWrapper><Account /></PageWrapper>} />
-          <Route path="/products/:id" element={<PageWrapper><ProductDetail addToCart={addToCart} addToWishlist={addToWishlist} /></PageWrapper>} />
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/admin/orders" element={<AdminOrders />} />
-          <Route path="/admin/products" element={<AdminProducts />} />
-          <Route path="/admin/users" element={<AdminUsers />} />
-          <Route path="*" element={<PageWrapper><NotFound /></PageWrapper>} />
+          <Route path="/"                        element={<PageWrapper><Home addToCart={addToCart} addToWishlist={addToWishlist} searchQuery={searchQuery} /></PageWrapper>} />
+          <Route path="/login"                   element={<PageWrapper><Login /></PageWrapper>} />
+          <Route path="/register"                element={<PageWrapper><Register /></PageWrapper>} />
+          <Route path="/forgot-password"         element={<PageWrapper><ForgotPassword /></PageWrapper>} />
+          <Route path="/reset-password/:token"   element={<PageWrapper><ResetPassword /></PageWrapper>} />
+          <Route path="/cart"                    element={<PageWrapper><Cart cartItems={cartItems} setCartItems={setCartItems} /></PageWrapper>} />
+          <Route path="/orders"                  element={<PageWrapper><Orders /></PageWrapper>} />
+          <Route path="/search"                  element={<PageWrapper><Search addToCart={addToCart} addToWishlist={addToWishlist} /></PageWrapper>} />
+          <Route path="/wishlist"                element={<PageWrapper><Wishlist wishlistItems={wishlistItems} removeFromWishlist={removeFromWishlist} addToCart={addToCart} /></PageWrapper>} />
+          <Route path="/account"                 element={<PageWrapper><Account /></PageWrapper>} />
+          <Route path="/products/:id"            element={<PageWrapper><ProductDetail addToCart={addToCart} addToWishlist={addToWishlist} /></PageWrapper>} />
+          <Route path="/admin"                   element={<AdminDashboard />} />
+          <Route path="/admin/orders"            element={<AdminOrders />} />
+          <Route path="/admin/products"          element={<AdminProducts />} />
+          <Route path="/admin/users"             element={<AdminUsers />} />
+          <Route path="*"                        element={<PageWrapper><NotFound /></PageWrapper>} />
         </Routes>
       </AnimatePresence>
       {!isAdmin && !isAuthPage && <Footer />}
