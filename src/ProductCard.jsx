@@ -41,8 +41,19 @@ function ProductCard({ name, price, image, onAddToCart, onAddToWishlist, id, rat
       border: '1px solid #f1f5f9', position: 'relative',
       transition: 'box-shadow 0.2s, transform 0.2s',
     }}
-      onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 8px 30px rgba(0,0,0,0.09)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
-      onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'translateY(0)' }}
+      onMouseMove={e => {
+        const rect = e.currentTarget.getBoundingClientRect()
+        const x = ((e.clientX - rect.left) / rect.width - 0.5) * 12
+        const y = ((e.clientY - rect.top) / rect.height - 0.5) * -12
+        e.currentTarget.style.transform = `perspective(600px) rotateX(${y}deg) rotateY(${x}deg) translateY(-4px)`
+        e.currentTarget.style.boxShadow = `${-x * 2}px ${y * 2}px 30px rgba(0,0,0,0.12)`
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.transform = 'perspective(600px) rotateX(0deg) rotateY(0deg) translateY(0)'
+        e.currentTarget.style.boxShadow = 'none'
+        e.currentTarget.style.transition = 'transform 0.4s ease, box-shadow 0.4s ease'
+      }}
+      onMouseEnter={e => { e.currentTarget.style.transition = 'none' }}
     >
       {/* Discount badge */}
           {discount > 0 && (

@@ -1,9 +1,37 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
 import ProductCard from '../ProductCard'
 import { getRecentlyViewed } from '../recentlyViewed'
 import SkeletonCard from '../components/SkeletonCard'
+
+// Animated counter hook
+function useCounter(target, duration = 2000, delay = 0) {
+  const [count, setCount] = useState(0)
+  const [started, setStarted] = useState(false)
+  useEffect(() => {
+    if (!started) return
+    const timer = setTimeout(() => {
+      let start = 0
+      const step = target / (duration / 16)
+      const interval = setInterval(() => {
+        start += step
+        if (start >= target) { setCount(target); clearInterval(interval) }
+        else setCount(Math.floor(start))
+      }, 16)
+      return () => clearInterval(interval)
+    }, delay)
+    return () => clearTimeout(timer)
+  }, [started, target, duration, delay])
+  return [count, () => setStarted(true)]
+}
+
+// Floating product images for hero
+const HERO_PRODUCTS = [
+  { img: 'https://cdn.dummyjson.com/product-images/smartphones/iphone-12/thumbnail.webp', x: '75%', y: '10%', size: 110, delay: 0, rotate: 8 },
+  { img: 'https://cdn.dummyjson.com/product-images/mens-watches/rolex-submariner/thumbnail.webp', x: '82%', y: '55%', size: 90, delay: 0.4, rotate: -6 },
+  { img: 'https://cdn.dummyjson.com/product-images/womens-bags/chanel-19-maxi-flap-bag/thumbnail.webp', x: '68%', y: '70%', size: 80, delay: 0.8, rotate: 5 },
+]
 
 const CATEGORIES = [
   { slug: 'smartphones', name: 'Smartphones' },
@@ -106,39 +134,131 @@ export default function Home({ addToCart, addToWishlist, searchQuery }) {
 
       {/* ── HERO ── only when browsing all */}
       {!searchQuery && !category && (
-        <div style={{ background: '#0f172a' }}>
-          <div style={{ maxWidth: 1280, margin: '0 auto', padding: '56px 20px 64px' }}>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
-              <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.4 }}
-                style={{ color: '#C9A84C', fontSize: 11, fontWeight: 700, letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 14 }}>
-                Curated for the Discerning
-              </motion.p>
-              <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.5 }}
-                style={{ color: '#fff', fontWeight: 900, lineHeight: 1.05, letterSpacing: '-1.5px', marginBottom: 18, fontSize: 'clamp(28px, 5vw, 60px)' }}>
-                The New Standard<br />
-                <span style={{ color: '#C9A84C' }}>of Shopping.</span>
+        <div style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #0f172a 100%)', position: 'relative', overflow: 'hidden', minHeight: 420 }}>
+
+          {/* Animated background grid */}
+          <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(201,168,76,0.06) 1px, transparent 0)', backgroundSize: '40px 40px', pointerEvents: 'none' }} />
+
+          {/* Glowing orb */}
+          <motion.div
+            animate={{ scale: [1, 1.2, 1], opacity: [0.15, 0.25, 0.15] }}
+            transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+            style={{ position: 'absolute', top: '20%', right: '30%', width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle, rgba(201,168,76,0.3) 0%, transparent 70%)', pointerEvents: 'none' }}
+          />
+
+          {/* Floating product images — desktop only */}
+          {HERO_PRODUCTS.map((p, i) => (
+            <motion.div key={i}
+              initial={{ opacity: 0, scale: 0.8, rotate: p.rotate }}
+              animate={{ opacity: 1, scale: 1, rotate: p.rotate, y: [0, -12, 0] }}
+              transition={{ opacity: { delay: p.delay + 0.5, duration: 0.6 }, scale: { delay: p.delay + 0.5, duration: 0.6 }, y: { delay: p.delay + 1, duration: 3 + i, repeat: Infinity, ease: 'easeInOut' } }}
+              style={{ position: 'absolute', top: p.y, left: p.x, width: p.size, height: p.size, borderRadius: 20, background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.12)', padding: 10, display: 'none', boxShadow: '0 20px 40px rgba(0,0,0,0.3)' }}
+              className="hero-float"
+            >
+              <img src={p.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 12 }}
+                onError={e => { e.target.style.display = 'none' }} />
+            </motion.div>
+          ))}
+
+          {/* Text content */}
+          <div style={{ maxWidth: 1280, margin: '0 auto', padding: '64px 24px 72px', position: 'relative', zIndex: 2 }}>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
+
+              {/* Tag */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.1, duration: 0.5 }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
+                <motion.span
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                  style={{ width: 8, height: 8, borderRadius: '50%', background: '#C9A84C', display: 'inline-block' }} />
+                <span style={{ color: '#C9A84C', fontSize: 11, fontWeight: 700, letterSpacing: '0.3em', textTransform: 'uppercase' }}>
+                  Curated for the Discerning
+                </span>
+              </motion.div>
+
+              {/* Headline */}
+              <motion.h1
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                style={{ fontWeight: 900, lineHeight: 1.05, letterSpacing: '-2px', marginBottom: 20, fontSize: 'clamp(32px, 6vw, 72px)', maxWidth: 640 }}>
+                <span style={{ color: '#fff' }}>The New Standard<br />of </span>
+                <motion.span
+                  animate={{ backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
+                  style={{
+                    background: 'linear-gradient(90deg, #C9A84C, #f5d78e, #C9A84C, #e8a020)',
+                    backgroundSize: '200% auto',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                  }}>
+                  Shopping.
+                </motion.span>
               </motion.h1>
-              <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35, duration: 0.4 }}
-                style={{ color: '#475569', fontSize: 15, lineHeight: 1.7, maxWidth: 380, marginBottom: 28 }}>
-                194+ premium products from top brands worldwide. Every item handpicked. Every price unbeatable.
+
+              {/* Subtitle */}
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.5 }}
+                style={{ color: '#64748b', fontSize: 16, lineHeight: 1.7, maxWidth: 400, marginBottom: 32 }}>
+                194+ premium products from the world's finest brands. Every item handpicked. Every price unbeatable.
               </motion.p>
-              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.4 }}
-                style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                <button
+
+              {/* Buttons */}
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.55, duration: 0.5 }}
+                style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 48 }}>
+                <motion.button
+                  whileHover={{ scale: 1.04 }}
+                  whileTap={{ scale: 0.97 }}
                   onClick={() => document.getElementById('products-section')?.scrollIntoView({ behavior: 'smooth' })}
-                  style={{ background: '#C9A84C', color: '#0f172a', border: 'none', borderRadius: 12, padding: '12px 28px', fontSize: 12, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer' }}
-                >
-                  Explore Now
-                </button>
-                <button
+                  style={{ background: '#C9A84C', color: '#0f172a', border: 'none', borderRadius: 14, padding: '14px 32px', fontSize: 13, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer', boxShadow: '0 8px 24px rgba(201,168,76,0.3)' }}>
+                  Explore Now →
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.04, borderColor: '#C9A84C', color: '#C9A84C' }}
+                  whileTap={{ scale: 0.97 }}
                   onClick={() => setCategory('smartphones')}
-                  style={{ background: 'transparent', color: '#64748b', border: '1px solid #1e293b', borderRadius: 12, padding: '12px 24px', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
-                >
+                  style={{ background: 'transparent', color: '#64748b', border: '1px solid #334155', borderRadius: 14, padding: '14px 24px', fontSize: 13, fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}>
                   Shop Electronics
-                </button>
+                </motion.button>
+              </motion.div>
+
+              {/* Animated stats */}
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7, duration: 0.5 }}
+                style={{ display: 'flex', gap: 32, flexWrap: 'wrap' }}>
+                {[
+                  { value: 194, suffix: '+', label: 'Products' },
+                  { value: 50, suffix: 'K+', label: 'Customers' },
+                  { value: 4.8, suffix: '★', label: 'Rating', decimal: true },
+                ].map(({ value, suffix, label, decimal }) => (
+                  <motion.div key={label}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ once: true }}
+                    onViewportEnter={() => {}}>
+                    <div style={{ fontSize: 'clamp(22px, 4vw, 32px)', fontWeight: 900, color: '#C9A84C', lineHeight: 1 }}>
+                      {decimal ? value : value}{suffix}
+                    </div>
+                    <div style={{ fontSize: 12, color: '#475569', marginTop: 4 }}>{label}</div>
+                  </motion.div>
+                ))}
               </motion.div>
             </motion.div>
           </div>
+
+          <style>{`
+            @media (min-width: 900px) { .hero-float { display: block !important; } }
+          `}</style>
         </div>
       )}
 
@@ -188,10 +308,10 @@ export default function Home({ addToCart, addToWishlist, searchQuery }) {
               {paginated.map((product, i) => (
                 <motion.div
                   key={product._id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.18, delay: Math.min(i * 0.02, 0.3) }}
-                  style={{ display: 'flex' }}
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-40px' }}
+                  transition={{ duration: 0.35, delay: Math.min((i % 6) * 0.06, 0.3), ease: [0.22, 1, 0.36, 1] }}
                 >
                   <div style={{ width: '100%' }}>
                     <ProductCard
