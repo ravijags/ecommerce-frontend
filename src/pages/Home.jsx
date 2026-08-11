@@ -134,7 +134,6 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
       <div className="hero-split" style={{
         maxWidth: 1300, margin: '0 auto',
         display: 'flex', alignItems: 'center',
-        minHeight: 'clamp(480px, 82vh, 740px)',
         padding: '0 clamp(20px, 5vw, 64px)',
         gap: 'clamp(24px, 4vw, 56px)',
         position: 'relative', zIndex: 2,
@@ -282,11 +281,12 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
           initial={{ opacity: 0, x: 40 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.2, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          className="hero-image-col"
           style={{
-            flex: '1 1 280px', minWidth: 240,
+            flex: '1 1 260px', minWidth: 0,  /* minWidth:0 prevents overflow */
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             position: 'relative',
-            padding: 'clamp(28px,4vw,56px) 0',
+            padding: 'clamp(20px,4vw,56px) 0',
           }}
         >
           {/* Glow halo */}
@@ -423,18 +423,30 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
       <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 60,
         background: 'linear-gradient(to top, #f8fafc, transparent)', pointerEvents: 'none', zIndex: 3 }} />
 
-      {/* FIX 1: Mobile stacking — image BELOW text */}
       <style>{`
-        .hero-split { flex-direction: row; }
-        @media (max-width: 720px) {
+        .hero-split { flex-direction: row; min-height: clamp(480px, 82vh, 740px); }
+        .hero-image-col { width: auto; }
+
+        @media (max-width: 700px) {
+          /* Stack: text on top, image below */
           .hero-split {
             flex-direction: column !important;
             min-height: unset !important;
-            padding-top: 32px !important;
-            padding-bottom: 8px !important;
+            padding-top: 36px !important;
+            padding-bottom: 0 !important;
+            gap: 0 !important;
+          }
+          /* Text col: full width, less bottom padding */
+          .hero-split > div:first-child {
+            padding-bottom: 16px !important;
+          }
+          /* Image col: full width, fixed sensible height */
+          .hero-image-col {
+            width: 100% !important;
+            max-height: 260px !important;
+            padding: 0 0 8px !important;
           }
         }
-        /* Hide scrollbar on webkit (pills row) */
         div::-webkit-scrollbar { display: none; }
       `}</style>
     </div>
