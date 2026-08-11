@@ -26,11 +26,11 @@ function useCounter(target, duration = 2000, delay = 0) {
   return [count, () => setStarted(true)]
 }
 
-// Floating product images for hero
-const HERO_PRODUCTS = [
-  { img: 'https://cdn.dummyjson.com/product-images/smartphones/iphone-12/thumbnail.webp', x: '75%', y: '10%', size: 110, delay: 0, rotate: 8 },
-  { img: 'https://cdn.dummyjson.com/product-images/mens-watches/rolex-submariner/thumbnail.webp', x: '82%', y: '55%', size: 90, delay: 0.4, rotate: -6 },
-  { img: 'https://cdn.dummyjson.com/product-images/womens-bags/chanel-19-maxi-flap-bag/thumbnail.webp', x: '68%', y: '70%', size: 80, delay: 0.8, rotate: 5 },
+// Fixed positions for hero floating cards
+const FLOAT_POSITIONS = [
+  { x: '75%', y: '8%',  size: 110, delay: 0,   rotate: 8  },
+  { x: '82%', y: '52%', size: 90,  delay: 0.4, rotate: -6 },
+  { x: '67%', y: '68%', size: 80,  delay: 0.8, rotate: 5  },
 ]
 
 const CATEGORIES = [
@@ -67,21 +67,37 @@ export default function Home({ addToCart, addToWishlist, searchQuery }) {
   const [category, setCategory] = useState('')
   const [sort, setSort] = useState('default')
   const [page, setPage] = useState(1)
+  const [heroImages, setHeroImages] = useState([])   // ← images for floating cards
   const [searchParams] = useSearchParams()
   const shuffleRef = useRef(null)
 
-  // Sync category from URL (when header nav links are clicked)
+  // Sync category from URL
   useEffect(() => {
     const cat = searchParams.get('category') || ''
     setCategory(cat)
     if (cat) setTimeout(() => document.getElementById('products-section')?.scrollIntoView({ behavior: 'smooth' }), 100)
   }, [searchParams])
 
-  // Fetch all products once
+  // Fetch all products once — then pick 3 with good images for hero
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL}/api/products?limit=500`)
       .then(r => r.json())
-      .then(d => { setProducts(d.products || []); setLoading(false) })
+      .then(d => {
+        const all = d.products || []
+        setProducts(all)
+        setLoading(false)
+
+        // Pick 3 products that have real image URLs for the hero floating cards
+        // Prefer premium-looking categories
+        const preferred = ['mens-watches', 'smartphones', 'laptops', 'fragrances', 'sunglasses', 'tablets']
+        const pool = all.filter(p => {
+          const img = p.image || p.thumbnail || (p.images && p.images[0])
+          return img && img.startsWith('http') && preferred.includes(p.category)
+        })
+        // Shuffle pool, take first 3
+        const picked = [...pool].sort(() => Math.random() - 0.5).slice(0, 3)
+        setHeroImages(picked.map(p => p.image || p.thumbnail || p.images?.[0]))
+      })
       .catch(() => setLoading(false))
   }, [])
 
@@ -146,19 +162,44 @@ export default function Home({ addToCart, addToWishlist, searchQuery }) {
             style={{ position: 'absolute', top: '20%', right: '30%', width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle, rgba(201,168,76,0.3) 0%, transparent 70%)', pointerEvents: 'none' }}
           />
 
-          {/* Floating product images — desktop only */}
-          {HERO_PRODUCTS.map((p, i) => (
-            <motion.div key={i}
-              initial={{ opacity: 0, scale: 0.8, rotate: p.rotate }}
-              animate={{ opacity: 1, scale: 1, rotate: p.rotate, y: [0, -12, 0] }}
-              transition={{ opacity: { delay: p.delay + 0.5, duration: 0.6 }, scale: { delay: p.delay + 0.5, duration: 0.6 }, y: { delay: p.delay + 1, duration: 3 + i, repeat: Infinity, ease: 'easeInOut' } }}
-              style={{ position: 'absolute', top: p.y, left: p.x, width: p.size, height: p.size, borderRadius: 20, background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.12)', padding: 10, display: 'none', boxShadow: '0 20px 40px rgba(0,0,0,0.3)' }}
-              className="hero-float"
-            >
-              <img src={p.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 12 }}
-                onError={e => { e.target.style.display = 'none' }} />
-            </motion.div>
-          ))}
+          {/* ── Floating product images — desktop only, uses real backend images ── */}
+          {heroImages.length > 0 && FLOAT_POSITIONS.map((pos, i) => {
+            const imgSrc = heroImages[i]
+            if (!imgSrc) return null
+            return (
+              <motion.div key={i}
+                initial={{ opacity: 0, scale: 0.8, rotate: pos.rotate }}
+                animate={{ opacity: 1, scale: 1, rotate: pos.rotate, y: [0, -12, 0] }}
+                transition={{
+                  opacity: { delay: pos.delay + 0.5, duration: 0.6 },
+                  scale:   { delay: pos.delay + 0.5, duration: 0.6 },
+                  y:       { delay: pos.delay + 1, duration: 3 + i, repeat: Infinity, ease: 'easeInOut' }
+                }}
+                style={{
+                  position: 'absolute',
+                  top: pos.y,
+                  left: pos.x,
+                  width: pos.size,
+                  height: pos.size,
+                  borderRadius: 20,
+                  background: 'rgba(255,255,255,0.08)',
+                  backdropFilter: 'blur(12px)',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  padding: 10,
+                  display: 'none',           // hidden on mobile
+                  boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
+                }}
+                className="hero-float"
+              >
+                <img
+                  src={imgSrc}
+                  alt=""
+                  style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 12 }}
+                  onError={e => { e.target.parentElement.style.display = 'none' }}  // hide card if img still fails
+                />
+              </motion.div>
+            )
+          })}
 
           {/* Text content */}
           <div style={{ maxWidth: 1280, margin: '0 auto', padding: '64px 24px 72px', position: 'relative', zIndex: 2 }}>
@@ -231,28 +272,24 @@ export default function Home({ addToCart, addToWishlist, searchQuery }) {
                 </motion.button>
               </motion.div>
 
-              {/* Animated stats */}
+              {/* Stats */}
               <motion.div
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.7, duration: 0.5 }}
                 style={{ display: 'flex', gap: 32, flexWrap: 'wrap' }}>
                 {[
-                  { value: 194, suffix: '+', label: 'Products' },
-                  { value: 50, suffix: 'K+', label: 'Customers' },
-                  { value: 4.8, suffix: '★', label: 'Rating', decimal: true },
-                ].map(({ value, suffix, label, decimal }) => (
-                  <motion.div key={label}
-                    whileInView={{ opacity: 1 }}
-                    viewport={{ once: true }}
-                    onViewportEnter={() => {}}>
-                    <div style={{ fontSize: 'clamp(22px, 4vw, 32px)', fontWeight: 900, color: '#C9A84C', lineHeight: 1 }}>
-                      {decimal ? value : value}{suffix}
-                    </div>
+                  { value: '194+', label: 'Products' },
+                  { value: '50K+', label: 'Customers' },
+                  { value: '4.8★', label: 'Rating' },
+                ].map(({ value, label }) => (
+                  <div key={label}>
+                    <div style={{ fontSize: 'clamp(22px, 4vw, 32px)', fontWeight: 900, color: '#C9A84C', lineHeight: 1 }}>{value}</div>
                     <div style={{ fontSize: 12, color: '#475569', marginTop: 4 }}>{label}</div>
-                  </motion.div>
+                  </div>
                 ))}
               </motion.div>
+
             </motion.div>
           </div>
 
@@ -297,13 +334,12 @@ export default function Home({ addToCart, addToWishlist, searchQuery }) {
             <p style={{ fontSize: 40, marginBottom: 16 }}>🔍</p>
             <p style={{ color: '#0f172a', fontSize: 16, fontWeight: 700, marginBottom: 8 }}>No products found</p>
             <p style={{ color: '#94a3b8', fontSize: 13, marginBottom: 24 }}>Try a different search or category</p>
-            <button onClick={() => { setCategory(''); }} style={{ background: '#0f172a', color: '#fff', border: 'none', borderRadius: 12, padding: '11px 24px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+            <button onClick={() => { setCategory('') }} style={{ background: '#0f172a', color: '#fff', border: 'none', borderRadius: 12, padding: '11px 24px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
               View All Products
             </button>
           </div>
         ) : (
           <>
-            {/* GRID — responsive via CSS class */}
             <div className="product-grid">
               {paginated.map((product, i) => (
                 <motion.div
@@ -331,7 +367,6 @@ export default function Home({ addToCart, addToWishlist, searchQuery }) {
               ))}
             </div>
 
-            {/* Load more */}
             {hasMore && (
               <div style={{ textAlign: 'center', marginTop: 36 }}>
                 <button
