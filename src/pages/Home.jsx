@@ -6,20 +6,20 @@ import { getRecentlyViewed } from '../recentlyViewed'
 import SkeletonCard from '../components/SkeletonCard'
 
 const CATEGORIES = [
-  { slug: 'smartphones',       name: 'Smartphones' },
-  { slug: 'laptops',           name: 'Laptops' },
-  { slug: 'mobile-accessories',name: 'Audio' },
-  { slug: 'mens-shirts',       name: 'Fashion' },
-  { slug: 'mens-shoes',        name: 'Footwear' },
-  { slug: 'beauty',            name: 'Beauty' },
-  { slug: 'skin-care',         name: 'Skin Care' },
-  { slug: 'fragrances',        name: 'Fragrances' },
-  { slug: 'mens-watches',      name: 'Watches' },
-  { slug: 'furniture',         name: 'Furniture' },
-  { slug: 'groceries',         name: 'Groceries' },
-  { slug: 'sports-accessories',name: 'Sports' },
-  { slug: 'sunglasses',        name: 'Sunglasses' },
-  { slug: 'tablets',           name: 'Tablets' },
+  { slug: 'smartphones',        name: 'Smartphones' },
+  { slug: 'laptops',            name: 'Laptops' },
+  { slug: 'mobile-accessories', name: 'Audio' },
+  { slug: 'mens-shirts',        name: 'Fashion' },
+  { slug: 'mens-shoes',         name: 'Footwear' },
+  { slug: 'beauty',             name: 'Beauty' },
+  { slug: 'skin-care',          name: 'Skin Care' },
+  { slug: 'fragrances',         name: 'Fragrances' },
+  { slug: 'mens-watches',       name: 'Watches' },
+  { slug: 'furniture',          name: 'Furniture' },
+  { slug: 'groceries',          name: 'Groceries' },
+  { slug: 'sports-accessories', name: 'Sports' },
+  { slug: 'sunglasses',         name: 'Sunglasses' },
+  { slug: 'tablets',            name: 'Tablets' },
   { slug: 'kitchen-accessories',name: 'Kitchen' },
 ]
 
@@ -55,13 +55,12 @@ const SORT_OPTIONS = [
 const PER_PAGE = 20
 
 function useCounter(target, duration = 1400, decimal = false) {
-  const [val, setVal]       = useState(0)
+  const [val, setVal]         = useState(0)
   const [started, setStarted] = useState(false)
   useEffect(() => {
     if (!started) return
     let cur = 0
-    const steps = 50
-    const inc = target / steps
+    const steps = 50, inc = target / steps
     const iv = setInterval(() => {
       cur += inc
       if (cur >= target) { setVal(target); clearInterval(iv) }
@@ -83,8 +82,7 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
 
   const startCounters = () => {
     if (started.current) return
-    started.current = true
-    s1(); s2(); s3()
+    started.current = true; s1(); s2(); s3()
   }
 
   const go = (idx) => {
@@ -100,14 +98,14 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
   }, [items.length])
 
   if (!items.length) return null
-  const cur  = items[active]
-  const glow = cur.glow
+  const cur     = items[active]
+  const glow    = cur.glow
   const catName = CATEGORIES.find(c => c.slug === cur.category)?.name || 'Collection'
 
   return (
     <div style={{ position: 'relative', overflow: 'hidden', background: '#05080f' }}>
 
-      {/* Full-bleed animated glow — shifts color per product */}
+      {/* Full-bleed glow — right side biased to match image position */}
       <AnimatePresence mode="sync">
         <motion.div
           key={`bg-${active}`}
@@ -126,44 +124,38 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
       </AnimatePresence>
 
       {/* Dot grid */}
-      <div style={{
-        position: 'absolute', inset: 0, pointerEvents: 'none',
+      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none',
         backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.025) 1px, transparent 0)',
-        backgroundSize: '36px 36px',
-      }} />
+        backgroundSize: '36px 36px' }} />
 
-      {/* ── MAGAZINE SPLIT — left text, right image ── */}
-      <div style={{
+      {/* ── MAGAZINE SPLIT ──
+          FIX 1: flex-direction row-reverse on mobile so text shows first, image second
+          We use a CSS class to flip on mobile */}
+      <div className="hero-split" style={{
         maxWidth: 1300, margin: '0 auto',
         display: 'flex', alignItems: 'center',
-        minHeight: 'clamp(520px, 85vh, 760px)',
+        minHeight: 'clamp(480px, 82vh, 740px)',
         padding: '0 clamp(20px, 5vw, 64px)',
-        gap: 'clamp(24px, 4vw, 64px)',
+        gap: 'clamp(24px, 4vw, 56px)',
         position: 'relative', zIndex: 2,
-        flexWrap: 'wrap',                   // stacks on mobile
       }}>
 
-        {/* ══ LEFT: All text content ══ */}
-        <div style={{ flex: '1 1 340px', minWidth: 280, padding: 'clamp(40px,6vw,80px) 0' }}>
+        {/* ══ LEFT: Text ══ */}
+        <div style={{ flex: '1 1 320px', minWidth: 260, padding: 'clamp(36px,5vw,72px) 0' }}>
 
-          {/* Live badge */}
+          {/* Badge */}
           <motion.div
             initial={{ opacity: 0, x: -16 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.1, duration: 0.5 }}
             style={{
               display: 'inline-flex', alignItems: 'center', gap: 7,
-              background: 'rgba(201,168,76,0.08)',
-              border: '1px solid rgba(201,168,76,0.22)',
-              borderRadius: 100, padding: '5px 14px',
-              marginBottom: 'clamp(16px,3vw,24px)',
+              background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.25)',
+              borderRadius: 100, padding: '5px 14px', marginBottom: 'clamp(14px,2.5vw,22px)',
             }}
           >
-            <motion.span
-              animate={{ scale: [1,1.5,1], opacity: [1,0.4,1] }}
-              transition={{ duration: 1.8, repeat: Infinity }}
-              style={{ width: 5, height: 5, borderRadius: '50%', background: '#C9A84C', display: 'inline-block' }}
-            />
+            <motion.span animate={{ scale:[1,1.5,1], opacity:[1,0.4,1] }} transition={{ duration: 1.8, repeat: Infinity }}
+              style={{ width: 5, height: 5, borderRadius: '50%', background: '#C9A84C', display: 'inline-block' }} />
             <span style={{ color: '#C9A84C', fontSize: 10, fontWeight: 700, letterSpacing: '0.28em', textTransform: 'uppercase' }}>
               Curated for the Discerning
             </span>
@@ -175,10 +167,9 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15, duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
             style={{
-              margin: '0 0 clamp(16px,3vw,28px)',
-              fontSize: 'clamp(42px, 7vw, 96px)',
-              fontWeight: 900,
-              lineHeight: 0.95,
+              margin: '0 0 clamp(14px,2.5vw,24px)',
+              fontSize: 'clamp(40px, 6.5vw, 92px)',
+              fontWeight: 900, lineHeight: 0.95,
               letterSpacing: 'clamp(-2px,-0.03em,-4px)',
             }}
           >
@@ -194,23 +185,19 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
                   backgroundSize: '200% auto',
                   WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
                 }}
-              >
-                Shopping.
-              </motion.span>
+              >Shopping.</motion.span>
             </span>
           </motion.h1>
 
-          {/* Subtitle */}
+          {/* FIX 3: subtitle readable — brighter color */}
           <motion.p
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.5 }}
             style={{
-              color: '#475569',
-              fontSize: 'clamp(13px,1.6vw,15px)',
-              lineHeight: 1.75,
-              maxWidth: 380,
-              margin: '0 0 clamp(24px,4vw,40px)',
+              color: '#94a3b8',  /* was #475569 — too dark on dark bg */
+              fontSize: 'clamp(13px,1.6vw,15px)', lineHeight: 1.75,
+              maxWidth: 380, margin: '0 0 clamp(22px,3.5vw,36px)',
             }}
           >
             194+ premium products from the world's finest brands.
@@ -222,7 +209,7 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.42, duration: 0.45 }}
-            style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 'clamp(28px,4vw,48px)' }}
+            style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 'clamp(24px,4vw,44px)' }}
           >
             <motion.button
               whileHover={{ scale: 1.05, boxShadow: '0 20px 52px rgba(201,168,76,0.55)' }}
@@ -241,7 +228,6 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
               Explore Now →
             </motion.button>
 
-            {/* Smart button — reads current product's category */}
             <AnimatePresence mode="wait">
               <motion.button
                 key={cur.category}
@@ -253,10 +239,8 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
                 whileTap={{ scale: 0.95 }}
                 onClick={() => onCategoryClick(cur.category)}
                 style={{
-                  background: 'rgba(255,255,255,0.04)',
-                  color: '#94a3b8',
-                  border: '1px solid rgba(255,255,255,0.12)',
-                  borderRadius: 14,
+                  background: 'rgba(255,255,255,0.05)', color: '#cbd5e1',
+                  border: '1px solid rgba(255,255,255,0.15)', borderRadius: 14,
                   padding: 'clamp(12px,2vw,15px) clamp(20px,3vw,32px)',
                   fontSize: 'clamp(12px,1.4vw,14px)', fontWeight: 600,
                   cursor: 'pointer', transition: 'all 0.2s', backdropFilter: 'blur(8px)',
@@ -267,7 +251,7 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
             </AnimatePresence>
           </motion.div>
 
-          {/* Animated stats */}
+          {/* FIX 2: Stats — bright label text, not dark */}
           <motion.div
             onViewportEnter={startCounters}
             initial={{ opacity: 0 }}
@@ -276,15 +260,16 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
             style={{ display: 'flex', gap: 'clamp(20px,3vw,40px)' }}
           >
             {[
-              { val: c1, suffix: '+', label: 'Products' },
+              { val: c1, suffix: '+',  label: 'Products' },
               { val: c2, suffix: 'K+', label: 'Customers' },
-              { val: c3, suffix: '★', label: 'Rating' },
-            ].map(({ val, suffix, label }, i) => (
+              { val: c3, suffix: '★',  label: 'Rating' },
+            ].map(({ val, suffix, label }) => (
               <div key={label}>
                 <div style={{ fontSize: 'clamp(22px,3.5vw,36px)', fontWeight: 900, color: '#C9A84C', lineHeight: 1 }}>
                   {val}{suffix}
                 </div>
-                <div style={{ fontSize: 10, color: '#334155', marginTop: 5, textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 600 }}>
+                {/* FIX 2: label was #334155 (invisible on dark bg), now #64748b */}
+                <div style={{ fontSize: 10, color: '#64748b', marginTop: 5, textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 600 }}>
                   {label}
                 </div>
               </div>
@@ -292,20 +277,19 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
           </motion.div>
         </div>
 
-        {/* ══ RIGHT: Full-height product image ══ */}
+        {/* ══ RIGHT: Product image ══ */}
         <motion.div
           initial={{ opacity: 0, x: 40 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.2, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           style={{
-            flex: '1 1 300px',
-            minWidth: 260,
+            flex: '1 1 280px', minWidth: 240,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             position: 'relative',
-            padding: 'clamp(32px,5vw,60px) 0',
+            padding: 'clamp(28px,4vw,56px) 0',
           }}
         >
-          {/* Giant glow behind image */}
+          {/* Glow halo */}
           <AnimatePresence mode="sync">
             <motion.div
               key={`halo-${active}`}
@@ -314,12 +298,10 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
               exit={{ opacity: 0 }}
               transition={{ duration: 1.2 }}
               style={{
-                position: 'absolute',
-                width: '130%', height: '130%',
+                position: 'absolute', width: '130%', height: '130%',
                 borderRadius: '50%',
-                background: `radial-gradient(circle, ${glow}45 0%, ${glow}15 35%, transparent 65%)`,
-                filter: 'blur(32px)',
-                pointerEvents: 'none',
+                background: `radial-gradient(circle, ${glow}42 0%, ${glow}12 38%, transparent 65%)`,
+                filter: 'blur(28px)', pointerEvents: 'none',
               }}
             />
           </AnimatePresence>
@@ -333,63 +315,51 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
               exit={{ opacity: 0 }}
               transition={{ duration: 1 }}
               style={{
-                position: 'absolute',
-                bottom: '8%', left: '15%', right: '15%', height: 40,
-                background: `radial-gradient(ellipse, ${glow}80 0%, transparent 70%)`,
-                filter: 'blur(20px)',
-                borderRadius: '50%',
+                position: 'absolute', bottom: '6%', left: '20%', right: '20%', height: 36,
+                background: `radial-gradient(ellipse, ${glow}75 0%, transparent 70%)`,
+                filter: 'blur(18px)', borderRadius: '50%',
               }}
             />
           </AnimatePresence>
 
-          {/* Slow outer ring */}
+          {/* FIX 5: rings sized to stay within container — not larger than image */}
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ duration: 24, repeat: Infinity, ease: 'linear' }}
             style={{
               position: 'absolute',
-              width: 'clamp(280px,42vw,480px)',
-              height: 'clamp(280px,42vw,480px)',
+              width: 'min(92%, 400px)', height: 'min(92%, 400px)',
               borderRadius: '50%',
-              border: `1px solid ${glow}35`,
-              borderTopColor: `${glow}70`,
+              border: `1px solid ${glow}30`,
+              borderTopColor: `${glow}65`,
             }}
           />
-          {/* Dashed inner ring */}
           <motion.div
             animate={{ rotate: -360 }}
             transition={{ duration: 16, repeat: Infinity, ease: 'linear' }}
             style={{
               position: 'absolute',
-              width: 'clamp(220px,34vw,390px)',
-              height: 'clamp(220px,34vw,390px)',
+              width: 'min(74%, 320px)', height: 'min(74%, 320px)',
               borderRadius: '50%',
-              border: `1px dashed ${glow}22`,
+              border: `1px dashed ${glow}20`,
             }}
           />
 
-          {/* THE PRODUCT — big and proud */}
-          <div style={{
-            position: 'relative', zIndex: 2,
-            width: 'clamp(220px,38vw,440px)',
-            height: 'clamp(220px,38vw,440px)',
-          }}>
+          {/* Product image */}
+          <div style={{ position: 'relative', zIndex: 2, width: 'min(88%, 380px)', height: 'min(88%, 380px)' }}>
             <AnimatePresence mode="wait">
               <motion.img
                 key={`img-${active}`}
                 src={cur.img}
                 alt={cur.name}
-                initial={{ opacity: 0, scale: 0.75, y: 32, filter: 'blur(14px)' }}
-                animate={{ opacity: 1, scale: 1,    y: 0,  filter: 'blur(0px)',
-                  transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] }
-                }}
-                exit={{   opacity: 0, scale: 1.15,  y: -32, filter: 'blur(12px)',
-                  transition: { duration: 0.45, ease: 'easeIn' }
-                }}
+                initial={{ opacity: 0, scale: 0.75, y: 30, filter: 'blur(14px)' }}
+                animate={{ opacity: 1, scale: 1,    y: 0,  filter: 'blur(0px)' }}
+                exit={{   opacity: 0, scale: 1.14,  y: -30, filter: 'blur(12px)' }}
+                transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
                 style={{
                   width: '100%', height: '100%', objectFit: 'contain',
-                  filter: `drop-shadow(0 32px 64px ${glow}70)`,
-                  padding: '5%',
+                  filter: `drop-shadow(0 28px 56px ${glow}65)`,
+                  padding: '6%',
                 }}
                 onError={e => { e.target.style.opacity = 0 }}
               />
@@ -398,18 +368,14 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
         </motion.div>
       </div>
 
-      {/* ── Bottom strip: dots + category pills ── */}
+      {/* FIX 4: Bottom strip — wraps cleanly on mobile */}
       <div style={{
         position: 'relative', zIndex: 2,
         borderTop: '1px solid rgba(255,255,255,0.05)',
-        padding: 'clamp(16px,2.5vw,24px) clamp(20px,5vw,64px)',
-        display: 'flex', alignItems: 'center',
-        gap: 'clamp(16px,3vw,32px)',
-        flexWrap: 'wrap',
-        justifyContent: 'space-between',
+        padding: 'clamp(14px,2vw,22px) clamp(20px,5vw,64px)',
       }}>
-        {/* Dots */}
-        <div style={{ display: 'flex', gap: 7, alignItems: 'center', flexShrink: 0 }}>
+        {/* Row 1: dots (always visible) */}
+        <div style={{ display: 'flex', gap: 7, alignItems: 'center', marginBottom: 12 }}>
           {items.map((_, i) => (
             <motion.button
               key={i}
@@ -424,8 +390,13 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
           ))}
         </div>
 
-        {/* Category pills */}
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        {/* Row 2: pills — scroll horizontally on mobile instead of wrapping awkwardly */}
+        <div style={{
+          display: 'flex', gap: 8,
+          overflowX: 'auto', paddingBottom: 4,
+          scrollbarWidth: 'none',    /* Firefox */
+          msOverflowStyle: 'none',   /* IE */
+        }}>
           {QUICK_CATS.map(cat => (
             <motion.button
               key={cat.slug}
@@ -435,11 +406,11 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
               style={{
                 background: 'rgba(255,255,255,0.04)',
                 border: '1px solid rgba(255,255,255,0.09)',
-                color: '#64748b', borderRadius: 100,
-                padding: 'clamp(6px,1.2vw,9px) clamp(14px,2vw,22px)',
-                fontSize: 'clamp(10px,1.3vw,12px)', fontWeight: 600,
+                color: '#94a3b8', borderRadius: 100,
+                padding: 'clamp(7px,1.2vw,10px) clamp(16px,2vw,24px)',
+                fontSize: 'clamp(11px,1.3vw,13px)', fontWeight: 600,
                 cursor: 'pointer', transition: 'all 0.2s',
-                backdropFilter: 'blur(8px)', whiteSpace: 'nowrap',
+                backdropFilter: 'blur(8px)', whiteSpace: 'nowrap', flexShrink: 0,
               }}
             >
               {cat.label}
@@ -449,11 +420,23 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
       </div>
 
       {/* Fade into page */}
-      <div style={{
-        position: 'absolute', bottom: 0, left: 0, right: 0, height: 60,
-        background: 'linear-gradient(to top, #f8fafc, transparent)',
-        pointerEvents: 'none', zIndex: 3,
-      }} />
+      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 60,
+        background: 'linear-gradient(to top, #f8fafc, transparent)', pointerEvents: 'none', zIndex: 3 }} />
+
+      {/* FIX 1: Mobile stacking — image BELOW text */}
+      <style>{`
+        .hero-split { flex-direction: row; }
+        @media (max-width: 720px) {
+          .hero-split {
+            flex-direction: column !important;
+            min-height: unset !important;
+            padding-top: 32px !important;
+            padding-bottom: 8px !important;
+          }
+        }
+        /* Hide scrollbar on webkit (pills row) */
+        div::-webkit-scrollbar { display: none; }
+      `}</style>
     </div>
   )
 }
@@ -490,8 +473,7 @@ export default function Home({ addToCart, addToWishlist, searchQuery }) {
         const picked = [...pool].sort(() => Math.random() - 0.5).slice(0, 6)
         setHeroItems(picked.map(p => ({
           img: p.image || p.thumbnail || p.images?.[0],
-          name: p.name,
-          category: p.category,
+          name: p.name, category: p.category,
           glow: GLOW_MAP[p.category] || GLOW_MAP.default,
         })))
       })
@@ -502,7 +484,6 @@ export default function Home({ addToCart, addToWishlist, searchQuery }) {
     shuffleRef.current = [...products].sort(() => Math.random() - 0.5)
   }
   const base = shuffleRef.current || products
-
   useEffect(() => { setPage(1) }, [category, searchQuery, sort])
 
   const filtered = base.filter(p => {
@@ -554,7 +535,6 @@ export default function Home({ addToCart, addToWishlist, searchQuery }) {
         />
       )}
 
-      {/* ── PRODUCTS SECTION ── */}
       <div id="products-section" style={{ maxWidth: 1280, margin: '0 auto', padding: '20px 12px 32px' }}>
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, gap: 12 }}>
