@@ -50,6 +50,17 @@ const SORT_OPTIONS = [
 
 const PER_PAGE = 20
 
+// ── useIsMobile hook — JS-based, never fails ──────────────────────────────
+function useIsMobile() {
+  const [mobile, setMobile] = useState(() => window.innerWidth <= 720)
+  useEffect(() => {
+    const fn = () => setMobile(window.innerWidth <= 720)
+    window.addEventListener('resize', fn)
+    return () => window.removeEventListener('resize', fn)
+  }, [])
+  return mobile
+}
+
 function useCounter(target, duration = 1400, decimal = false) {
   const [val, setVal]         = useState(0)
   const [started, setStarted] = useState(false)
@@ -67,13 +78,63 @@ function useCounter(target, duration = 1400, decimal = false) {
   return [val, () => setStarted(true)]
 }
 
+// ── Product image component ───────────────────────────────────────────────
+function HeroImage({ active, cur, glow, size }) {
+  return (
+    <div style={{ position: 'relative', width: size, height: size, flexShrink: 0 }}>
+      <AnimatePresence mode="sync">
+        <motion.div key={`halo-${active}`}
+          initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
+          transition={{ duration: 1.2 }}
+          style={{ position: 'absolute', inset: '-25%', borderRadius: '50%',
+            background: `radial-gradient(circle, ${glow}40 0%, ${glow}10 40%, transparent 65%)`,
+            filter: 'blur(24px)', pointerEvents: 'none' }}
+        />
+      </AnimatePresence>
+      <AnimatePresence mode="sync">
+        <motion.div key={`sh-${active}`}
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+          transition={{ duration: 1 }}
+          style={{ position: 'absolute', bottom: '-4%', left: '15%', right: '15%', height: 24,
+            background: `radial-gradient(ellipse, ${glow}65 0%, transparent 70%)`,
+            filter: 'blur(12px)', borderRadius: '50%' }}
+        />
+      </AnimatePresence>
+      <motion.div animate={{ rotate: 360 }} transition={{ duration: 22, repeat: Infinity, ease: 'linear' }}
+        style={{ position: 'absolute', inset: -10, borderRadius: '50%',
+          border: `1px solid ${glow}25`, borderTopColor: `${glow}60` }} />
+      <motion.div animate={{ rotate: -360 }} transition={{ duration: 15, repeat: Infinity, ease: 'linear' }}
+        style={{ position: 'absolute', inset: -3, borderRadius: '50%', border: `1px dashed ${glow}18` }} />
+      <AnimatePresence mode="wait">
+        <motion.img key={`img-${active}`} src={cur.img} alt={cur.name}
+          initial={{ opacity: 0, scale: 0.78, y: 20, filter: 'blur(12px)' }}
+          animate={{ opacity: 1, scale: 1,    y: 0,  filter: 'blur(0px)' }}
+          exit={{   opacity: 0, scale: 1.12,  y: -20, filter: 'blur(10px)' }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '8%',
+            filter: `drop-shadow(0 24px 48px ${glow}60)`, position: 'relative', zIndex: 2 }}
+          onError={e => { e.target.style.opacity = 0 }}
+        />
+      </AnimatePresence>
+    </div>
+  )
+}
+
+// ── Main Hero ─────────────────────────────────────────────────────────────
 function LuxuryHero({ items, onCategoryClick, onExplore }) {
+  const isMobile            = useIsMobile()
   const [active, setActive] = useState(0)
   const timerRef            = useRef(null)
   const [c1, s1] = useCounter(194)
   const [c2, s2] = useCounter(50)
   const [c3, s3] = useCounter(4.8, 1400, true)
   const countersFired = useRef(false)
+
+  const fireCounters = () => {
+    if (countersFired.current) return
+    countersFired.current = true
+    s1(); s2(); s3()
+  }
 
   const go = (idx) => {
     setActive(idx)
@@ -87,119 +148,21 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
     return () => clearInterval(timerRef.current)
   }, [items.length])
 
+  // Fire counters after mount (they're always in view on load)
+  useEffect(() => { const t = setTimeout(fireCounters, 800); return () => clearTimeout(t) }, [])
+
   if (!items.length) return null
   const cur     = items[active]
   const glow    = cur.glow
   const catName = CATEGORIES.find(c => c.slug === cur.category)?.name || 'Collection'
 
-  return (
-    <div style={{ position: 'relative', overflow: 'hidden', background: '#05080f' }}>
-
-      {/* Color-shifting background */}
-      <AnimatePresence mode="sync">
-        <motion.div key={`bg-${active}`}
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-          transition={{ duration: 1.4 }}
-          style={{
-            position: 'absolute', inset: 0, pointerEvents: 'none',
-            background: `radial-gradient(ellipse 70% 60% at 65% 40%, ${glow}25 0%, transparent 65%)`,
-          }}
-        />
-      </AnimatePresence>
-
-      {/* Dot grid */}
-      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none',
-        backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.025) 1px, transparent 0)',
-        backgroundSize: '36px 36px' }} />
-
-      {/* ── DESKTOP: side by side | MOBILE: stacked ── */}
-      <div style={{ maxWidth: 1300, margin: '0 auto', position: 'relative', zIndex: 2 }}>
-
-        {/* Desktop layout */}
-        <div className="hero-desktop" style={{ display: 'none' }}>
-          {/* Left */}
-          <div style={{ flex: '0 0 50%', padding: '80px 48px 80px 64px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            <HeroText
-              glow={glow} catName={catName} cur={cur}
-              c1={c1} c2={c2} c3={c3}
-              onExplore={onExplore}
-              onCategoryClick={onCategoryClick}
-              onCountersVisible={() => { if (countersFired.current) return; countersFired.current = true; s1(); s2(); s3() }}
-            />
-          </div>
-          {/* Right */}
-          <div style={{ flex: '0 0 50%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '60px 48px' }}>
-            <HeroImage active={active} cur={cur} glow={glow} size={400} />
-          </div>
-        </div>
-
-        {/* Mobile layout */}
-        <div className="hero-mobile" style={{ display: 'none', flexDirection: 'column', padding: '36px 24px 0' }}>
-          {/* Text first */}
-          <HeroText
-            glow={glow} catName={catName} cur={cur}
-            c1={c1} c2={c2} c3={c3}
-            onExplore={onExplore}
-            onCategoryClick={onCategoryClick}
-            onCountersVisible={() => { if (countersFired.current) return; countersFired.current = true; s1(); s2(); s3() }}
-            mobile
-          />
-          {/* Image below, contained */}
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 24 }}>
-            <HeroImage active={active} cur={cur} glow={glow} size={220} />
-          </div>
-        </div>
-      </div>
-
-      {/* Dots + Pills strip */}
-      <div style={{ position: 'relative', zIndex: 2, borderTop: '1px solid rgba(255,255,255,0.05)', padding: '14px 24px 20px' }}>
-        <div style={{ display: 'flex', gap: 7, marginBottom: 12 }}>
-          {items.map((_, i) => (
-            <motion.button key={i} onClick={() => go(i)}
-              animate={{ width: i === active ? 26 : 7, background: i === active ? '#C9A84C' : 'rgba(255,255,255,0.2)' }}
-              transition={{ duration: 0.3 }}
-              style={{ height: 7, borderRadius: 4, border: 'none', cursor: 'pointer', padding: 0 }}
-            />
-          ))}
-        </div>
-        <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 2, scrollbarWidth: 'none' }}>
-          {QUICK_CATS.map(cat => (
-            <motion.button key={cat.slug}
-              whileHover={{ background: 'rgba(201,168,76,0.12)', borderColor: 'rgba(201,168,76,0.45)', color: '#C9A84C' }}
-              whileTap={{ scale: 0.94 }}
-              onClick={() => onCategoryClick(cat.slug)}
-              style={{
-                background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)',
-                color: '#94a3b8', borderRadius: 100, padding: '8px 18px',
-                fontSize: 12, fontWeight: 600, cursor: 'pointer',
-                transition: 'all 0.2s', whiteSpace: 'nowrap', flexShrink: 0,
-              }}
-            >{cat.label}</motion.button>
-          ))}
-        </div>
-      </div>
-
-      {/* Fade to page */}
-      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 48,
-        background: 'linear-gradient(to top, #f8fafc, transparent)', pointerEvents: 'none', zIndex: 3 }} />
-
-      <style>{`
-        @media (min-width: 721px) { .hero-desktop { display: flex !important; } }
-        @media (max-width: 720px) { .hero-mobile  { display: flex !important; } }
-        div::-webkit-scrollbar { display: none; }
-      `}</style>
-    </div>
-  )
-}
-
-/* ── Shared text block ── */
-function HeroText({ glow, catName, cur, c1, c2, c3, onExplore, onCategoryClick, onCountersVisible, mobile }) {
-  return (
-    <motion.div onViewportEnter={onCountersVisible}>
+  // ── Shared text content ──
+  const textContent = (
+    <div>
       {/* Badge */}
       <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7,
         background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.25)',
-        borderRadius: 100, padding: '5px 14px', marginBottom: mobile ? 16 : 20 }}>
+        borderRadius: 100, padding: '5px 14px', marginBottom: isMobile ? 14 : 20 }}>
         <motion.span animate={{ scale:[1,1.5,1] }} transition={{ duration: 1.8, repeat: Infinity }}
           style={{ width: 5, height: 5, borderRadius: '50%', background: '#C9A84C', display: 'inline-block' }} />
         <span style={{ color: '#C9A84C', fontSize: 10, fontWeight: 700, letterSpacing: '0.28em', textTransform: 'uppercase' }}>
@@ -211,12 +174,9 @@ function HeroText({ glow, catName, cur, c1, c2, c3, onExplore, onCategoryClick, 
       <motion.h1
         initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        style={{
-          margin: `0 0 ${mobile ? 12 : 20}px`,
-          fontSize: mobile ? 'clamp(36px, 10vw, 52px)' : 'clamp(48px, 5.5vw, 88px)',
-          fontWeight: 900, lineHeight: 0.95,
-          letterSpacing: '-2px',
-        }}
+        style={{ margin: `0 0 ${isMobile ? 12 : 20}px`,
+          fontSize: isMobile ? 'clamp(34px, 9vw, 48px)' : 'clamp(48px, 5.5vw, 88px)',
+          fontWeight: 900, lineHeight: 0.95, letterSpacing: '-2px' }}
       >
         <span style={{ color: '#fff', display: 'block' }}>The New</span>
         <span style={{ color: '#fff', display: 'block' }}>Standard</span>
@@ -225,14 +185,15 @@ function HeroText({ glow, catName, cur, c1, c2, c3, onExplore, onCategoryClick, 
           <motion.span
             animate={{ backgroundPosition: ['0% 50%','100% 50%','0% 50%'] }}
             transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
-            style={{ background: 'linear-gradient(90deg,#C9A84C,#f5d78e,#C9A84C,#e8a020)', backgroundSize: '200% auto',
-              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}
+            style={{ background: 'linear-gradient(90deg,#C9A84C,#f5d78e,#C9A84C,#e8a020)',
+              backgroundSize: '200% auto', WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}
           >Shopping.</motion.span>
         </span>
       </motion.h1>
 
-      {/* Subtitle — hidden on mobile to save space */}
-      {!mobile && (
+      {/* Subtitle — desktop only */}
+      {!isMobile && (
         <p style={{ color: '#94a3b8', fontSize: 15, lineHeight: 1.75, maxWidth: 380, margin: '0 0 32px' }}>
           194+ premium products from the world's finest brands.
           Every item handpicked. Every price unbeatable.
@@ -240,88 +201,116 @@ function HeroText({ glow, catName, cur, c1, c2, c3, onExplore, onCategoryClick, 
       )}
 
       {/* Buttons */}
-      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: mobile ? 20 : 40 }}>
-        <motion.button whileHover={{ scale: 1.05, boxShadow: '0 20px 48px rgba(201,168,76,0.5)' }} whileTap={{ scale: 0.95 }}
-          onClick={onExplore}
+      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: isMobile ? 18 : 36 }}>
+        <motion.button
+          whileHover={{ scale: 1.05, boxShadow: '0 20px 48px rgba(201,168,76,0.5)' }}
+          whileTap={{ scale: 0.95 }} onClick={onExplore}
           style={{ background: 'linear-gradient(135deg,#C9A84C,#e8b84b)', color: '#0f172a',
-            border: 'none', borderRadius: 12, padding: mobile ? '11px 24px' : '14px 36px',
-            fontSize: mobile ? 12 : 13, fontWeight: 800, letterSpacing: '0.08em',
-            textTransform: 'uppercase', cursor: 'pointer', boxShadow: '0 8px 28px rgba(201,168,76,0.3)' }}
+            border: 'none', borderRadius: 12,
+            padding: isMobile ? '11px 22px' : '14px 36px',
+            fontSize: isMobile ? 12 : 13, fontWeight: 800,
+            letterSpacing: '0.08em', textTransform: 'uppercase',
+            cursor: 'pointer', boxShadow: '0 8px 28px rgba(201,168,76,0.3)' }}
         >Explore Now →</motion.button>
 
         <AnimatePresence mode="wait">
           <motion.button key={cur.category}
             initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.3 }}
-            whileHover={{ scale: 1.05, borderColor: '#C9A84C', color: '#C9A84C' }} whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.05, borderColor: '#C9A84C', color: '#C9A84C' }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => onCategoryClick(cur.category)}
             style={{ background: 'rgba(255,255,255,0.05)', color: '#cbd5e1',
               border: '1px solid rgba(255,255,255,0.15)', borderRadius: 12,
-              padding: mobile ? '11px 20px' : '14px 28px',
-              fontSize: mobile ? 12 : 13, fontWeight: 600, cursor: 'pointer',
-              transition: 'all 0.2s', backdropFilter: 'blur(8px)' }}
+              padding: isMobile ? '11px 18px' : '14px 28px',
+              fontSize: isMobile ? 12 : 13, fontWeight: 600,
+              cursor: 'pointer', transition: 'all 0.2s', backdropFilter: 'blur(8px)' }}
           >Shop {catName} →</motion.button>
         </AnimatePresence>
       </div>
 
       {/* Stats */}
-      <div style={{ display: 'flex', gap: mobile ? 24 : 36 }}>
-        {[{val:c1,suf:'+',label:'Products'},{val:c2,suf:'K+',label:'Customers'},{val:c3,suf:'★',label:'Rating'}].map(({val,suf,label}) => (
-          <div key={label}>
-            <div style={{ fontSize: mobile ? 22 : 32, fontWeight: 900, color: '#C9A84C', lineHeight: 1 }}>{val}{suf}</div>
-            <div style={{ fontSize: 10, color: '#64748b', marginTop: 4, textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 600 }}>{label}</div>
+      <div style={{ display: 'flex', gap: isMobile ? 22 : 36 }}>
+        {[{v:c1,s:'+',l:'Products'},{v:c2,s:'K+',l:'Customers'},{v:c3,s:'★',l:'Rating'}].map(({v,s,l}) => (
+          <div key={l}>
+            <div style={{ fontSize: isMobile ? 20 : 30, fontWeight: 900, color: '#C9A84C', lineHeight: 1 }}>{v}{s}</div>
+            <div style={{ fontSize: 9, color: '#64748b', marginTop: 4, textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 600 }}>{l}</div>
           </div>
         ))}
       </div>
-    </motion.div>
+    </div>
   )
-}
 
-/* ── Product image with glow + rings ── */
-function HeroImage({ active, cur, glow, size }) {
   return (
-    <div style={{ position: 'relative', width: size, height: size, flexShrink: 0 }}>
-      {/* Glow halo */}
+    <div style={{ position: 'relative', overflow: 'hidden', background: '#05080f' }}>
+
+      {/* Animated bg glow */}
       <AnimatePresence mode="sync">
-        <motion.div key={`halo-${active}`}
-          initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
-          transition={{ duration: 1.2 }}
-          style={{ position: 'absolute', inset: '-25%', borderRadius: '50%',
-            background: `radial-gradient(circle, ${glow}40 0%, ${glow}10 40%, transparent 65%)`,
-            filter: 'blur(24px)', pointerEvents: 'none' }}
-        />
-      </AnimatePresence>
-      {/* Floor shadow */}
-      <AnimatePresence mode="sync">
-        <motion.div key={`sh-${active}`}
+        <motion.div key={`bg-${active}`}
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-          transition={{ duration: 1 }}
-          style={{ position: 'absolute', bottom: '-4%', left: '15%', right: '15%', height: 28,
-            background: `radial-gradient(ellipse, ${glow}70 0%, transparent 70%)`,
-            filter: 'blur(14px)', borderRadius: '50%' }}
+          transition={{ duration: 1.4 }}
+          style={{ position: 'absolute', inset: 0, pointerEvents: 'none',
+            background: isMobile
+              ? `radial-gradient(ellipse 90% 50% at 50% 20%, ${glow}22 0%, transparent 65%)`
+              : `radial-gradient(ellipse 65% 80% at 70% 50%, ${glow}25 0%, transparent 65%)` }}
         />
       </AnimatePresence>
-      {/* Outer ring */}
-      <motion.div animate={{ rotate: 360 }} transition={{ duration: 22, repeat: Infinity, ease: 'linear' }}
-        style={{ position: 'absolute', inset: -12, borderRadius: '50%',
-          border: `1px solid ${glow}25`, borderTopColor: `${glow}60` }} />
-      {/* Inner dashed ring */}
-      <motion.div animate={{ rotate: -360 }} transition={{ duration: 15, repeat: Infinity, ease: 'linear' }}
-        style={{ position: 'absolute', inset: -4, borderRadius: '50%',
-          border: `1px dashed ${glow}18` }} />
-      {/* Image */}
-      <AnimatePresence mode="wait">
-        <motion.img key={`img-${active}`} src={cur.img} alt={cur.name}
-          initial={{ opacity: 0, scale: 0.78, y: 24, filter: 'blur(12px)' }}
-          animate={{ opacity: 1, scale: 1,    y: 0,  filter: 'blur(0px)' }}
-          exit={{   opacity: 0, scale: 1.12,  y: -24, filter: 'blur(10px)' }}
-          transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-          style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '8%',
-            filter: `drop-shadow(0 24px 48px ${glow}60)`,
-            position: 'relative', zIndex: 2 }}
-          onError={e => { e.target.style.opacity = 0 }}
-        />
-      </AnimatePresence>
+
+      {/* Dot grid */}
+      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none',
+        backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.025) 1px, transparent 0)',
+        backgroundSize: '36px 36px' }} />
+
+      {isMobile ? (
+        /* ── MOBILE: text then image, everything centered ── */
+        <div style={{ padding: '36px 24px 0', position: 'relative', zIndex: 2 }}>
+          {textContent}
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 24, marginBottom: 8 }}>
+            <HeroImage active={active} cur={cur} glow={glow} size={200} />
+          </div>
+        </div>
+      ) : (
+        /* ── DESKTOP: side by side ── */
+        <div style={{ maxWidth: 1300, margin: '0 auto', display: 'flex', alignItems: 'center',
+          minHeight: 680, padding: '0 64px', gap: 48, position: 'relative', zIndex: 2 }}>
+          <div style={{ flex: '0 0 50%' }}>
+            {textContent}
+          </div>
+          <div style={{ flex: '0 0 50%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '60px 0' }}>
+            <HeroImage active={active} cur={cur} glow={glow} size={400} />
+          </div>
+        </div>
+      )}
+
+      {/* Dots + Pills */}
+      <div style={{ position: 'relative', zIndex: 2,
+        borderTop: '1px solid rgba(255,255,255,0.05)',
+        padding: '14px 24px 20px', marginTop: isMobile ? 16 : 0 }}>
+        <div style={{ display: 'flex', gap: 7, marginBottom: 12 }}>
+          {items.map((_, i) => (
+            <motion.button key={i} onClick={() => go(i)}
+              animate={{ width: i === active ? 26 : 7, background: i === active ? '#C9A84C' : 'rgba(255,255,255,0.2)' }}
+              transition={{ duration: 0.3 }}
+              style={{ height: 7, borderRadius: 4, border: 'none', cursor: 'pointer', padding: 0 }} />
+          ))}
+        </div>
+        <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 2, scrollbarWidth: 'none' }}>
+          {QUICK_CATS.map(cat => (
+            <motion.button key={cat.slug}
+              whileHover={{ background: 'rgba(201,168,76,0.12)', borderColor: 'rgba(201,168,76,0.45)', color: '#C9A84C' }}
+              whileTap={{ scale: 0.94 }}
+              onClick={() => onCategoryClick(cat.slug)}
+              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)',
+                color: '#94a3b8', borderRadius: 100, padding: '8px 18px',
+                fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                transition: 'all 0.2s', whiteSpace: 'nowrap', flexShrink: 0 }}
+            >{cat.label}</motion.button>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 48,
+        background: 'linear-gradient(to top, #f8fafc, transparent)', pointerEvents: 'none', zIndex: 3 }} />
     </div>
   )
 }
