@@ -262,11 +262,68 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
         backgroundSize: '36px 36px' }} />
 
       {isMobile ? (
-        /* ── MOBILE: text then image, everything centered ── */
-        <div style={{ padding: '24px 20px 0', position: 'relative', zIndex: 2 }}>
-          {textContent}
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 24, marginBottom: 8 }}>
-            <HeroImage active={active} cur={cur} glow={glow} size={160} />
+        /* ── MOBILE: ultra compact ── */
+        <div style={{ position: 'relative', zIndex: 2, padding: '20px 20px 8px', display: 'flex', alignItems: 'center', gap: 16 }}>
+          {/* Left: headline + button */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            {/* Badge */}
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6,
+              background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.25)',
+              borderRadius: 100, padding: '3px 10px', marginBottom: 10 }}>
+              <motion.span animate={{ scale:[1,1.5,1] }} transition={{ duration: 1.8, repeat: Infinity }}
+                style={{ width: 4, height: 4, borderRadius: '50%', background: '#C9A84C', display: 'inline-block' }} />
+              <span style={{ color: '#C9A84C', fontSize: 9, fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase' }}>
+                Premium
+              </span>
+            </div>
+
+            {/* Compact headline */}
+            <motion.h1
+              initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15, duration: 0.5 }}
+              style={{ margin: '0 0 6px', fontSize: 'clamp(26px, 7vw, 36px)', fontWeight: 900, lineHeight: 1, letterSpacing: '-1.5px' }}
+            >
+              <span style={{ color: '#fff' }}>New Standard</span><br />
+              <motion.span
+                animate={{ backgroundPosition: ['0% 50%','100% 50%','0% 50%'] }}
+                transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
+                style={{ background: 'linear-gradient(90deg,#C9A84C,#f5d78e,#C9A84C)', backgroundSize: '200% auto',
+                  WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}
+              >of Shopping.</motion.span>
+            </motion.h1>
+
+            {/* Product name — changes with carousel */}
+            <AnimatePresence mode="wait">
+              <motion.p key={`mn-${active}`}
+                initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                style={{ color: 'rgba(255,255,255,0.4)', fontSize: 10, margin: '0 0 14px',
+                  fontWeight: 500, letterSpacing: '0.06em', textTransform: 'uppercase',
+                  whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+              >
+                {cur.name}
+              </motion.p>
+            </AnimatePresence>
+
+            {/* Single CTA button */}
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={onExplore}
+              style={{
+                background: 'linear-gradient(135deg,#C9A84C,#e8b84b)',
+                color: '#0f172a', border: 'none', borderRadius: 10,
+                padding: '10px 20px', fontSize: 12, fontWeight: 800,
+                letterSpacing: '0.06em', textTransform: 'uppercase',
+                cursor: 'pointer', boxShadow: '0 4px 16px rgba(201,168,76,0.35)',
+              }}
+            >
+              Explore Now →
+            </motion.button>
+          </div>
+
+          {/* Right: product image — compact */}
+          <div style={{ flexShrink: 0 }}>
+            <HeroImage active={active} cur={cur} glow={glow} size={140} />
           </div>
         </div>
       ) : (
@@ -282,10 +339,17 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
         </div>
       )}
 
-      {/* Dots + Pills */}
+      {/* ── Progress bar at bottom of hero ── */}
+      <div style={{ position: 'relative', zIndex: 2, padding: '0 24px 4px', display: 'flex', gap: 4 }}>
+        {items.map((_, i) => (
+          <div key={i} style={{ flex: 1, height: 2, borderRadius: 2, background: i === active ? '#C9A84C' : 'rgba(255,255,255,0.15)', transition: 'background 0.3s' }} />
+        ))}
+      </div>
+
+      {/* Dots + Pills — hidden on mobile to save space */}
       <div style={{ position: 'relative', zIndex: 2,
         borderTop: '1px solid rgba(255,255,255,0.05)',
-        padding: '14px 24px 20px', marginTop: isMobile ? 16 : 0 }}>
+        padding: isMobile ? '8px 20px 12px' : '14px 24px 20px', marginTop: isMobile ? 8 : 0 }}>
         <div style={{ display: 'flex', gap: 7, marginBottom: 12 }}>
           {items.map((_, i) => (
             <motion.button key={i} onClick={() => go(i)}
@@ -294,7 +358,7 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
               style={{ height: 7, borderRadius: 4, border: 'none', cursor: 'pointer', padding: 0 }} />
           ))}
         </div>
-        <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 2, scrollbarWidth: 'none' }}>
+        {!isMobile && <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 2, scrollbarWidth: 'none' }}>
           {QUICK_CATS.map(cat => (
             <motion.button key={cat.slug}
               whileHover={{ background: 'rgba(201,168,76,0.12)', borderColor: 'rgba(201,168,76,0.45)', color: '#C9A84C' }}
@@ -307,8 +371,8 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
             >{cat.label}</motion.button>
           ))}
         </div>
+}
       </div>
-
       <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 48,
         background: 'linear-gradient(to top, #f8fafc, transparent)', pointerEvents: 'none', zIndex: 3 }} />
     </div>

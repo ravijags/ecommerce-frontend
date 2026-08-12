@@ -47,7 +47,7 @@ export default function BottomNav({ cartCount, wishlistCount, onSearch }) {
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => { setSearchOpen(false); setQuery('') }}
-              style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 98 }}
+              style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.25)', zIndex: 98 }}
             />
             {/* Search bar slides up from bottom */}
             <motion.div
