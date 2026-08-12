@@ -21,6 +21,7 @@ import AdminUsers from './pages/admin/AdminUsers'
 import ProductDetail from './pages/ProductDetail'
 import Footer from './components/Footer'
 import BackToTop from './components/BackToTop'
+import BottomNav from './components/BottomNav'
 import ProgressBar from './components/ProgressBar'
 import ScrollToTop from './components/ScrollToTop'
 import { getWishlist, addToWishlistStore, removeFromWishlistStore } from './wishlistStore'
@@ -239,6 +240,12 @@ function App() {
       </AnimatePresence>
       {!isAdmin && !isAuthPage && <Footer />}
       <BackToTop />
+      {!isAdmin && !isAuthPage && (
+        <BottomNav
+          cartCount={cartItems.reduce((t, i) => t + (i.quantity || 1), 0)}
+          wishlistCount={wishlistItems.length}
+        />
+      )}
     </div>
   )
 }
