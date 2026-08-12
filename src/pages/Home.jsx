@@ -263,10 +263,10 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
 
       {isMobile ? (
         /* ── MOBILE: text then image, everything centered ── */
-        <div style={{ padding: '36px 24px 0', position: 'relative', zIndex: 2 }}>
+        <div style={{ padding: '24px 20px 0', position: 'relative', zIndex: 2 }}>
           {textContent}
           <div style={{ display: 'flex', justifyContent: 'center', marginTop: 24, marginBottom: 8 }}>
-            <HeroImage active={active} cur={cur} glow={glow} size={200} />
+            <HeroImage active={active} cur={cur} glow={glow} size={160} />
           </div>
         </div>
       ) : (

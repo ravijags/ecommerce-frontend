@@ -244,6 +244,7 @@ function App() {
         <BottomNav
           cartCount={cartItems.reduce((t, i) => t + (i.quantity || 1), 0)}
           wishlistCount={wishlistItems.length}
+          onSearch={setRawSearch}
         />
       )}
     </div>
