@@ -450,7 +450,7 @@ export default function Home({ addToCart, addToWishlist, removeFromWishlist, car
   }
 
   if (loading) return (
-    <div style={{ background: '#f8fafc', minHeight: '100vh', padding: '20px 12px' }}>
+    <div style={{ background: '#fff', minHeight: '100vh', padding: '20px 12px' }}>
       <div style={{ maxWidth: 1280, margin: '0 auto' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
           <div style={{ width: 140, height: 24, borderRadius: 8, background: '#e2e8f0', animation: 'skeletonPulse 1.4s ease-in-out infinite' }} />
@@ -464,13 +464,13 @@ export default function Home({ addToCart, addToWishlist, removeFromWishlist, car
   )
 
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100vh' }} className="mobile-page-padding">
+    <div style={{ background: '#fff', minHeight: '100vh' }} className="mobile-page-padding">
       {!searchQuery && !category && (
         <LuxuryHero items={heroItems} onCategoryClick={handleCategoryClick}
           onExplore={() => document.getElementById('products-section')?.scrollIntoView({ behavior: 'smooth' })} />
       )}
 
-      <div id="products-section" style={{ maxWidth: 1280, margin: '0 auto', padding: '20px 12px 32px' }}>
+      <div id="products-section" style={{ maxWidth: 1280, margin: '0 auto', padding: '16px 12px 32px', background: '#fff' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, gap: 12 }}>
           <h2 style={{ color: '#0f172a', fontSize: 17, fontWeight: 800, letterSpacing: '-0.3px', margin: 0 }}>
             {searchQuery ? `"${searchQuery}"` : activeLabel}
