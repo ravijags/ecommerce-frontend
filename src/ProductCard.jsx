@@ -45,6 +45,8 @@ function ProductCard({
         transition: 'box-shadow 0.2s, transform 0.2s',
       }}
       onMouseMove={e => {
+        // Disable tilt on touch devices
+        if (window.matchMedia('(hover: none)').matches) return
         const rect = e.currentTarget.getBoundingClientRect()
         const x = ((e.clientX - rect.left) / rect.width - 0.5) * 12
         const y = ((e.clientY - rect.top) / rect.height - 0.5) * -12
@@ -52,11 +54,19 @@ function ProductCard({
         e.currentTarget.style.boxShadow = `${-x * 2}px ${y * 2}px 30px rgba(0,0,0,0.12)`
       }}
       onMouseLeave={e => {
-        e.currentTarget.style.transform = 'perspective(600px) rotateX(0deg) rotateY(0deg) translateY(0)'
+        e.currentTarget.style.transform = 'none'
         e.currentTarget.style.boxShadow = 'none'
         e.currentTarget.style.transition = 'transform 0.4s ease, box-shadow 0.4s ease'
       }}
       onMouseEnter={e => { e.currentTarget.style.transition = 'none' }}
+      onTouchStart={e => {
+        e.currentTarget.style.transform = 'none'
+        e.currentTarget.style.boxShadow = 'none'
+      }}
+      onTouchEnd={e => {
+        e.currentTarget.style.transform = 'none'
+        e.currentTarget.style.boxShadow = 'none'
+      }}
     >
       {/* Discount badge */}
       {discount > 0 && (
