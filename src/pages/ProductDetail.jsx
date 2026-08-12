@@ -1,26 +1,28 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { ShoppingCart, Heart, Star, ChevronLeft, Shield, Truck, RotateCcw, CheckCircle, Zap, Tag, Package, Clock, MapPin, CreditCard, Percent, Share2, Copy } from 'lucide-react'
+import { ShoppingCart, Heart, Star, ChevronLeft, Shield, Truck, RotateCcw, CheckCircle, Zap, Tag, Package, Clock, MapPin, CreditCard, Percent, Share2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 import ProductCard from '../ProductCard'
 import { addRecentlyViewed } from '../recentlyViewed'
+import { getWishlist } from '../wishlistStore'
 
-export default function ProductDetail({ addToCart, addToWishlist }) {
-  const [product, setProduct] = useState(null)
-  const [related, setRelated] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [selectedImage, setSelectedImage] = useState(0)
-  const [quantity, setQuantity] = useState(1)
-  const [wishlisted, setWishlisted] = useState(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem('premia_wishlist') || '[]')
-      return saved.some(p => p._id === id)
-    } catch { return false }
-  })
-  const [addedToCart, setAddedToCart] = useState(false)
-  const { id } = useParams()
+export default function ProductDetail({ addToCart, addToWishlist, removeFromWishlist, cartItemIds, wishlistIds }) {
+  const { id } = useParams()   // ← moved to top so it's available everywhere
   const navigate = useNavigate()
+
+  const [product, setProduct]       = useState(null)
+  const [related, setRelated]       = useState([])
+  const [loading, setLoading]       = useState(true)
+  const [selectedImage, setSelectedImage] = useState(0)
+  const [quantity, setQuantity]     = useState(1)
+  const [addedToCart, setAddedToCart] = useState(false)
+
+  // ── Wishlist state — derived from wishlistIds prop (App owns truth)
+  // Falls back to localStorage if prop not available
+  const isWishlisted = wishlistIds
+    ? wishlistIds.has(id)
+    : getWishlist().some(p => p._id === id)
 
   useEffect(() => {
     setSelectedImage(0); setQuantity(1); setLoading(true)
@@ -54,6 +56,15 @@ export default function ProductDetail({ addToCart, addToWishlist }) {
     setTimeout(() => setAddedToCart(false), 2000)
   }
 
+  // ── Toggle wishlist — calls correct function based on current state
+  const handleWishlist = () => {
+    if (isWishlisted) {
+      if (removeFromWishlist) removeFromWishlist(id)
+    } else {
+      if (addToWishlist) addToWishlist(product)
+    }
+  }
+
   if (loading) return (
     <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div style={{ width: 36, height: 36, border: '3px solid #C9A84C', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
@@ -66,39 +77,40 @@ export default function ProductDetail({ addToCart, addToWishlist }) {
   const unique = [...new Set(images)]
   if (unique.length === 0) unique.push('https://placehold.co/600x600/f8fafc/94a3b8?text=No+Image')
 
-  const hasDiscount = product.originalPrice > product.price
-  const discountPct = hasDiscount ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0
-  const savings = hasDiscount ? (product.originalPrice - product.price) : 0
-  const emiPerMonth = product.price > 3000 ? Math.round(product.price / 12) : null
-  const isLowStock = product.stock > 0 && product.stock <= 10
+  const hasDiscount  = product.originalPrice > product.price
+  const discountPct  = hasDiscount ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0
+  const savings      = hasDiscount ? (product.originalPrice - product.price) : 0
+  const emiPerMonth  = product.price > 3000 ? Math.round(product.price / 12) : null
+  const isLowStock   = product.stock > 0 && product.stock <= 10
   const deliveryDate = new Date(); deliveryDate.setDate(deliveryDate.getDate() + 2)
-  const deliveryStr = deliveryDate.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' })
+  const deliveryStr  = deliveryDate.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' })
 
-  // Split description into bullet points for richer display
   const descSentences = product.description
     ? product.description.split(/[.!]/).map(s => s.trim()).filter(s => s.length > 20)
     : []
 
   const SPECS = [
-    product.brand && ['Brand', product.brand],
+    product.brand    && ['Brand', product.brand],
     product.category && ['Category', product.category.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())],
     product.stock > 0 && ['Availability', isLowStock ? `Only ${product.stock} left` : `${product.stock} units in stock`],
     product.rating > 0 && ['Customer Rating', `${product.rating.toFixed(1)} ★ (${((product.rating * 1000) | 0).toLocaleString()} reviews)`],
-    savings > 0 && ['Savings', `₹${savings.toLocaleString('en-IN')} (${discountPct}% off)`],
-    emiPerMonth && ['No-Cost EMI', `From ₹${emiPerMonth.toLocaleString('en-IN')}/month`],
+    savings > 0      && ['Savings', `₹${savings.toLocaleString('en-IN')} (${discountPct}% off)`],
+    emiPerMonth      && ['No-Cost EMI', `From ₹${emiPerMonth.toLocaleString('en-IN')}/month`],
     ['Delivery', `Free by ${deliveryStr}`],
     ['Sold by', 'PREMIA Official Store'],
     ['Warranty', '1 Year Brand Warranty'],
   ].filter(Boolean)
 
   const OFFERS = [
-    { icon: Percent, color: '#7c3aed', bg: '#ede9fe', title: 'Bank Offer', desc: '10% cashback on PREMIA card. Min. ₹3,000' },
-    { icon: Zap, color: '#2563eb', bg: '#dbeafe', title: 'No-Cost EMI', desc: `EMI from ₹${emiPerMonth?.toLocaleString('en-IN') || '999'}/month. No interest charged` },
-    { icon: Tag, color: '#16a34a', bg: '#dcfce7', title: 'Partner Offer', desc: 'Buy with PREMIA Pay & get ₹200 cashback' },
+    { icon: Percent, color: '#7c3aed', bg: '#ede9fe', title: 'Bank Offer',    desc: '10% cashback on PREMIA card. Min. ₹3,000' },
+    { icon: Zap,     color: '#2563eb', bg: '#dbeafe', title: 'No-Cost EMI',   desc: `EMI from ₹${emiPerMonth?.toLocaleString('en-IN') || '999'}/month. No interest charged` },
+    { icon: Tag,     color: '#16a34a', bg: '#dcfce7', title: 'Partner Offer', desc: 'Buy with PREMIA Pay & get ₹200 cashback' },
   ]
 
+  const inCart = cartItemIds?.has(id) || addedToCart
+
   return (
-    <main style={{ maxWidth: 1200, margin: '0 auto', padding: '16px 24px 64px', fontFamily: 'Inter, sans-serif' }}>
+    <main style={{ maxWidth: 1200, margin: '0 auto', padding: '16px 16px 64px', fontFamily: 'Inter, sans-serif' }}>
 
       {/* Breadcrumb */}
       <nav style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 20, fontSize: 12, flexWrap: 'wrap' }}>
@@ -116,12 +128,11 @@ export default function ProductDetail({ addToCart, addToWishlist }) {
       </nav>
 
       {/* Main 2-col grid */}
-      <div className="pd-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48, alignItems: 'start' }}>
+      <div className="pd-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 40, alignItems: 'start' }}>
 
-        {/* ── LEFT: Images ── */}
+        {/* LEFT: Images */}
         <div style={{ position: 'sticky', top: 90 }}>
           <div style={{ display: 'flex', gap: 10 }}>
-            {/* Thumbnails */}
             {unique.length > 1 && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {unique.slice(0, 6).map((img, i) => (
@@ -136,7 +147,6 @@ export default function ProductDetail({ addToCart, addToWishlist }) {
                 ))}
               </div>
             )}
-            {/* Main image */}
             <AnimatePresence mode="wait">
               <motion.div key={selectedImage}
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}
@@ -156,10 +166,9 @@ export default function ProductDetail({ addToCart, addToWishlist }) {
           </div>
         </div>
 
-        {/* ── RIGHT: Info ── */}
+        {/* RIGHT: Info */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
 
-          {/* Brand badge */}
           {product.brand && (
             <div style={{ marginBottom: 8 }}>
               <span style={{ fontSize: 11, fontWeight: 700, color: '#C9A84C', textTransform: 'uppercase', letterSpacing: '0.12em' }}>
@@ -168,23 +177,18 @@ export default function ProductDetail({ addToCart, addToWishlist }) {
             </div>
           )}
 
-          {/* Title */}
           <h1 style={{ fontSize: 22, fontWeight: 800, color: '#0f172a', lineHeight: 1.3, marginBottom: 12, letterSpacing: '-0.3px' }}>
             {product.name}
           </h1>
 
-          {/* Rating row */}
           {product.rating > 0 && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14, paddingBottom: 14, borderBottom: '1px solid #f1f5f9' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14, paddingBottom: 14, borderBottom: '1px solid #f1f5f9', flexWrap: 'wrap' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
                 {[1,2,3,4,5].map(s => (
-                  <Star key={s} size={14}
-                    fill={s <= Math.round(product.rating) ? '#f59e0b' : 'none'}
-                    color={s <= Math.round(product.rating) ? '#f59e0b' : '#d1d5db'}
-                  />
+                  <Star key={s} size={14} fill={s <= Math.round(product.rating) ? '#f59e0b' : 'none'} color={s <= Math.round(product.rating) ? '#f59e0b' : '#d1d5db'} />
                 ))}
               </div>
-              <span style={{ fontSize: 13, color: '#3b82f6', fontWeight: 600, cursor: 'pointer' }}>
+              <span style={{ fontSize: 13, color: '#3b82f6', fontWeight: 600 }}>
                 {((product.rating * 1000) | 0).toLocaleString()} ratings
               </span>
               <span style={{ color: '#e2e8f0' }}>|</span>
@@ -209,9 +213,7 @@ export default function ProductDetail({ addToCart, addToWishlist }) {
             {hasDiscount && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
                 <span style={{ fontSize: 15, fontWeight: 800, color: '#ef4444' }}>-{discountPct}%</span>
-                <span style={{ fontSize: 13, color: '#16a34a', fontWeight: 600 }}>
-                  You save ₹{savings.toLocaleString('en-IN')}
-                </span>
+                <span style={{ fontSize: 13, color: '#16a34a', fontWeight: 600 }}>You save ₹{savings.toLocaleString('en-IN')}</span>
               </div>
             )}
             <p style={{ fontSize: 12, color: '#64748b', margin: 0 }}>Inclusive of all taxes</p>
@@ -245,7 +247,7 @@ export default function ProductDetail({ addToCart, addToWishlist }) {
             </div>
           )}
 
-          {/* Delivery + location */}
+          {/* Delivery */}
           <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 12, padding: '12px 16px', marginBottom: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
               <Truck size={14} color="#16a34a" />
@@ -259,7 +261,7 @@ export default function ProductDetail({ addToCart, addToWishlist }) {
             </div>
           </div>
 
-          {/* Qty + Add to Cart */}
+          {/* Qty selector */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
             <div style={{ display: 'flex', alignItems: 'center', border: '1.5px solid #e2e8f0', borderRadius: 10, overflow: 'hidden' }}>
               <button onClick={() => setQuantity(q => Math.max(1, q - 1))} style={{ padding: '10px 14px', border: 'none', background: '#f8fafc', cursor: 'pointer', color: '#0f172a', fontSize: 16, fontWeight: 700 }}>−</button>
@@ -269,30 +271,32 @@ export default function ProductDetail({ addToCart, addToWishlist }) {
             <span style={{ fontSize: 12, color: '#64748b' }}>Max {product.stock || 99} per order</span>
           </div>
 
+          {/* Add to cart + Wishlist */}
           <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
             <motion.button whileTap={{ scale: 0.98 }} onClick={handleAddToCart} disabled={product.stock === 0}
               style={{
                 flex: 1, padding: '13px', borderRadius: 12, border: 'none',
-                background: addedToCart ? '#16a34a' : '#0f172a',
-                color: '#fff', fontSize: 14, fontWeight: 700,
+                background: addedToCart ? '#16a34a' : inCart ? '#f0fdf4' : '#0f172a',
+                color: addedToCart ? '#fff' : inCart ? '#16a34a' : '#fff',
+                border: inCart && !addedToCart ? '1px solid #bbf7d0' : 'none',
+                fontSize: 14, fontWeight: 700,
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                 cursor: product.stock === 0 ? 'not-allowed' : 'pointer',
                 opacity: product.stock === 0 ? 0.5 : 1, transition: 'background 0.2s',
               }}>
               <ShoppingCart size={16} />
-              {addedToCart ? '✓ Added to Cart!' : product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+              {addedToCart ? '✓ Added to Cart!' : inCart ? '✓ In Cart' : product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
             </motion.button>
-            <button onClick={() => {
-              setWishlisted(w => !w)
-              if (!wishlisted && addToWishlist) addToWishlist(product)
-            }} style={{
+
+            {/* ── Wishlist button — properly toggles ── */}
+            <button onClick={handleWishlist} style={{
               padding: '13px 16px', borderRadius: 12,
-              border: `2px solid ${wishlisted ? '#ef4444' : '#e2e8f0'}`,
-              background: wishlisted ? '#fef2f2' : '#fff',
-              color: wishlisted ? '#ef4444' : '#94a3b8', cursor: 'pointer',
-              display: 'flex', alignItems: 'center',
+              border: `2px solid ${isWishlisted ? '#ef4444' : '#e2e8f0'}`,
+              background: isWishlisted ? '#fef2f2' : '#fff',
+              color: isWishlisted ? '#ef4444' : '#94a3b8',
+              cursor: 'pointer', display: 'flex', alignItems: 'center', transition: 'all 0.2s',
             }}>
-              <Heart size={18} fill={wishlisted ? '#ef4444' : 'none'} />
+              <Heart size={18} fill={isWishlisted ? '#ef4444' : 'none'} />
             </button>
           </div>
 
@@ -305,9 +309,9 @@ export default function ProductDetail({ addToCart, addToWishlist }) {
           {/* Trust row */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 16 }}>
             {[
-              { Icon: Truck, title: 'Free Delivery', desc: 'Above ₹999' },
-              { Icon: RotateCcw, title: '7-Day Return', desc: 'Easy returns' },
-              { Icon: Shield, title: 'Secure Pay', desc: '100% safe' },
+              { Icon: Truck,     title: 'Free Delivery', desc: 'Above ₹999' },
+              { Icon: RotateCcw, title: '7-Day Return',  desc: 'Easy returns' },
+              { Icon: Shield,    title: 'Secure Pay',    desc: '100% safe' },
             ].map(({ Icon, title, desc }) => (
               <div key={title} style={{ textAlign: 'center', padding: '10px 6px', background: '#f8fafc', borderRadius: 10, border: '1px solid #e2e8f0' }}>
                 <Icon size={18} color="#C9A84C" style={{ margin: '0 auto 5px' }} />
@@ -317,7 +321,7 @@ export default function ProductDetail({ addToCart, addToWishlist }) {
             ))}
           </div>
 
-          {/* Share button */}
+          {/* Share */}
           <button onClick={() => {
             const url = window.location.href
             if (navigator.share) {
@@ -348,8 +352,6 @@ export default function ProductDetail({ addToCart, addToWishlist }) {
 
       {/* About this item */}
       <div style={{ marginTop: 48, display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 32, alignItems: 'start' }} className="pd-about-grid">
-
-        {/* Left: Description as bullets */}
         <div>
           <h2 style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', marginBottom: 20, paddingBottom: 12, borderBottom: '2px solid #0f172a', display: 'inline-block' }}>
             About this item
@@ -367,8 +369,6 @@ export default function ProductDetail({ addToCart, addToWishlist }) {
             <p style={{ fontSize: 14, color: '#475569', lineHeight: 1.85, margin: 0 }}>{product.description}</p>
           )}
         </div>
-
-        {/* Right: Tech specs */}
         <div>
           <h2 style={{ fontSize: 16, fontWeight: 900, color: '#0f172a', marginBottom: 16 }}>Technical Details</h2>
           <div style={{ border: '1px solid #e2e8f0', borderRadius: 12, overflow: 'hidden' }}>
@@ -387,7 +387,6 @@ export default function ProductDetail({ addToCart, addToWishlist }) {
         <div style={{ marginTop: 48, paddingTop: 32, borderTop: '1px solid #e2e8f0' }}>
           <h2 style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', marginBottom: 20 }}>Frequently Bought Together</h2>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: 20, background: '#f8fafc', borderRadius: 16, border: '1px solid #e2e8f0', flexWrap: 'wrap' }}>
-            {/* Current product */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, minWidth: 100 }}>
               <div style={{ width: 80, height: 80, borderRadius: 12, background: '#fff', border: '1px solid #e2e8f0', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <img src={product.image || product.thumbnail} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 6 }} />
@@ -395,16 +394,13 @@ export default function ProductDetail({ addToCart, addToWishlist }) {
               <span style={{ fontSize: 11, fontWeight: 600, color: '#0f172a', textAlign: 'center', maxWidth: 100 }}>{product.name?.slice(0, 20)}</span>
               <span style={{ fontSize: 12, fontWeight: 800, color: '#0f172a' }}>₹{product.price?.toLocaleString('en-IN')}</span>
             </div>
-
             <span style={{ fontSize: 20, color: '#94a3b8', fontWeight: 300 }}>+</span>
-
-            {/* Related product */}
             {(() => {
               const p = related[0]
               return (
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, minWidth: 100 }}>
                   <Link to={`/products/${p._id}`}>
-                    <div style={{ width: 80, height: 80, borderRadius: 12, background: '#fff', border: '1px solid #e2e8f0', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ width: 80, height: 80, borderRadius: 12, background: '#fff', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
                       <img src={p.image || p.thumbnail} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 6 }} />
                     </div>
                   </Link>
@@ -413,8 +409,6 @@ export default function ProductDetail({ addToCart, addToWishlist }) {
                 </div>
               )
             })()}
-
-            {/* Total + Add both */}
             <div style={{ marginLeft: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 10 }}>
               <div>
                 <p style={{ fontSize: 11, color: '#64748b', margin: '0 0 2px', textAlign: 'right' }}>Total price</p>
@@ -422,11 +416,8 @@ export default function ProductDetail({ addToCart, addToWishlist }) {
                   ₹{((product.price || 0) + (related[0]?.price || 0)).toLocaleString('en-IN')}
                 </p>
               </div>
-              <button onClick={() => {
-                addToCart(product)
-                addToCart(related[0])
-                toast.success('Both items added to cart!')
-              }} style={{ padding: '10px 20px', borderRadius: 12, border: 'none', background: '#C9A84C', color: '#0f172a', fontSize: 13, fontWeight: 800, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+              <button onClick={() => { addToCart(product); addToCart(related[0]); toast.success('Both items added to cart!') }}
+                style={{ padding: '10px 20px', borderRadius: 12, border: 'none', background: '#C9A84C', color: '#0f172a', fontSize: 13, fontWeight: 800, cursor: 'pointer', whiteSpace: 'nowrap' }}>
                 Add Both to Cart
               </button>
             </div>
@@ -437,13 +428,9 @@ export default function ProductDetail({ addToCart, addToWishlist }) {
       {/* Customer Reviews */}
       {product.rating > 0 && (() => {
         const rating = product.rating
-        const count = ((rating * 1000) | 0)
-        const dist = [
-          Math.round(count * 0.55), Math.round(count * 0.22),
-          Math.round(count * 0.13), Math.round(count * 0.06),
-          Math.round(count * 0.04)
-        ]
-        const NAMES = ['Arjun S.','Priya M.','Rahul K.','Sneha R.','Vikram P.','Anjali T.','Rohit G.']
+        const count  = ((rating * 1000) | 0)
+        const dist   = [Math.round(count * 0.55), Math.round(count * 0.22), Math.round(count * 0.13), Math.round(count * 0.06), Math.round(count * 0.04)]
+        const NAMES    = ['Arjun S.','Priya M.','Rahul K.','Sneha R.','Vikram P.','Anjali T.','Rohit G.']
         const COMMENTS = [
           'Excellent product! Exactly as described. Very happy with the quality.',
           'Good value for money. Delivery was fast and packaging was great.',
@@ -462,7 +449,6 @@ export default function ProductDetail({ addToCart, addToWishlist }) {
           <div style={{ marginTop: 48, paddingTop: 32, borderTop: '1px solid #e2e8f0' }}>
             <h2 style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', marginBottom: 24 }}>Customer Reviews</h2>
             <div style={{ display: 'grid', gridTemplateColumns: '200px 1fr', gap: 32, alignItems: 'start', marginBottom: 28 }} className="pd-reviews-grid">
-              {/* Rating summary */}
               <div style={{ textAlign: 'center', padding: '24px 20px', background: '#f8fafc', borderRadius: 16, border: '1px solid #e2e8f0' }}>
                 <div style={{ fontSize: 52, fontWeight: 900, color: '#0f172a', lineHeight: 1 }}>{rating.toFixed(1)}</div>
                 <div style={{ display: 'flex', justifyContent: 'center', gap: 3, margin: '8px 0' }}>
@@ -470,25 +456,23 @@ export default function ProductDetail({ addToCart, addToWishlist }) {
                 </div>
                 <div style={{ fontSize: 12, color: '#64748b' }}>{count.toLocaleString('en-IN')} ratings</div>
               </div>
-              {/* Bars */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {[5,4,3,2,1].map((star, i) => (
                   <div key={star} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <span style={{ fontSize: 12, color: '#64748b', width: 8, flexShrink: 0 }}>{star}</span>
                     <span style={{ color: '#f59e0b', fontSize: 12 }}>★</span>
                     <div style={{ flex: 1, height: 8, background: '#f1f5f9', borderRadius: 4, overflow: 'hidden' }}>
-                      <div style={{ height: '100%', background: '#f59e0b', borderRadius: 4, width: `${Math.round(dist[5-star] / count * 100)}%`, transition: 'width 0.5s' }} />
+                      <div style={{ height: '100%', background: '#f59e0b', borderRadius: 4, width: `${Math.round(dist[5-star] / count * 100)}%` }} />
                     </div>
                     <span style={{ fontSize: 11, color: '#94a3b8', width: 40, flexShrink: 0, textAlign: 'right' }}>{dist[5-star].toLocaleString()}</span>
                   </div>
                 ))}
               </div>
             </div>
-            {/* Individual reviews */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               {reviews.map((r, i) => (
                 <div key={i} style={{ padding: '18px', background: '#fff', border: '1px solid #e2e8f0', borderRadius: 14 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, flexWrap: 'wrap', gap: 8 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                       <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800, color: '#C9A84C' }}>
                         {r.name[0]}
@@ -516,16 +500,18 @@ export default function ProductDetail({ addToCart, addToWishlist }) {
       {/* Related products */}
       {related.length > 0 && (
         <div style={{ marginTop: 56, paddingTop: 32, borderTop: '1px solid #e2e8f0' }}>
-          <h2 style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', marginBottom: 20 }}>
-            Customers also viewed
-          </h2>
+          <h2 style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', marginBottom: 20 }}>Customers also viewed</h2>
           <div className="product-grid">
             {related.map(p => (
               <ProductCard key={p._id} id={p._id} name={p.name} price={p.price}
                 image={p.image || p.thumbnail || p.images?.[0]}
                 rating={p.rating} discount={p.discount} originalPrice={p.originalPrice}
-                brand={p.brand} onAddToCart={() => addToCart(p)}
+                brand={p.brand}
+                onAddToCart={() => addToCart(p)}
                 onAddToWishlist={() => addToWishlist && addToWishlist(p)}
+                onRemoveFromWishlist={removeFromWishlist}
+                isInCart={cartItemIds?.has(p._id) || false}
+                isWishlisted={wishlistIds?.has(p._id) || false}
               />
             ))}
           </div>

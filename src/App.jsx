@@ -229,7 +229,7 @@ function App() {
           } />
           <Route path="/wishlist"              element={<PageWrapper><Wishlist wishlistItems={wishlistItems} removeFromWishlist={removeFromWishlist} addToCart={addToCart} /></PageWrapper>} />
           <Route path="/account"              element={<PageWrapper><Account /></PageWrapper>} />
-          <Route path="/products/:id"          element={<PageWrapper><ProductDetail addToCart={addToCart} addToWishlist={addToWishlist} /></PageWrapper>} />
+          <Route path="/products/:id"          element={<PageWrapper><ProductDetail addToCart={addToCart} addToWishlist={addToWishlist} removeFromWishlist={removeFromWishlist} cartItemIds={cartItemIds} wishlistIds={wishlistIds} /></PageWrapper>} />
           <Route path="/admin"                 element={<AdminDashboard />} />
           <Route path="/admin/orders"          element={<AdminOrders />} />
           <Route path="/admin/products"        element={<AdminProducts />} />

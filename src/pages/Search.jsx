@@ -6,19 +6,19 @@ import ProductCard from '../ProductCard'
 import SkeletonCard from '../components/SkeletonCard'
 
 const SEARCH_SORT_OPTIONS = [
-  { value: 'default', label: 'Relevance' },
-  { value: 'price-low', label: 'Price: Low to High' },
+  { value: 'default',    label: 'Relevance' },
+  { value: 'price-low',  label: 'Price: Low to High' },
   { value: 'price-high', label: 'Price: High to Low' },
-  { value: 'rating', label: 'Top Rated' },
-  { value: 'discount', label: 'Best Discount' },
+  { value: 'rating',     label: 'Top Rated' },
+  { value: 'discount',   label: 'Best Discount' },
 ]
 
-export default function Search({ addToCart, addToWishlist }) {
-  const [searchParams, setSearchParams] = useSearchParams()
+export default function Search({ addToCart, addToWishlist, removeFromWishlist, cartItemIds, wishlistIds }) {
+  const [searchParams] = useSearchParams()
   const query = searchParams.get('q') || ''
   const [products, setProducts] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [sort, setSort] = useState('default')
+  const [loading, setLoading]   = useState(true)
+  const [sort, setSort]         = useState('default')
   const [priceRange, setPriceRange] = useState({ min: '', max: '' })
   const [showFilters, setShowFilters] = useState(false)
 
@@ -49,17 +49,16 @@ export default function Search({ addToCart, addToWishlist }) {
       return true
     })
     .sort((a, b) => {
-      if (sort === 'price-low') return a.price - b.price
+      if (sort === 'price-low')  return a.price - b.price
       if (sort === 'price-high') return b.price - a.price
-      if (sort === 'rating') return (b.rating || 0) - (a.rating || 0)
-      if (sort === 'discount') return (b.discount || 0) - (a.discount || 0)
+      if (sort === 'rating')     return (b.rating || 0) - (a.rating || 0)
+      if (sort === 'discount')   return (b.discount || 0) - (a.discount || 0)
       return 0
     })
 
   return (
     <main style={{ maxWidth: 1280, margin: '0 auto', padding: '24px 16px 80px', fontFamily: 'Inter, sans-serif' }}>
 
-      {/* Header */}
       <div style={{ marginBottom: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
           <SearchIcon size={18} color="#94a3b8" />
@@ -72,23 +71,23 @@ export default function Search({ addToCart, addToWishlist }) {
         </p>
       </div>
 
-      {/* Filters + Sort bar */}
+      {/* Filters + Sort */}
       <div style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
         <button onClick={() => setShowFilters(!showFilters)} style={{
           display: 'flex', alignItems: 'center', gap: 6, padding: '9px 16px',
-          borderRadius: 10, border: '1px solid #e2e8f0', background: showFilters ? '#0f172a' : '#fff',
-          color: showFilters ? '#fff' : '#0f172a', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+          borderRadius: 10, border: '1px solid #e2e8f0',
+          background: showFilters ? '#0f172a' : '#fff',
+          color: showFilters ? '#fff' : '#0f172a',
+          fontSize: 13, fontWeight: 600, cursor: 'pointer',
         }}>
           <SlidersHorizontal size={14} /> Filters
         </button>
-
         <select value={sort} onChange={e => setSort(e.target.value)} style={{
           padding: '9px 14px', borderRadius: 10, border: '1px solid #e2e8f0',
           fontSize: 13, color: '#0f172a', background: '#fff', cursor: 'pointer', outline: 'none',
         }}>
           {SEARCH_SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
-
         {(priceRange.min || priceRange.max) && (
           <button onClick={() => setPriceRange({ min: '', max: '' })} style={{
             display: 'flex', alignItems: 'center', gap: 4, padding: '9px 14px',
@@ -106,7 +105,7 @@ export default function Search({ addToCart, addToWishlist }) {
           style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 14, padding: '16px 20px', marginBottom: 20, display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'flex-end' }}>
           <div>
             <label style={{ fontSize: 11, fontWeight: 700, color: '#475569', display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Min Price (₹)</label>
-            <input id="min-price" name="min-price" type="number" placeholder="0" value={priceRange.min}
+            <input type="number" placeholder="0" value={priceRange.min}
               onChange={e => setPriceRange(p => ({ ...p, min: e.target.value }))}
               style={{ padding: '9px 12px', borderRadius: 10, border: '1px solid #e2e8f0', fontSize: 13, width: 120, outline: 'none' }}
               onFocus={e => e.target.style.borderColor = '#C9A84C'}
@@ -114,7 +113,7 @@ export default function Search({ addToCart, addToWishlist }) {
           </div>
           <div>
             <label style={{ fontSize: 11, fontWeight: 700, color: '#475569', display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Max Price (₹)</label>
-            <input id="max-price" name="max-price" type="number" placeholder="Any" value={priceRange.max}
+            <input type="number" placeholder="Any" value={priceRange.max}
               onChange={e => setPriceRange(p => ({ ...p, max: e.target.value }))}
               style={{ padding: '9px 12px', borderRadius: 10, border: '1px solid #e2e8f0', fontSize: 13, width: 120, outline: 'none' }}
               onFocus={e => e.target.style.borderColor = '#C9A84C'}
@@ -151,6 +150,9 @@ export default function Search({ addToCart, addToWishlist }) {
                 originalPrice={product.originalPrice} brand={product.brand}
                 onAddToCart={() => addToCart(product)}
                 onAddToWishlist={() => addToWishlist && addToWishlist(product)}
+                onRemoveFromWishlist={removeFromWishlist}
+                isInCart={cartItemIds?.has(product._id) || false}
+                isWishlisted={wishlistIds?.has(product._id) || false}
               />
             </motion.div>
           ))}
