@@ -371,6 +371,7 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
             >{cat.label}</motion.button>
           ))}
         </div>
+}
       </div>
 
       <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 48,
