@@ -167,11 +167,7 @@ function ProductCard({
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
             transition: 'background 0.2s, color 0.2s', cursor: 'pointer',
           }}
-          onMouseDown={e => e.currentTarget.style.transform = 'scale(0.96)'}
-          onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
-          onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
-          onTouchStart={e => e.currentTarget.style.transform = 'scale(0.96)'}
-          onTouchEnd={e => e.currentTarget.style.transform = 'scale(1)'}
+
         >
           {added
             ? <><Check size={12} /> Added!</>
