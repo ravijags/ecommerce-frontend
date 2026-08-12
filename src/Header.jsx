@@ -249,24 +249,32 @@ function Header({ cartCount, wishlistCount, onSearch }) {
         </div>
       </header>
 
-      {/* ── MOBILE TOP BAR — logo + search icon only ── */}
+      {/* ── MOBILE TOP BAR — PREMIA branded ── */}
       <div className="mobile-header" style={{
         position: 'sticky', top: 0, zIndex: 50,
-        background: '#fff', borderBottom: '1px solid #f1f5f9',
+        background: '#0f172a',
         display: 'none', alignItems: 'center', justifyContent: 'space-between',
-        padding: '12px 16px', boxShadow: '0 1px 8px rgba(0,0,0,0.06)',
+        padding: '10px 16px',
+        boxShadow: '0 2px 12px rgba(0,0,0,0.2)',
       }}>
-        <Link to="/" style={{ textDecoration: 'none' }}>
-          <PremiaLogo variant="light" size="sm" />
+        {/* Logo */}
+        <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ width: 28, height: 28, borderRadius: 8, background: '#C9A84C', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 13, color: '#0f172a' }}>P</div>
+          <div>
+            <div style={{ fontWeight: 900, fontSize: 14, color: '#fff', lineHeight: 1, letterSpacing: '-0.3px' }}>PREMIA</div>
+            <div style={{ fontSize: 8, color: '#C9A84C', letterSpacing: '0.15em', textTransform: 'uppercase', fontWeight: 600 }}>Premium Shopping</div>
+          </div>
         </Link>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+
+        {/* Right actions */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <button onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
-            style={{ padding: 8, borderRadius: 10, border: 'none', background: '#f8fafc', cursor: 'pointer', display: 'flex' }}>
-            <Search size={18} color="#0f172a" />
+            style={{ width: 34, height: 34, borderRadius: 10, border: 'none', background: 'rgba(255,255,255,0.08)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Search size={16} color="#fff" />
           </button>
           <button onClick={() => setMobileMenuOpen(true)}
-            style={{ padding: 8, borderRadius: 10, border: 'none', background: '#f8fafc', cursor: 'pointer', display: 'flex' }}>
-            <Menu size={18} color="#0f172a" />
+            style={{ width: 34, height: 34, borderRadius: 10, border: 'none', background: 'rgba(255,255,255,0.08)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Menu size={16} color="#fff" />
           </button>
         </div>
       </div>
@@ -276,7 +284,7 @@ function Header({ cartCount, wishlistCount, onSearch }) {
         {mobileSearchOpen && (
           <motion.div
             initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
-            style={{ overflow: 'hidden', padding: '0 16px 12px', backgroundColor: '#fff', borderBottom: '1px solid #f1f5f9', position: 'sticky', top: 53, zIndex: 49 }}
+            style={{ overflow: 'hidden', padding: '0 16px 12px', backgroundColor: '#0f172a', borderBottom: '1px solid rgba(255,255,255,0.08)', position: 'sticky', top: 53, zIndex: 49 }}
             className="mobile-header"
           >
             <div style={{ display: 'flex', alignItems: 'center', border: '2px solid #0f172a', borderRadius: 12, backgroundColor: '#fff' }}>

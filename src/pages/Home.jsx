@@ -323,7 +323,7 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
 
           {/* Right: product image — compact */}
           <div style={{ flexShrink: 0 }}>
-            <HeroImage active={active} cur={cur} glow={glow} size={140} />
+            <HeroImage active={active} cur={cur} glow={glow} size={175} />
           </div>
         </div>
       ) : (
@@ -371,8 +371,8 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
             >{cat.label}</motion.button>
           ))}
         </div>
-}
       </div>
+
       <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 48,
         background: 'linear-gradient(to top, #f8fafc, transparent)', pointerEvents: 'none', zIndex: 3 }} />
     </div>
