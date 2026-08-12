@@ -63,10 +63,10 @@ function App() {
   const isAdmin    = location.pathname.startsWith('/admin')
   const isAuthPage = ['/login', '/register', '/forgot-password'].includes(location.pathname) || location.pathname.startsWith('/reset-password')
 
-  const [cartItems, setCartItems]       = useState([])
+  const [cartItems, setCartItems]         = useState([])
   const [wishlistItems, setWishlistItems] = useState(getWishlist)
-  const [rawSearch, setRawSearch]       = useState('')
-  const [searchQuery, setSearchQuery]   = useState('')
+  const [rawSearch, setRawSearch]         = useState('')
+  const [searchQuery, setSearchQuery]     = useState('')
 
   useEffect(() => {
     const timer = setTimeout(() => setSearchQuery(rawSearch), 300)
@@ -166,6 +166,9 @@ function App() {
     }
   }, [])
 
+  // Set of cart item IDs — passed to pages so ProductCard knows what's in cart
+  const cartItemIds = new Set(cartItems.map(i => i._id))
+
   return (
     <div className="bg-gray-50 min-h-screen">
       <ProgressBar />
@@ -174,43 +177,58 @@ function App() {
         toastOptions={{
           duration: 2000,
           style: {
-            fontFamily: 'Inter, sans-serif',
-            fontSize: 13,
-            fontWeight: 600,
-            background: '#0f172a',
-            color: '#fff',
-            borderRadius: 12,
-            padding: '12px 18px',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.24)',
-            maxWidth: 320,
+            fontFamily: 'Inter, sans-serif', fontSize: 13, fontWeight: 600,
+            background: '#0f172a', color: '#fff', borderRadius: 12,
+            padding: '12px 18px', boxShadow: '0 8px 32px rgba(0,0,0,0.24)', maxWidth: 320,
           },
           success: { iconTheme: { primary: '#C9A84C', secondary: '#0f172a' } },
-          error: {
-          iconTheme: { primary: '#ef4444', secondary: '#0f172a' },
-         },
+          error:   { iconTheme: { primary: '#ef4444', secondary: '#0f172a' } },
         }}
       />
       {!isAdmin && !isAuthPage && (
-        <Header cartCount={cartItems.reduce((t, i) => t + (i.quantity || 1), 0)} wishlistCount={wishlistItems.length} onSearch={setRawSearch} />
+        <Header
+          cartCount={cartItems.reduce((t, i) => t + (i.quantity || 1), 0)}
+          wishlistCount={wishlistItems.length}
+          onSearch={setRawSearch}
+        />
       )}
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
-          <Route path="/"                        element={<PageWrapper><Home addToCart={addToCart} addToWishlist={addToWishlist} searchQuery={searchQuery} /></PageWrapper>} />
-          <Route path="/login"                   element={<PageWrapper><Login /></PageWrapper>} />
-          <Route path="/register"                element={<PageWrapper><Register /></PageWrapper>} />
-          <Route path="/forgot-password"         element={<PageWrapper><ForgotPassword /></PageWrapper>} />
-          <Route path="/reset-password/:token"   element={<PageWrapper><ResetPassword /></PageWrapper>} />
-          <Route path="/cart"                    element={<PageWrapper><Cart cartItems={cartItems} setCartItems={setCartItems} /></PageWrapper>} />
-          <Route path="/orders"                  element={<PageWrapper><Orders /></PageWrapper>} />
-          <Route path="/search"                  element={<PageWrapper><Search addToCart={addToCart} addToWishlist={addToWishlist} /></PageWrapper>} />
-          <Route path="/wishlist"                element={<PageWrapper><Wishlist wishlistItems={wishlistItems} removeFromWishlist={removeFromWishlist} addToCart={addToCart} /></PageWrapper>} />
-          <Route path="/account"                 element={<PageWrapper><Account /></PageWrapper>} />
-          <Route path="/products/:id"            element={<PageWrapper><ProductDetail addToCart={addToCart} addToWishlist={addToWishlist} /></PageWrapper>} />
-          <Route path="/admin"                   element={<AdminDashboard />} />
-          <Route path="/admin/orders"            element={<AdminOrders />} />
-          <Route path="/admin/products"          element={<AdminProducts />} />
-          <Route path="/admin/users"             element={<AdminUsers />} />
-          <Route path="*"                        element={<PageWrapper><NotFound /></PageWrapper>} />
+          <Route path="/" element={
+            <PageWrapper>
+              <Home
+                addToCart={addToCart}
+                addToWishlist={addToWishlist}
+                removeFromWishlist={removeFromWishlist}
+                cartItemIds={cartItemIds}
+                searchQuery={searchQuery}
+              />
+            </PageWrapper>
+          } />
+          <Route path="/login"                 element={<PageWrapper><Login /></PageWrapper>} />
+          <Route path="/register"              element={<PageWrapper><Register /></PageWrapper>} />
+          <Route path="/forgot-password"       element={<PageWrapper><ForgotPassword /></PageWrapper>} />
+          <Route path="/reset-password/:token" element={<PageWrapper><ResetPassword /></PageWrapper>} />
+          <Route path="/cart"                  element={<PageWrapper><Cart cartItems={cartItems} setCartItems={setCartItems} /></PageWrapper>} />
+          <Route path="/orders"                element={<PageWrapper><Orders /></PageWrapper>} />
+          <Route path="/search"                element={
+            <PageWrapper>
+              <Search
+                addToCart={addToCart}
+                addToWishlist={addToWishlist}
+                removeFromWishlist={removeFromWishlist}
+                cartItemIds={cartItemIds}
+              />
+            </PageWrapper>
+          } />
+          <Route path="/wishlist"              element={<PageWrapper><Wishlist wishlistItems={wishlistItems} removeFromWishlist={removeFromWishlist} addToCart={addToCart} /></PageWrapper>} />
+          <Route path="/account"              element={<PageWrapper><Account /></PageWrapper>} />
+          <Route path="/products/:id"          element={<PageWrapper><ProductDetail addToCart={addToCart} addToWishlist={addToWishlist} /></PageWrapper>} />
+          <Route path="/admin"                 element={<AdminDashboard />} />
+          <Route path="/admin/orders"          element={<AdminOrders />} />
+          <Route path="/admin/products"        element={<AdminProducts />} />
+          <Route path="/admin/users"           element={<AdminUsers />} />
+          <Route path="*"                      element={<PageWrapper><NotFound /></PageWrapper>} />
         </Routes>
       </AnimatePresence>
       {!isAdmin && !isAuthPage && <Footer />}

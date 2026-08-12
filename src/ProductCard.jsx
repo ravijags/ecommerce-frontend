@@ -1,27 +1,44 @@
 import { Link } from 'react-router-dom'
 import { ShoppingCart, Heart, Star, Check } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
-function ProductCard({ name, price, image, onAddToCart, onAddToWishlist, onRemoveFromWishlist, id, rating, discount, originalPrice, brand, isInCart }) {
+function ProductCard({ name, price, image, onAddToCart, onAddToWishlist, onRemoveFromWishlist, id, rating, discount, originalPrice, brand, cartItems }) {
 
-  // ── Wishlist state — read from localStorage on mount ──
-  const [wishlisted, setWishlisted] = useState(() => {
+  const [wishlisted, setWishlisted] = useState(false)
+  const [added, setAdded]           = useState(false)
+  const [imgLoaded, setImgLoaded]   = useState(false)
+
+  // Sync wishlist state from localStorage on mount + when id changes
+  useEffect(() => {
     try {
       const saved = JSON.parse(localStorage.getItem('premia_wishlist') || '[]')
-      return saved.some(p => p._id === id)
-    } catch { return false }
-  })
+      setWishlisted(saved.some(p => p._id === id))
+    } catch { setWishlisted(false) }
+  }, [id])
 
-  // ── Cart state ──
-  const [added, setAdded] = useState(false)
-
-  const [imgLoaded, setImgLoaded] = useState(false)
+  // Listen for wishlist changes from other tabs/components
+  useEffect(() => {
+    const sync = () => {
+      try {
+        const saved = JSON.parse(localStorage.getItem('premia_wishlist') || '[]')
+        setWishlisted(saved.some(p => p._id === id))
+      } catch {}
+    }
+    window.addEventListener('storage', sync)
+    window.addEventListener('wishlist-updated', sync)
+    return () => {
+      window.removeEventListener('storage', sync)
+      window.removeEventListener('wishlist-updated', sync)
+    }
+  }, [id])
 
   const imageUrl = (image && image.startsWith('http'))
     ? image
     : `https://placehold.co/400x300/f1f5f9/94a3b8?text=${encodeURIComponent(name?.slice(0, 14) || 'Product')}`
 
-  // ── Add to cart ──
+  // Is this product already in cart?
+  const inCart = cartItems ? cartItems.some(i => i._id === id) : false
+
   const handleAddToCart = (e) => {
     e.preventDefault()
     e.stopPropagation()
@@ -30,30 +47,30 @@ function ProductCard({ name, price, image, onAddToCart, onAddToWishlist, onRemov
     setTimeout(() => setAdded(false), 2000)
   }
 
-  // ── Toggle wishlist — add OR remove ──
   const handleWishlist = (e) => {
+    // Stop ALL propagation — prevents card tilt firing
     e.preventDefault()
     e.stopPropagation()
+    e.nativeEvent.stopImmediatePropagation()
 
     if (wishlisted) {
-      // REMOVE — update state + localStorage + call parent
+      // REMOVE from wishlist
       setWishlisted(false)
       try {
         const saved = JSON.parse(localStorage.getItem('premia_wishlist') || '[]')
         const updated = saved.filter(p => p._id !== id)
         localStorage.setItem('premia_wishlist', JSON.stringify(updated))
+        // Notify other components
+        window.dispatchEvent(new Event('wishlist-updated'))
       } catch {}
-      // Call parent remove if provided, otherwise call addToWishlist with flag
-      if (onRemoveFromWishlist) onRemoveFromWishlist(id)
+      if (onRemoveFromWishlist) onRemoveFromWishlist(id, true)
     } else {
-      // ADD
+      // ADD to wishlist
       setWishlisted(true)
       if (onAddToWishlist) onAddToWishlist()
+      window.dispatchEvent(new Event('wishlist-updated'))
     }
   }
-
-  // Already in cart = isInCart prop OR local added state
-  const inCart = isInCart || added
 
   return (
     <div
@@ -64,6 +81,8 @@ function ProductCard({ name, price, image, onAddToCart, onAddToWishlist, onRemov
         transition: 'box-shadow 0.2s, transform 0.2s',
       }}
       onMouseMove={e => {
+        // Don't tilt if clicking wishlist button
+        if (e.target.closest('.wishlist-btn')) return
         const rect = e.currentTarget.getBoundingClientRect()
         const x = ((e.clientX - rect.left) / rect.width - 0.5) * 12
         const y = ((e.clientY - rect.top) / rect.height - 0.5) * -12
@@ -80,10 +99,10 @@ function ProductCard({ name, price, image, onAddToCart, onAddToWishlist, onRemov
       {/* Discount badge */}
       {discount > 0 && (
         <div style={{
-          position: 'absolute', top: 8, left: 8,
+          position: 'absolute', top: 8, left: 8, zIndex: 10,
           background: '#ef4444', color: '#fff',
           fontSize: 9, fontWeight: 800, padding: '2px 6px',
-          borderRadius: 6, letterSpacing: '0.03em', pointerEvents: 'none', zIndex: 10,
+          borderRadius: 6, letterSpacing: '0.03em', pointerEvents: 'none',
         }}>
           {Math.round(discount)}% OFF
         </div>
@@ -95,28 +114,23 @@ function ProductCard({ name, price, image, onAddToCart, onAddToWishlist, onRemov
         className="wishlist-btn"
         title={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
         style={{
-          position: 'absolute', top: 8, right: 8, zIndex: 20,
+          position: 'absolute', top: 8, right: 8, zIndex: 30,
           background: wishlisted ? '#fff0f0' : '#fff',
-          border: wishlisted ? '1px solid #fecaca' : 'none',
+          border: wishlisted ? '1px solid #fecaca' : '1px solid #f1f5f9',
           borderRadius: '50%', width: 30, height: 30,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           boxShadow: '0 1px 6px rgba(0,0,0,0.15)',
           cursor: 'pointer', transition: 'all 0.2s',
         }}
       >
-        <Heart
-          size={13}
-          color={wishlisted ? '#ef4444' : '#94a3b8'}
-          fill={wishlisted ? '#ef4444' : 'none'}
-        />
+        <Heart size={13} color={wishlisted ? '#ef4444' : '#94a3b8'} fill={wishlisted ? '#ef4444' : 'none'} />
       </button>
 
       {/* Image */}
       <Link to={`/products/${id}`} style={{ display: 'block' }}>
         <div style={{ width: '100%', background: '#f8fafc', overflow: 'hidden' }}>
           <img
-            src={imageUrl}
-            alt={name}
+            src={imageUrl} alt={name}
             onError={e => {
               e.target.onerror = null
               e.target.src = `https://placehold.co/400x300/f1f5f9/94a3b8?text=${encodeURIComponent(name?.slice(0, 14) || 'Product')}`
@@ -173,28 +187,19 @@ function ProductCard({ name, price, image, onAddToCart, onAddToWishlist, onRemov
           )}
         </div>
 
-        {/* ── Cart button — 3 states: Add / Added! / In Cart ── */}
+        {/* Cart button — 3 states */}
         <button
           onClick={handleAddToCart}
           style={{
             width: '100%', padding: '9px 0',
-            background: inCart
-              ? (added ? '#C9A84C' : '#f0fdf4')   // gold flash → soft green if already in cart
-              : '#0f172a',
-            color: inCart
-              ? (added ? '#0f172a' : '#16a34a')
-              : '#fff',
+            background: added ? '#C9A84C' : inCart ? '#f0fdf4' : '#0f172a',
+            color: added ? '#0f172a' : inCart ? '#16a34a' : '#fff',
             border: inCart && !added ? '1px solid #bbf7d0' : 'none',
             borderRadius: 10, fontSize: 11, fontWeight: 700,
             letterSpacing: '0.04em', textTransform: 'uppercase',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-            transition: 'background 0.2s, color 0.2s, transform 0.1s', cursor: 'pointer',
+            transition: 'background 0.2s, color 0.2s', cursor: 'pointer',
           }}
-          onMouseDown={e => e.currentTarget.style.transform = 'scale(0.96)'}
-          onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
-          onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
-          onTouchStart={e => e.currentTarget.style.transform = 'scale(0.96)'}
-          onTouchEnd={e => e.currentTarget.style.transform = 'scale(1)'}
         >
           {added
             ? <><Check size={12} /> Added!</>
@@ -208,7 +213,7 @@ function ProductCard({ name, price, image, onAddToCart, onAddToWishlist, onRemov
       <style>{`
         .wishlist-btn { opacity: 1 !important; }
         @media (hover: hover) { .wishlist-btn { opacity: 0 !important; } }
-        .wishlist-btn:hover, div:hover .wishlist-btn { opacity: 1 !important; }
+        div:hover .wishlist-btn { opacity: 1 !important; }
       `}</style>
     </div>
   )

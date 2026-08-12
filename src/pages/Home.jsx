@@ -316,7 +316,7 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-export default function Home({ addToCart, addToWishlist, searchQuery }) {
+export default function Home({ addToCart, addToWishlist, removeFromWishlist, searchQuery, cartItems }) {
   const [products, setProducts]   = useState([])
   const [loading, setLoading]     = useState(true)
   const [category, setCategory]   = useState('')
@@ -478,8 +478,10 @@ export default function Home({ addToCart, addToWishlist, searchQuery }) {
                   <ProductCard key={p._id} id={p._id} name={p.name} price={p.price}
                     image={p.image} rating={p.rating} discount={p.discount}
                     originalPrice={p.originalPrice} brand={p.brand}
+                    cartItems={cartItems}
                     onAddToCart={() => addToCart(p)}
-                    onAddToWishlist={() => addToWishlist && addToWishlist(p)} />
+                    onAddToWishlist={() => addToWishlist && addToWishlist(p)}
+                    onRemoveFromWishlist={removeFromWishlist} />
                 ))}
               </div>
             </div>
