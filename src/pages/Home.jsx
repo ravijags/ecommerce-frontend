@@ -480,7 +480,6 @@ export default function Home({ addToCart, addToWishlist, removeFromWishlist, car
                   <ProductCard key={p._id} id={p._id} name={p.name} price={p.price}
                     image={p.image} rating={p.rating} discount={p.discount}
                     originalPrice={p.originalPrice} brand={p.brand}
-                    cartItems={cartItems}
                     onAddToCart={() => addToCart(p)}
                     onAddToWishlist={() => addToWishlist && addToWishlist(p)}
                     onRemoveFromWishlist={removeFromWishlist}
