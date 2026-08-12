@@ -1,43 +1,19 @@
 import { Link } from 'react-router-dom'
 import { ShoppingCart, Heart, Star, Check } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
-function ProductCard({ name, price, image, onAddToCart, onAddToWishlist, onRemoveFromWishlist, id, rating, discount, originalPrice, brand, cartItems }) {
-
-  const [wishlisted, setWishlisted] = useState(false)
-  const [added, setAdded]           = useState(false)
-  const [imgLoaded, setImgLoaded]   = useState(false)
-
-  // Sync wishlist state from localStorage on mount + when id changes
-  useEffect(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem('premia_wishlist') || '[]')
-      setWishlisted(saved.some(p => p._id === id))
-    } catch { setWishlisted(false) }
-  }, [id])
-
-  // Listen for wishlist changes from other tabs/components
-  useEffect(() => {
-    const sync = () => {
-      try {
-        const saved = JSON.parse(localStorage.getItem('premia_wishlist') || '[]')
-        setWishlisted(saved.some(p => p._id === id))
-      } catch {}
-    }
-    window.addEventListener('storage', sync)
-    window.addEventListener('wishlist-updated', sync)
-    return () => {
-      window.removeEventListener('storage', sync)
-      window.removeEventListener('wishlist-updated', sync)
-    }
-  }, [id])
+function ProductCard({
+  name, price, image, onAddToCart, onAddToWishlist, onRemoveFromWishlist,
+  id, rating, discount, originalPrice, brand,
+  isInCart,      // passed from App via cartItemIds
+  isWishlisted,  // passed from App via wishlistItems
+}) {
+  const [added, setAdded]       = useState(false)
+  const [imgLoaded, setImgLoaded] = useState(false)
 
   const imageUrl = (image && image.startsWith('http'))
     ? image
     : `https://placehold.co/400x300/f1f5f9/94a3b8?text=${encodeURIComponent(name?.slice(0, 14) || 'Product')}`
-
-  // Is this product already in cart?
-  const inCart = cartItems ? cartItems.some(i => i._id === id) : false
 
   const handleAddToCart = (e) => {
     e.preventDefault()
@@ -47,30 +23,18 @@ function ProductCard({ name, price, image, onAddToCart, onAddToWishlist, onRemov
     setTimeout(() => setAdded(false), 2000)
   }
 
+  // Toggle — App owns the state, we just call the right function
   const handleWishlist = (e) => {
-    // Stop ALL propagation — prevents card tilt firing
     e.preventDefault()
     e.stopPropagation()
-    e.nativeEvent.stopImmediatePropagation()
-
-    if (wishlisted) {
-      // REMOVE from wishlist
-      setWishlisted(false)
-      try {
-        const saved = JSON.parse(localStorage.getItem('premia_wishlist') || '[]')
-        const updated = saved.filter(p => p._id !== id)
-        localStorage.setItem('premia_wishlist', JSON.stringify(updated))
-        // Notify other components
-        window.dispatchEvent(new Event('wishlist-updated'))
-      } catch {}
-      if (onRemoveFromWishlist) onRemoveFromWishlist(id, true)
+    if (isWishlisted) {
+      if (onRemoveFromWishlist) onRemoveFromWishlist(id)
     } else {
-      // ADD to wishlist
-      setWishlisted(true)
       if (onAddToWishlist) onAddToWishlist()
-      window.dispatchEvent(new Event('wishlist-updated'))
     }
   }
+
+  const inCart = isInCart || added
 
   return (
     <div
@@ -81,8 +45,6 @@ function ProductCard({ name, price, image, onAddToCart, onAddToWishlist, onRemov
         transition: 'box-shadow 0.2s, transform 0.2s',
       }}
       onMouseMove={e => {
-        // Don't tilt if clicking wishlist button
-        if (e.target.closest('.wishlist-btn')) return
         const rect = e.currentTarget.getBoundingClientRect()
         const x = ((e.clientX - rect.left) / rect.width - 0.5) * 12
         const y = ((e.clientY - rect.top) / rect.height - 0.5) * -12
@@ -108,29 +70,34 @@ function ProductCard({ name, price, image, onAddToCart, onAddToWishlist, onRemov
         </div>
       )}
 
-      {/* Wishlist button */}
+      {/* Wishlist button — driven by isWishlisted prop */}
       <button
         onClick={handleWishlist}
         className="wishlist-btn"
-        title={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+        title={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
         style={{
-          position: 'absolute', top: 8, right: 8, zIndex: 30,
-          background: wishlisted ? '#fff0f0' : '#fff',
-          border: wishlisted ? '1px solid #fecaca' : '1px solid #f1f5f9',
+          position: 'absolute', top: 8, right: 8, zIndex: 20,
+          background: isWishlisted ? '#fff0f0' : '#fff',
+          border: isWishlisted ? '1px solid #fecaca' : 'none',
           borderRadius: '50%', width: 30, height: 30,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           boxShadow: '0 1px 6px rgba(0,0,0,0.15)',
           cursor: 'pointer', transition: 'all 0.2s',
         }}
       >
-        <Heart size={13} color={wishlisted ? '#ef4444' : '#94a3b8'} fill={wishlisted ? '#ef4444' : 'none'} />
+        <Heart
+          size={13}
+          color={isWishlisted ? '#ef4444' : '#94a3b8'}
+          fill={isWishlisted ? '#ef4444' : 'none'}
+        />
       </button>
 
       {/* Image */}
       <Link to={`/products/${id}`} style={{ display: 'block' }}>
         <div style={{ width: '100%', background: '#f8fafc', overflow: 'hidden' }}>
           <img
-            src={imageUrl} alt={name}
+            src={imageUrl}
+            alt={name}
             onError={e => {
               e.target.onerror = null
               e.target.src = `https://placehold.co/400x300/f1f5f9/94a3b8?text=${encodeURIComponent(name?.slice(0, 14) || 'Product')}`
@@ -193,13 +160,18 @@ function ProductCard({ name, price, image, onAddToCart, onAddToWishlist, onRemov
           style={{
             width: '100%', padding: '9px 0',
             background: added ? '#C9A84C' : inCart ? '#f0fdf4' : '#0f172a',
-            color: added ? '#0f172a' : inCart ? '#16a34a' : '#fff',
-            border: inCart && !added ? '1px solid #bbf7d0' : 'none',
+            color:      added ? '#0f172a' : inCart ? '#16a34a' : '#fff',
+            border:     inCart && !added ? '1px solid #bbf7d0' : 'none',
             borderRadius: 10, fontSize: 11, fontWeight: 700,
             letterSpacing: '0.04em', textTransform: 'uppercase',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
             transition: 'background 0.2s, color 0.2s', cursor: 'pointer',
           }}
+          onMouseDown={e => e.currentTarget.style.transform = 'scale(0.96)'}
+          onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
+          onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+          onTouchStart={e => e.currentTarget.style.transform = 'scale(0.96)'}
+          onTouchEnd={e => e.currentTarget.style.transform = 'scale(1)'}
         >
           {added
             ? <><Check size={12} /> Added!</>
@@ -213,7 +185,7 @@ function ProductCard({ name, price, image, onAddToCart, onAddToWishlist, onRemov
       <style>{`
         .wishlist-btn { opacity: 1 !important; }
         @media (hover: hover) { .wishlist-btn { opacity: 0 !important; } }
-        div:hover .wishlist-btn { opacity: 1 !important; }
+        .wishlist-btn:hover, div:hover .wishlist-btn { opacity: 1 !important; }
       `}</style>
     </div>
   )

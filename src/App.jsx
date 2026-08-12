@@ -166,8 +166,9 @@ function App() {
     }
   }, [])
 
-  // Set of cart item IDs — passed to pages so ProductCard knows what's in cart
-  const cartItemIds = new Set(cartItems.map(i => i._id))
+  // Sets for O(1) lookup — passed to pages so ProductCard knows state
+  const cartItemIds    = new Set(cartItems.map(i => i._id))
+  const wishlistIds    = new Set(wishlistItems.map(i => i._id))
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -201,6 +202,8 @@ function App() {
                 addToWishlist={addToWishlist}
                 removeFromWishlist={removeFromWishlist}
                 cartItemIds={cartItemIds}
+                wishlistIds={wishlistIds}
+                wishlistIds={wishlistIds}
                 searchQuery={searchQuery}
               />
             </PageWrapper>
@@ -218,6 +221,7 @@ function App() {
                 addToWishlist={addToWishlist}
                 removeFromWishlist={removeFromWishlist}
                 cartItemIds={cartItemIds}
+                wishlistIds={wishlistIds}
               />
             </PageWrapper>
           } />
