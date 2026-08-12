@@ -316,7 +316,7 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-export default function Home({ addToCart, addToWishlist, removeFromWishlist, searchQuery, cartItems }) {
+export default function Home({ addToCart, addToWishlist, removeFromWishlist, cartItemIds, wishlistIds, searchQuery }) {
   const [products, setProducts]   = useState([])
   const [loading, setLoading]     = useState(true)
   const [category, setCategory]   = useState('')
@@ -450,8 +450,10 @@ export default function Home({ addToCart, addToWishlist, removeFromWishlist, sea
                       rating={product.rating} discount={product.discount}
                       originalPrice={product.originalPrice} brand={product.brand}
                       onAddToCart={() => addToCart(product)}
-                      isInCart={false}
-                      onAddToWishlist={() => addToWishlist && addToWishlist(product)} />
+                      onAddToWishlist={() => addToWishlist && addToWishlist(product)}
+                      onRemoveFromWishlist={removeFromWishlist}
+                      isInCart={cartItemIds?.has(product._id) || false}
+                      isWishlisted={wishlistIds?.has(product._id) || false} />
                   </div>
                 </motion.div>
               ))}
@@ -481,7 +483,9 @@ export default function Home({ addToCart, addToWishlist, removeFromWishlist, sea
                     cartItems={cartItems}
                     onAddToCart={() => addToCart(p)}
                     onAddToWishlist={() => addToWishlist && addToWishlist(p)}
-                    onRemoveFromWishlist={removeFromWishlist} />
+                    onRemoveFromWishlist={removeFromWishlist}
+                    isInCart={cartItemIds?.has(p._id) || false}
+                    isWishlisted={wishlistIds?.has(p._id) || false} />
                 ))}
               </div>
             </div>
