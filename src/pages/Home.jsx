@@ -77,7 +77,7 @@ function useIsMobile() {
   return mobile
 }
 
-// ── Product image ─────────────────────────────────────────────────────────
+// ── Hero Image ────────────────────────────────────────────────────────────
 function HeroImage({ active, cur, glow, size }) {
   return (
     <div style={{ position: 'relative', width: size, height: size, flexShrink: 0 }}>
@@ -87,8 +87,8 @@ function HeroImage({ active, cur, glow, size }) {
           initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
           transition={{ duration: 1 }}
           style={{ position: 'absolute', inset: '-40%', borderRadius: '50%',
-            background: `radial-gradient(circle, ${glow}55 0%, ${glow}20 35%, transparent 65%)`,
-            filter: 'blur(32px)', pointerEvents: 'none' }}
+            background: `radial-gradient(circle, ${glow}60 0%, ${glow}22 35%, transparent 65%)`,
+            filter: 'blur(30px)', pointerEvents: 'none' }}
         />
       </AnimatePresence>
       {/* Floor shadow */}
@@ -96,29 +96,33 @@ function HeroImage({ active, cur, glow, size }) {
         <motion.div key={`sh-${active}`}
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
           transition={{ duration: 1 }}
-          style={{ position: 'absolute', bottom: '-8%', left: '5%', right: '5%', height: 40,
-            background: `radial-gradient(ellipse, ${glow}80 0%, transparent 70%)`,
-            filter: 'blur(20px)', borderRadius: '50%' }}
+          style={{ position: 'absolute', bottom: '-8%', left: '5%', right: '5%', height: 36,
+            background: `radial-gradient(ellipse, ${glow}85 0%, transparent 70%)`,
+            filter: 'blur(18px)', borderRadius: '50%' }}
         />
       </AnimatePresence>
-      {/* Outer ring */}
-      <motion.div animate={{ rotate: 360 }} transition={{ duration: 22, repeat: Infinity, ease: 'linear' }}
-        style={{ position: 'absolute', inset: -16, borderRadius: '50%',
-          border: `1.5px solid ${glow}40`, borderTopColor: `${glow}90`,
-          borderRightColor: `${glow}20` }} />
+      {/* Outer ring — clearly visible */}
+      <motion.div animate={{ rotate: 360 }} transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
+        style={{ position: 'absolute', inset: -14, borderRadius: '50%',
+          border: `2px solid transparent`,
+          borderTopColor: `${glow}90`,
+          borderRightColor: `${glow}40`,
+          borderBottomColor: `${glow}15`,
+          borderLeftColor: `${glow}40`,
+        }} />
       {/* Inner dashed ring */}
-      <motion.div animate={{ rotate: -360 }} transition={{ duration: 15, repeat: Infinity, ease: 'linear' }}
-        style={{ position: 'absolute', inset: -6, borderRadius: '50%',
-          border: `1px dashed ${glow}30` }} />
+      <motion.div animate={{ rotate: -360 }} transition={{ duration: 14, repeat: Infinity, ease: 'linear' }}
+        style={{ position: 'absolute', inset: -4, borderRadius: '50%',
+          border: `1px dashed ${glow}40` }} />
       {/* Product image */}
       <AnimatePresence mode="wait">
         <motion.img key={`img-${active}`} src={cur.img} alt={cur.name}
-          initial={{ opacity: 0, scale: 0.75, y: 28, filter: 'blur(14px)' }}
+          initial={{ opacity: 0, scale: 0.78, y: 24, filter: 'blur(12px)' }}
           animate={{ opacity: 1, scale: 1,    y: 0,  filter: 'blur(0px)' }}
-          exit={{   opacity: 0, scale: 1.14,  y: -28, filter: 'blur(12px)' }}
-          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '6%',
-            filter: `drop-shadow(0 32px 64px ${glow}75)`, position: 'relative', zIndex: 2 }}
+          exit={{   opacity: 0, scale: 1.12,  y: -24, filter: 'blur(10px)' }}
+          transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+          style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '5%',
+            filter: `drop-shadow(0 28px 56px ${glow}80)`, position: 'relative', zIndex: 2 }}
           onError={e => { e.target.style.opacity = 0 }}
         />
       </AnimatePresence>
@@ -163,34 +167,34 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
   return (
     <div style={{ position: 'relative', overflow: 'hidden', background: '#04060f' }}>
 
-      {/* ── Strong color-shifting background ── */}
+      {/* Strong multi-layer color-shifting background */}
       <AnimatePresence mode="sync">
         <motion.div key={`bg-${active}`}
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
           transition={{ duration: 1.6 }}
           style={{ position: 'absolute', inset: 0, pointerEvents: 'none',
             background: isMobile
-              ? `radial-gradient(ellipse 120% 60% at 60% 10%, ${glow}30 0%, transparent 60%)`
-              : `
-                radial-gradient(ellipse 55% 100% at 78% 50%, ${glow}35 0%, transparent 60%),
-                radial-gradient(ellipse 35% 55% at 15% 25%, ${glow}12 0%, transparent 55%),
-                radial-gradient(ellipse 60% 40% at 50% 100%, ${glow}08 0%, transparent 60%)
-              `
+              ? `radial-gradient(ellipse 130% 70% at 70% 0%, ${glow}35 0%, transparent 60%),
+                 radial-gradient(ellipse 80% 50% at 20% 80%, ${glow}10 0%, transparent 55%)`
+              : `radial-gradient(ellipse 55% 100% at 78% 50%, ${glow}40 0%, transparent 58%),
+                 radial-gradient(ellipse 35% 55% at 15% 25%, ${glow}14 0%, transparent 55%),
+                 radial-gradient(ellipse 60% 40% at 50% 100%, ${glow}10 0%, transparent 60%)`
           }}
         />
       </AnimatePresence>
 
-      {/* Subtle noise texture */}
-      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', opacity: 0.4,
-        backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.015) 1px, transparent 0)',
+      {/* Dot grid */}
+      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none',
+        backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.018) 1px, transparent 0)',
         backgroundSize: '32px 32px' }} />
 
       {isMobile ? (
-        /* ── MOBILE: compact premium layout ── */
-        <div style={{ position: 'relative', zIndex: 2, padding: '22px 20px 18px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            {/* Left text */}
-            <div style={{ flex: 1, minWidth: 0 }}>
+        /* ── MOBILE: balanced side-by-side ── */
+        <div style={{ position: 'relative', zIndex: 2, padding: '22px 18px 16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+
+            {/* Left: text — takes 55% */}
+            <div style={{ flex: '0 0 55%', minWidth: 0 }}>
               <motion.div initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1, duration: 0.4 }}
                 style={{ display: 'inline-flex', alignItems: 'center', gap: 6,
                   background: 'rgba(201,168,76,0.12)', border: '1px solid rgba(201,168,76,0.3)',
@@ -202,8 +206,8 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
 
               <motion.h1 initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.15, duration: 0.5 }}
-                style={{ margin: '0 0 8px', fontWeight: 900, lineHeight: 1, letterSpacing: '-1.5px',
-                  fontSize: 'clamp(26px, 7.5vw, 36px)' }}>
+                style={{ margin: '0 0 6px', fontWeight: 900, lineHeight: 1.0, letterSpacing: '-1.5px',
+                  fontSize: 'clamp(22px, 6.5vw, 32px)' }}>
                 <span style={{ color: '#fff' }}>New Standard<br />of </span>
                 <motion.span animate={{ backgroundPosition: ['0% 50%','100% 50%','0% 50%'] }}
                   transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
@@ -217,8 +221,8 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
               <AnimatePresence mode="wait">
                 <motion.p key={`mn-${active}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                   transition={{ duration: 0.3 }}
-                  style={{ color: 'rgba(255,255,255,0.5)', fontSize: 10, margin: '0 0 14px',
-                    fontWeight: 500, letterSpacing: '0.05em', textTransform: 'uppercase',
+                  style={{ color: 'rgba(255,255,255,0.55)', fontSize: 10, margin: '0 0 14px',
+                    fontWeight: 500, letterSpacing: '0.04em',
                     whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {cur.name}
                 </motion.p>
@@ -227,38 +231,37 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
               <motion.button whileTap={{ scale: 0.95 }} onClick={onExplore}
                 style={{ background: 'linear-gradient(135deg,#C9A84C,#e8b84b)',
                   color: '#0f172a', border: 'none', borderRadius: 10,
-                  padding: '10px 22px', fontSize: 12, fontWeight: 800,
+                  padding: '10px 20px', fontSize: 12, fontWeight: 800,
                   letterSpacing: '0.06em', textTransform: 'uppercase', cursor: 'pointer',
-                  boxShadow: '0 4px 20px rgba(201,168,76,0.45)' }}>
+                  boxShadow: '0 4px 20px rgba(201,168,76,0.5)', whiteSpace: 'nowrap' }}>
                 Explore →
               </motion.button>
             </div>
 
-            {/* Right image */}
-            <div style={{ flexShrink: 0 }}>
-              <HeroImage active={active} cur={cur} glow={glow} size={150} />
+            {/* Right: image — takes 45% */}
+            <div style={{ flex: '0 0 45%', display: 'flex', justifyContent: 'center' }}>
+              <HeroImage active={active} cur={cur} glow={glow} size={Math.min(window.innerWidth * 0.4, 170)} />
             </div>
           </div>
 
-          {/* Mobile dots */}
-          <div style={{ display: 'flex', gap: 5, marginTop: 16 }}>
+          {/* Dots — bigger tap targets */}
+          <div style={{ display: 'flex', gap: 6, marginTop: 14, paddingLeft: 2 }}>
             {items.map((_, i) => (
               <motion.button key={i} onClick={() => go(i)}
-                animate={{ width: i === active ? 20 : 5, background: i === active ? '#C9A84C' : 'rgba(255,255,255,0.2)' }}
+                animate={{ width: i === active ? 22 : 7, background: i === active ? '#C9A84C' : 'rgba(255,255,255,0.25)' }}
                 transition={{ duration: 0.3 }}
-                style={{ height: 5, borderRadius: 3, border: 'none', cursor: 'pointer', padding: 0 }} />
+                style={{ height: 7, borderRadius: 4, border: 'none', cursor: 'pointer', padding: 0,
+                  minWidth: 7 }} />
             ))}
           </div>
         </div>
       ) : (
         /* ── DESKTOP: magazine split ── */
         <div style={{ maxWidth: 1300, margin: '0 auto', display: 'flex', alignItems: 'center',
-          minHeight: 560, padding: '0 80px', gap: 32, position: 'relative', zIndex: 2 }}>
+          minHeight: 580, padding: '0 80px', gap: 0, position: 'relative', zIndex: 2 }}>
 
-          {/* LEFT: Text */}
-          <div style={{ flex: '0 0 52%', paddingRight: 32 }}>
-
-            {/* Badge */}
+          {/* LEFT: Text — 50% */}
+          <div style={{ flex: '0 0 50%', paddingRight: 48 }}>
             <motion.div initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1, duration: 0.5 }}
               style={{ display: 'inline-flex', alignItems: 'center', gap: 7,
                 background: 'rgba(201,168,76,0.08)', border: '1px solid rgba(201,168,76,0.22)',
@@ -270,11 +273,10 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
               </span>
             </motion.div>
 
-            {/* ── BIG HEADLINE — fixed wrapping ── */}
             <motion.h1 initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15, duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-              style={{ margin: '0 0 20px', fontWeight: 900, lineHeight: 0.92, letterSpacing: '-3px',
-                fontSize: 'clamp(48px, 5.8vw, 86px)' }}>
+              style={{ margin: '0 0 20px', fontWeight: 900, lineHeight: 0.92,
+                letterSpacing: '-3px', fontSize: 'clamp(48px, 5.5vw, 84px)' }}>
               <span style={{ color: '#fff', display: 'block' }}>The New</span>
               <span style={{ color: '#fff', display: 'block' }}>Standard of</span>
               <motion.span
@@ -294,18 +296,16 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
               Every item handpicked. Every price unbeatable.
             </motion.p>
 
-            {/* Buttons */}
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.42, duration: 0.45 }}
               style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 40 }}>
               <motion.button
-                whileHover={{ scale: 1.04, boxShadow: '0 24px 56px rgba(201,168,76,0.6)' }}
-                whileTap={{ scale: 0.95 }}
-                onClick={onExplore}
+                whileHover={{ scale: 1.04, boxShadow: '0 24px 56px rgba(201,168,76,0.65)' }}
+                whileTap={{ scale: 0.95 }} onClick={onExplore}
                 style={{ background: 'linear-gradient(135deg,#C9A84C 0%,#e8b84b 100%)',
                   color: '#0f172a', border: 'none', borderRadius: 14,
                   padding: '15px 40px', fontSize: 13, fontWeight: 800,
                   letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer',
-                  boxShadow: '0 8px 28px rgba(201,168,76,0.45), 0 0 0 1px rgba(201,168,76,0.2)',
+                  boxShadow: '0 8px 28px rgba(201,168,76,0.5), 0 0 0 1px rgba(201,168,76,0.25)',
                   transition: 'all 0.2s' }}>
                 Explore Now →
               </motion.button>
@@ -316,8 +316,8 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
                   whileHover={{ scale: 1.04, borderColor: '#C9A84C', color: '#C9A84C' }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => onCategoryClick(cur.category)}
-                  style={{ background: 'rgba(255,255,255,0.04)', color: '#94a3b8',
-                    border: '1px solid rgba(255,255,255,0.12)', borderRadius: 14,
+                  style={{ background: 'rgba(255,255,255,0.05)', color: '#94a3b8',
+                    border: '1px solid rgba(255,255,255,0.15)', borderRadius: 14,
                     padding: '15px 30px', fontSize: 13, fontWeight: 600,
                     cursor: 'pointer', transition: 'all 0.2s', backdropFilter: 'blur(8px)' }}>
                   Shop {catName} →
@@ -329,21 +329,21 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.55, duration: 0.5 }}
               style={{ display: 'flex', gap: 0 }}>
               {[{v:c1,s:'+',l:'Products'},{v:c2,s:'K+',l:'Customers'},{v:c3,s:'★',l:'Rating'}].map(({v,s,l},i) => (
-                <div key={l} style={{
-                  flex: 1, paddingRight: i < 2 ? 28 : 0, paddingLeft: i > 0 ? 28 : 0,
+                <div key={l} style={{ flex: 1,
+                  paddingRight: i < 2 ? 28 : 0, paddingLeft: i > 0 ? 28 : 0,
                   borderRight: i < 2 ? '1px solid rgba(255,255,255,0.07)' : 'none' }}>
-                  <div style={{ fontSize: 'clamp(24px,3vw,34px)', fontWeight: 900, color: '#C9A84C', lineHeight: 1 }}>{v}{s}</div>
+                  <div style={{ fontSize: 'clamp(22px,2.8vw,32px)', fontWeight: 900, color: '#C9A84C', lineHeight: 1 }}>{v}{s}</div>
                   <div style={{ fontSize: 10, color: '#475569', marginTop: 5, textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 600 }}>{l}</div>
                 </div>
               ))}
             </motion.div>
           </div>
 
-          {/* RIGHT: Image — bigger, more dominant */}
+          {/* RIGHT: Image — 50%, perfectly centered */}
           <motion.div initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-            style={{ flex: '0 0 48%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 0' }}>
-            <HeroImage active={active} cur={cur} glow={glow} size={440} />
+            style={{ flex: '0 0 50%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '48px 0' }}>
+            <HeroImage active={active} cur={cur} glow={glow} size={460} />
           </motion.div>
         </div>
       )}
@@ -351,28 +351,26 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
       {/* Desktop bottom strip */}
       {!isMobile && (
         <div style={{ position: 'relative', zIndex: 2,
-          borderTop: '1px solid rgba(255,255,255,0.05)',
-          padding: '14px 80px 20px',
+          borderTop: '1px solid rgba(255,255,255,0.06)',
+          padding: '14px 80px 22px',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          {/* Dots */}
           <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
             {items.map((_, i) => (
               <motion.button key={i} onClick={() => go(i)}
-                animate={{ width: i === active ? 24 : 6, background: i === active ? '#C9A84C' : 'rgba(255,255,255,0.2)' }}
+                animate={{ width: i === active ? 24 : 7, background: i === active ? '#C9A84C' : 'rgba(255,255,255,0.22)' }}
                 transition={{ duration: 0.3 }}
-                style={{ height: 6, borderRadius: 3, border: 'none', cursor: 'pointer', padding: 0 }} />
+                style={{ height: 7, borderRadius: 4, border: 'none', cursor: 'pointer', padding: 0 }} />
             ))}
           </div>
-          {/* Category pills */}
           <div style={{ display: 'flex', gap: 8 }}>
             {QUICK_CATS.map(cat => (
               <motion.button key={cat.slug}
-                whileHover={{ background: 'rgba(201,168,76,0.12)', borderColor: 'rgba(201,168,76,0.4)', color: '#C9A84C' }}
+                whileHover={{ background: 'rgba(201,168,76,0.15)', borderColor: 'rgba(201,168,76,0.5)', color: '#C9A84C', scale: 1.04 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => onCategoryClick(cat.slug)}
-                style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)',
+                style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.18)',
                   color: '#94a3b8', borderRadius: 100, padding: '7px 18px',
-                  fontSize: 12, fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}>
+                  fontSize: 12, fontWeight: 600, cursor: 'pointer', transition: 'all 0.18s' }}>
                 {cat.label}
               </motion.button>
             ))}
@@ -380,9 +378,9 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
         </div>
       )}
 
-      {/* Fade into page */}
-      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 60,
-        background: 'linear-gradient(to top, #fff, transparent)', pointerEvents: 'none', zIndex: 3 }} />
+      {/* Fade to page */}
+      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 64,
+        background: 'linear-gradient(to top, #fafafa, transparent)', pointerEvents: 'none', zIndex: 3 }} />
     </div>
   )
 }
@@ -394,14 +392,16 @@ function SortSelect({ value, onChange }) {
   return (
     <div style={{ position: 'relative', flexShrink: 0 }}>
       <button onClick={() => setOpen(o => !o)}
-        style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 14px',
+        style={{ display: 'flex', alignItems: 'center', gap: 8,
+          padding: 'clamp(8px,1.5vw,10px) clamp(12px,2vw,16px)',
           background: '#fff', border: '1.5px solid #e2e8f0', borderRadius: 10,
-          fontSize: 12, fontWeight: 600, color: '#0f172a', cursor: 'pointer',
-          boxShadow: '0 1px 4px rgba(0,0,0,0.05)', transition: 'border-color 0.2s' }}
+          fontSize: 'clamp(11px,1.5vw,13px)', fontWeight: 600, color: '#0f172a', cursor: 'pointer',
+          boxShadow: '0 1px 4px rgba(0,0,0,0.05)', transition: 'border-color 0.2s',
+          minHeight: 40 }}
         onMouseEnter={e => e.currentTarget.style.borderColor = '#C9A84C'}
         onMouseLeave={e => e.currentTarget.style.borderColor = '#e2e8f0'}>
         {current?.label}
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+        <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
           <path d="M2 4l4 4 4-4" stroke="#94a3b8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
       </button>
@@ -416,8 +416,9 @@ function SortSelect({ value, onChange }) {
                 boxShadow: '0 12px 40px rgba(0,0,0,0.12)', minWidth: 190 }}>
               {SORT_OPTIONS.map(o => (
                 <button key={o.value} onClick={() => { onChange(o.value); setOpen(false) }}
-                  style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '12px 18px',
-                    border: 'none', background: o.value === value ? '#fef9ec' : '#fff',
+                  style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%',
+                    padding: '12px 18px', border: 'none',
+                    background: o.value === value ? '#fef9ec' : '#fff',
                     fontSize: 13, color: o.value === value ? '#C9A84C' : '#0f172a',
                     fontWeight: o.value === value ? 700 : 500, cursor: 'pointer', textAlign: 'left' }}
                   onMouseEnter={e => { if (o.value !== value) e.currentTarget.style.background = '#f8fafc' }}
@@ -506,11 +507,11 @@ export default function Home({ addToCart, addToWishlist, removeFromWishlist, car
   }
 
   if (loading) return (
-    <div style={{ background: '#fff', minHeight: '100vh', padding: '20px 16px' }}>
+    <div style={{ background: '#fafafa', minHeight: '100vh', padding: '24px 16px' }}>
       <div style={{ maxWidth: 1280, margin: '0 auto' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-          <div style={{ width: 160, height: 28, borderRadius: 8, background: '#f1f5f9', animation: 'skeletonPulse 1.4s ease-in-out infinite' }} />
-          <div style={{ width: 130, height: 36, borderRadius: 10, background: '#f1f5f9', animation: 'skeletonPulse 1.4s ease-in-out infinite' }} />
+          <div style={{ width: 160, height: 28, borderRadius: 8, background: '#e2e8f0', animation: 'skeletonPulse 1.4s ease-in-out infinite' }} />
+          <div style={{ width: 130, height: 40, borderRadius: 10, background: '#e2e8f0', animation: 'skeletonPulse 1.4s ease-in-out infinite' }} />
         </div>
         <div className="product-grid">
           {Array.from({ length: 10 }).map((_, i) => <SkeletonCard key={i} />)}
@@ -520,7 +521,7 @@ export default function Home({ addToCart, addToWishlist, removeFromWishlist, car
   )
 
   return (
-    <div style={{ background: '#fff', minHeight: '100vh' }} className="mobile-page-padding">
+    <div style={{ background: '#fafafa', minHeight: '100vh' }} className="mobile-page-padding">
 
       {!searchQuery && !category && (
         <LuxuryHero items={heroItems} onCategoryClick={handleCategoryClick}
@@ -528,12 +529,12 @@ export default function Home({ addToCart, addToWishlist, removeFromWishlist, car
       )}
 
       {/* ── PRODUCTS SECTION ── */}
-      <div id="products-section" style={{ maxWidth: 1280, margin: '0 auto', padding: '28px 16px 48px' }}>
+      <div id="products-section" style={{ maxWidth: 1280, margin: '0 auto', padding: '28px 16px 56px' }}>
 
-        {/* Header row */}
-        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 20, gap: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 22, gap: 12 }}>
           <div>
-            <h2 style={{ color: '#0f172a', fontSize: 'clamp(16px, 4vw, 22px)', fontWeight: 900, letterSpacing: '-0.5px', margin: 0, lineHeight: 1 }}>
+            <h2 style={{ color: '#0f172a', fontWeight: 900, letterSpacing: '-0.5px', margin: 0, lineHeight: 1,
+              fontSize: 'clamp(17px, 3.5vw, 22px)' }}>
               {searchQuery ? `"${searchQuery}"` : activeLabel}
             </h2>
             <p style={{ color: '#94a3b8', fontSize: 12, fontWeight: 500, margin: '5px 0 0' }}>
@@ -543,7 +544,6 @@ export default function Home({ addToCart, addToWishlist, removeFromWishlist, car
           <SortSelect value={sort} onChange={setSort} />
         </div>
 
-        {/* Active filter chip */}
         {category && (
           <div style={{ marginBottom: 18 }}>
             <button onClick={() => setCategory('')}
@@ -620,11 +620,11 @@ export default function Home({ addToCart, addToWishlist, removeFromWishlist, car
               <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 28 }}>
                 <div style={{ flex: 1, height: 1, background: 'linear-gradient(to right, transparent, #e2e8f0)' }} />
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#C9A84C' }} />
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#C9A84C' }} />
                   <span style={{ fontSize: 11, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.18em' }}>
                     Recently Viewed
                   </span>
-                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#C9A84C' }} />
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#C9A84C' }} />
                 </div>
                 <div style={{ flex: 1, height: 1, background: 'linear-gradient(to left, transparent, #e2e8f0)' }} />
               </div>

@@ -10,7 +10,7 @@
   --navy: #0f172a;
   --gold: #C9A84C;
   --white: #ffffff;
-  --bg: #ffffff;
+  --bg: #fafafa;
   --text: #0f172a;
   --text-secondary: #64748b;
   --border: #e2e8f0;
@@ -24,7 +24,7 @@ html {
 
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background-color: #fff;
+  background-color: #fafafa;
   color: var(--text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -54,7 +54,7 @@ img { max-width: 100%; display: block; }
 @media (min-width: 768px)  { .product-img-wrapper { height: 210px; } }
 @media (min-width: 1024px) { .product-img-wrapper { height: 220px; } }
 
-/* ── Product grid columns ── */
+/* ── Product grid ── */
 .product-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -73,7 +73,7 @@ img { max-width: 100%; display: block; }
 /* ── Animations ── */
 @keyframes skeletonPulse {
   0%, 100% { opacity: 1; }
-  50%       { opacity: 0.4; }
+  50%       { opacity: 0.45; }
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 .spin { animation: spin 0.8s linear infinite; }
@@ -82,11 +82,11 @@ img { max-width: 100%; display: block; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* ── Product card — bigger text on mobile ── */
+/* ── Mobile card improvements ── */
 @media (max-width: 768px) {
-  .product-card-name  { font-size: 13px !important; font-weight: 600 !important; }
+  .product-card-name  { font-size: 13px !important; }
   .product-card-price { font-size: 16px !important; font-weight: 800 !important; }
   .product-card-brand { font-size: 10px !important; }
-  .product-card-btn   { font-size: 12px !important; padding: 11px 0 !important; }
+  .product-card-btn   { font-size: 12px !important; }
   .product-card { border-radius: 14px !important; }
 }
