@@ -84,7 +84,7 @@ function Header({ cartCount, wishlistCount, onSearch }) {
       <header style={{
         position: 'sticky', top: 0, zIndex: 50,
         backgroundColor: '#fff',
-        boxShadow: scrolled ? '0 4px 20px rgba(0,0,0,0.08)' : '0 1px 0 #f1f5f9',
+        boxShadow: scrolled ? '0 2px 12px rgba(0,0,0,0.06)' : '0 1px 0 #f1f5f9',
         transition: 'box-shadow 0.3s ease',
       }} className="desktop-header">
 
@@ -252,10 +252,9 @@ function Header({ cartCount, wishlistCount, onSearch }) {
       {/* ── MOBILE TOP BAR — PREMIA branded ── */}
       <div className="mobile-header" style={{
         position: 'sticky', top: 0, zIndex: 50,
-        background: '#0f172a',
+        background: '#04060f',
         display: 'none', alignItems: 'center', justifyContent: 'space-between',
         padding: '10px 16px',
-        boxShadow: '0 2px 12px rgba(0,0,0,0.2)',
       }}>
         {/* Logo */}
         <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>

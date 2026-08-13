@@ -161,10 +161,11 @@ function ProductCard({
             background: added ? '#C9A84C' : inCart ? '#f0fdf4' : '#0f172a',
             color: added ? '#0f172a' : inCart ? '#16a34a' : '#fff',
             border: inCart && !added ? '1px solid #bbf7d0' : 'none',
-            borderRadius: 10, fontSize: 11, fontWeight: 700,
+            borderRadius: 10, fontSize: 12, fontWeight: 700,
             letterSpacing: '0.04em', textTransform: 'uppercase',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
             transition: 'background 0.2s, color 0.2s', cursor: 'pointer',
+            minHeight: 40,
           }}
         >
           {added

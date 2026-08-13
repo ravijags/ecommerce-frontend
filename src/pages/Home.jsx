@@ -370,8 +370,8 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
                 whileHover={{ background: 'rgba(201,168,76,0.12)', borderColor: 'rgba(201,168,76,0.4)', color: '#C9A84C' }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => onCategoryClick(cat.slug)}
-                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
-                  color: '#64748b', borderRadius: 100, padding: '7px 18px',
+                style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)',
+                  color: '#94a3b8', borderRadius: 100, padding: '7px 18px',
                   fontSize: 12, fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}>
                 {cat.label}
               </motion.button>
@@ -533,7 +533,7 @@ export default function Home({ addToCart, addToWishlist, removeFromWishlist, car
         {/* Header row */}
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 20, gap: 12 }}>
           <div>
-            <h2 style={{ color: '#0f172a', fontSize: 22, fontWeight: 900, letterSpacing: '-0.5px', margin: 0, lineHeight: 1 }}>
+            <h2 style={{ color: '#0f172a', fontSize: 'clamp(16px, 4vw, 22px)', fontWeight: 900, letterSpacing: '-0.5px', margin: 0, lineHeight: 1 }}>
               {searchQuery ? `"${searchQuery}"` : activeLabel}
             </h2>
             <p style={{ color: '#94a3b8', fontSize: 12, fontWeight: 500, margin: '5px 0 0' }}>
