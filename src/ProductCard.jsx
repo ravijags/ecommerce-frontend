@@ -97,7 +97,7 @@ function ProductCard({
 
       {/* Image */}
       <Link to={`/products/${id}`} className="product-img-wrapper" style={{ display: 'block' }}>
-        <div style={{ width: '100%', height: '100%', background: '#f9f9f9', overflow: 'hidden' }}>
+        <div style={{ width: '100%', height: '100%', background: '#f3f5f8', overflow: 'hidden' }}>
           <img
             src={imageUrl} alt={name}
             onError={e => { e.target.onerror = null; e.target.src = `https://placehold.co/400x300/f1f5f9/94a3b8?text=${encodeURIComponent(name?.slice(0, 14) || 'Product')}` }}

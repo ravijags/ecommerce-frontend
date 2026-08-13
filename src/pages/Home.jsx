@@ -275,7 +275,7 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
 
             <motion.h1 initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15, duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-              style={{ margin: '0 0 20px', fontWeight: 900, lineHeight: 0.92,
+              style={{ margin: '0 0 16px', fontWeight: 900, lineHeight: 0.92,
                 letterSpacing: '-3px', fontSize: 'clamp(48px, 5.5vw, 84px)' }}>
               <span style={{ color: '#fff', display: 'block' }}>The New</span>
               <span style={{ color: '#fff', display: 'block' }}>Standard of</span>
@@ -380,7 +380,7 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
 
       {/* Fade to page */}
       <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 64,
-        background: 'linear-gradient(to top, #fafafa, transparent)', pointerEvents: 'none', zIndex: 3 }} />
+        background: 'linear-gradient(to top, #fafafa 0%, rgba(250,250,250,0.8) 40%, transparent 100%)', pointerEvents: 'none', zIndex: 3 }} />
     </div>
   )
 }
@@ -529,7 +529,7 @@ export default function Home({ addToCart, addToWishlist, removeFromWishlist, car
       )}
 
       {/* ── PRODUCTS SECTION ── */}
-      <div id="products-section" style={{ maxWidth: 1280, margin: '0 auto', padding: '28px 16px 56px' }}>
+      <div id="products-section" style={{ maxWidth: 1280, margin: '0 auto', padding: '24px 12px 56px' }}>
 
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 22, gap: 12 }}>
           <div>

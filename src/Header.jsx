@@ -84,7 +84,7 @@ function Header({ cartCount, wishlistCount, onSearch }) {
       <header style={{
         position: 'sticky', top: 0, zIndex: 50,
         backgroundColor: '#fff',
-        boxShadow: scrolled ? '0 2px 12px rgba(0,0,0,0.06)' : '0 1px 0 #f1f5f9',
+        boxShadow: scrolled ? '0 1px 0 #e2e8f0, 0 2px 8px rgba(0,0,0,0.04)' : '0 1px 0 #f1f5f9',
         transition: 'box-shadow 0.3s ease',
       }} className="desktop-header">
 
