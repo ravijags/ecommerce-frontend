@@ -153,9 +153,9 @@ export default function ProductDetail({ addToCart, addToWishlist, removeFromWish
         {/* ── LEFT: Images ── */}
         <div style={{ position: 'sticky', top: 24 }}>
           <div style={{ display: 'flex', gap: 10 }}>
-            {/* Thumbnails */}
+            {/* Thumbnails — desktop: left column, mobile: hidden (shown below) */}
             {unique.length > 1 && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div className="pd-thumbnails" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {unique.slice(0, 6).map((img, i) => (
                   <motion.button key={i} onClick={() => setSelectedImage(i)}
                     whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
@@ -203,6 +203,21 @@ export default function ProductDetail({ addToCart, addToWishlist, removeFromWish
               </motion.div>
             </AnimatePresence>
           </div>
+
+          {/* Mobile thumbnails — horizontal scroll below main image */}
+          {unique.length > 1 && (
+            <div className="pd-mobile-thumbs" style={{ display: 'none', gap: 8, marginTop: 10, overflowX: 'auto', paddingBottom: 4 }}>
+              {unique.slice(0, 6).map((img, i) => (
+                <button key={i} onClick={() => setSelectedImage(i)}
+                  style={{ width: 52, height: 52, borderRadius: 10, overflow: 'hidden', flexShrink: 0,
+                    border: `2px solid ${selectedImage === i ? '#C9A84C' : '#e2e8f0'}`,
+                    background: '#f4f6f8', cursor: 'pointer', padding: 0 }}>
+                  <img src={img} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 4 }}
+                    onError={e => { e.target.src = 'https://placehold.co/52x52/f4f6f8/94a3b8?text=?' }} />
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* Share button — desktop */}
           <button onClick={() => {
@@ -492,7 +507,7 @@ export default function ProductDetail({ addToCart, addToWishlist, removeFromWish
           <h2 style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', marginBottom: 20 }}>
             Frequently Bought Together
           </h2>
-          <div style={{ background: '#f8fafc', borderRadius: 16, border: '1px solid #e2e8f0',
+          <div className="fbt-container" style={{ background: '#f8fafc', borderRadius: 16, border: '1px solid #e2e8f0',
             padding: 'clamp(16px,3vw,24px)', display: 'flex', alignItems: 'center',
             gap: 'clamp(12px,2vw,20px)', flexWrap: 'wrap' }}>
             {/* Current product */}
@@ -635,6 +650,11 @@ export default function ProductDetail({ addToCart, addToWishlist, removeFromWish
           .pd-grid { grid-template-columns: 1fr !important; gap: 20px !important; }
           .pd-about-grid { grid-template-columns: 1fr !important; gap: 24px !important; }
           .pd-reviews-grid { grid-template-columns: 1fr !important; gap: 16px !important; }
+          .pd-thumbnails { display: none !important; }
+          .pd-mobile-thumbs { display: flex !important; }
+          .fbt-container { flex-direction: column !important; align-items: flex-start !important; }
+          .fbt-container > div:last-child { margin-left: 0 !important; width: 100% !important; align-items: stretch !important; }
+          .fbt-container > div:last-child button { width: 100% !important; }
         }
       `}</style>
     </main>
