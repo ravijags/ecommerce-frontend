@@ -116,13 +116,13 @@ export default function BottomNav({ cartCount, wishlistCount, onSearch }) {
               {active && (
                 <motion.div layoutId="activeTab"
                   style={{ position: 'absolute', top: 0, left: '25%', right: '25%', height: 3, borderRadius: '0 0 3px 3px', background: '#C9A84C' }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                  transition={{ type: 'spring', stiffness: 500, damping: 35 }}
                 />
               )}
 
               {/* Icon with badge */}
               <div style={{ position: 'relative' }}>
-                <motion.div animate={{ scale: active ? 1.12 : 1 }} transition={{ type: 'spring', stiffness: 400, damping: 20 }}>
+                <motion.div animate={{ scale: active ? 1.12 : 1 }} transition={{ type: 'spring', stiffness: 500, damping: 25 }}>
                   <Icon active={active} />
                 </motion.div>
                 <AnimatePresence>

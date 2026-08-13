@@ -55,9 +55,10 @@ function ProductCard({
       onMouseLeave={e => {
         e.currentTarget.style.transform = 'none'
         e.currentTarget.style.boxShadow = '0 1px 8px rgba(0,0,0,0.06)'
-        e.currentTarget.style.transition = 'transform 0.4s ease, box-shadow 0.4s ease'
+        e.currentTarget.style.transition = 'transform 0.35s ease, box-shadow 0.35s ease'
+        e.currentTarget.style.willChange = 'auto'
       }}
-      onMouseEnter={e => { e.currentTarget.style.transition = 'none' }}
+      onMouseEnter={e => { e.currentTarget.style.transition = 'none'; e.currentTarget.style.willChange = 'transform' }}
       onTouchStart={e => { e.currentTarget.style.transform = 'none' }}
       onTouchEnd={e => { e.currentTarget.style.transform = 'none' }}
     >
@@ -178,9 +179,14 @@ function ProductCard({
       </div>
 
       <style>{`
-        .wishlist-btn { opacity: 1 !important; }
-        @media (hover: hover) { .wishlist-btn { opacity: 0 !important; } }
-        .wishlist-btn:hover, div:hover .wishlist-btn { opacity: 1 !important; }
+        /* Desktop: hide until hover. Mobile: always show */
+        @media (hover: hover) {
+          .wishlist-btn { opacity: 0 !important; transition: opacity 0.2s; }
+          div:hover .wishlist-btn { opacity: 1 !important; }
+        }
+        @media (hover: none) {
+          .wishlist-btn { opacity: 1 !important; }
+        }
       `}</style>
     </div>
   )

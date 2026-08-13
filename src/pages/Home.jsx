@@ -236,7 +236,7 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
 
             {/* Right image */}
             <div style={{ flexShrink: 0 }}>
-              <HeroImage active={active} cur={cur} glow={glow} size={170} />
+              <HeroImage active={active} cur={cur} glow={glow} size={160} />
             </div>
           </div>
 
@@ -416,7 +416,7 @@ function SortSelect({ value, onChange }) {
                 boxShadow: '0 12px 40px rgba(0,0,0,0.12)', minWidth: 190 }}>
               {SORT_OPTIONS.map(o => (
                 <button key={o.value} onClick={() => { onChange(o.value); setOpen(false) }}
-                  style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '11px 16px',
+                  style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '12px 18px',
                     border: 'none', background: o.value === value ? '#fef9ec' : '#fff',
                     fontSize: 13, color: o.value === value ? '#C9A84C' : '#0f172a',
                     fontWeight: o.value === value ? 700 : 500, cursor: 'pointer', textAlign: 'left' }}
@@ -591,7 +591,7 @@ export default function Home({ addToCart, addToWishlist, removeFromWishlist, car
             </div>
 
             {hasMore && (
-              <div style={{ textAlign: 'center', marginTop: 52 }}>
+              <div style={{ textAlign: 'center', marginTop: 64 }}>
                 <motion.button
                   whileHover={{ scale: 1.03, boxShadow: '0 12px 32px rgba(15,23,42,0.18)' }}
                   whileTap={{ scale: 0.97 }}

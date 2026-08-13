@@ -257,10 +257,10 @@ function Header({ cartCount, wishlistCount, onSearch }) {
         padding: '10px 16px',
       }}>
         {/* Logo */}
-        <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ width: 28, height: 28, borderRadius: 8, background: '#C9A84C', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 13, color: '#0f172a' }}>P</div>
+        <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ width: 30, height: 30, borderRadius: 8, background: '#C9A84C', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 14, color: '#0f172a', flexShrink: 0 }}>P</div>
           <div>
-            <div style={{ fontWeight: 900, fontSize: 14, color: '#fff', lineHeight: 1, letterSpacing: '-0.3px' }}>PREMIA</div>
+            <div style={{ fontWeight: 900, fontSize: 15, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.3px' }}>PREMIA</div>
             <div style={{ fontSize: 8, color: '#C9A84C', letterSpacing: '0.15em', textTransform: 'uppercase', fontWeight: 600 }}>Premium Shopping</div>
           </div>
         </Link>
