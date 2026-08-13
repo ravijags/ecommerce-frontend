@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Instagram, Twitter, Youtube, Facebook, Mail, Phone, MapPin, ArrowRight } from 'lucide-react'
+import { Mail, Phone, MapPin, ArrowRight } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useState } from 'react'
 
@@ -82,11 +82,35 @@ const FOOTER_LINKS = {
   ],
 }
 
+// Social SVG icons inline — avoids lucide version issues
+const SocialIcons = {
+  Instagram: ({ color }) => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1" fill={color} stroke="none"/>
+    </svg>
+  ),
+  Twitter: ({ color }) => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill={color}>
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.736-8.857L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+    </svg>
+  ),
+  Youtube: ({ color }) => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill={color}>
+      <path d="M23 7s-.3-1.9-1.2-2.7c-1.1-1.2-2.4-1.2-3-1.3C16.2 3 12 3 12 3s-4.2 0-6.8.2c-.6 0-1.9.1-3 1.3C1.3 5.3 1 7 1 7S.7 9.1.7 11.2v2c0 2 .3 4.1.3 4.1s.3 1.9 1.2 2.7c1.1 1.2 2.6 1.1 3.3 1.2C7.2 21.3 12 21.3 12 21.3s4.2 0 6.8-.3c.6-.1 1.9-.1 3-1.3.9-.8 1.2-2.7 1.2-2.7S23.3 15.2 23.3 13.2v-2C23.3 9.1 23 7 23 7zM9.7 15.5v-7l6.6 3.5-6.6 3.5z"/>
+    </svg>
+  ),
+  Facebook: ({ color }) => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill={color}>
+      <path d="M24 12.07C24 5.41 18.63 0 12 0S0 5.41 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.51c-1.49 0-1.95.93-1.95 1.88v2.27h3.32l-.53 3.49h-2.79V24C19.61 23.1 24 18.1 24 12.07z"/>
+    </svg>
+  ),
+}
+
 const SOCIALS = [
-  { Icon: Instagram, label: 'Instagram', color: '#E1306C', href: '#' },
-  { Icon: Twitter,   label: 'Twitter',   color: '#1DA1F2', href: '#' },
-  { Icon: Youtube,   label: 'YouTube',   color: '#FF0000', href: '#' },
-  { Icon: Facebook,  label: 'Facebook',  color: '#1877F2', href: '#' },
+  { key: 'Instagram', label: 'Instagram', color: '#E1306C', href: '#' },
+  { key: 'Twitter',   label: 'Twitter',   color: '#1DA1F2', href: '#' },
+  { key: 'Youtube',   label: 'YouTube',   color: '#FF0000', href: '#' },
+  { key: 'Facebook',  label: 'Facebook',  color: '#1877F2', href: '#' },
 ]
 
 export default function Footer() {
@@ -178,16 +202,19 @@ export default function Footer() {
 
             {/* Socials */}
             <div style={{ display: 'flex', gap: 8 }}>
-              {SOCIALS.map(({ Icon, label, color, href }) => (
-                <motion.a key={label} href={href} whileHover={{ scale: 1.1, y: -2 }} whileTap={{ scale: 0.95 }}
-                  style={{ width: 32, height: 32, borderRadius: 8,
-                    background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
-                  onMouseEnter={e => e.currentTarget.style.background = `${color}20`}
-                  onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.06)'}>
-                  <Icon size={14} color={color} />
-                </motion.a>
-              ))}
+              {SOCIALS.map(({ key, label, color, href }) => {
+                const SocialIcon = SocialIcons[key]
+                return (
+                  <motion.a key={label} href={href} whileHover={{ scale: 1.1, y: -2 }} whileTap={{ scale: 0.95 }}
+                    style={{ width: 32, height: 32, borderRadius: 8,
+                      background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
+                    onMouseEnter={e => e.currentTarget.style.background = `${color}20`}
+                    onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.06)'}>
+                    <SocialIcon color={color} />
+                  </motion.a>
+                )
+              })}
             </div>
           </div>
 
