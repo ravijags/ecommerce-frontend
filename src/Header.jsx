@@ -97,7 +97,7 @@ function Header({ cartCount, wishlistCount, onSearch }) {
               style={{ display: 'inline-flex', gap: 48 }}
             >
               {[...Array(2)].map((_, j) => (
-                <span key={j} style={{ display: 'inline-flex', gap: 48, color: '#fff', fontSize: 12, fontWeight: 500, letterSpacing: '0.05em' }}>
+                <span key={j} style={{ display: 'inline-flex', gap: 56, color: '#fff', fontSize: 12, fontWeight: 600, letterSpacing: '0.08em' }}>
                   <span>🚚 FREE SHIPPING ABOVE ₹999</span>
                   <span style={{ color: '#C9A84C' }}>· USE CODE <strong>PREMIA10</strong> ·</span>
                   <span>✨ NEW ARRIVALS EVERY WEEK</span>

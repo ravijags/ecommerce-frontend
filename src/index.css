@@ -10,7 +10,7 @@
   --navy: #0f172a;
   --gold: #C9A84C;
   --white: #ffffff;
-  --bg: #f8fafc;
+  --bg: #ffffff;
   --text: #0f172a;
   --text-secondary: #64748b;
   --border: #e2e8f0;
@@ -43,7 +43,7 @@ img { max-width: 100%; display: block; }
 ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 ::selection { background: #C9A84C; color: #0f172a; }
 
-/* ── Product card image ── */
+/* ── Product card image height ── */
 .product-img-wrapper {
   height: 190px;
   display: block;
@@ -54,16 +54,16 @@ img { max-width: 100%; display: block; }
 @media (min-width: 768px)  { .product-img-wrapper { height: 210px; } }
 @media (min-width: 1024px) { .product-img-wrapper { height: 220px; } }
 
-/* ── Product grid ── */
+/* ── Product grid columns ── */
 .product-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 12px;
 }
-@media (min-width: 480px)  { .product-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; } }
-@media (min-width: 640px)  { .product-grid { grid-template-columns: repeat(3, 1fr); gap: 14px; } }
+@media (min-width: 480px)  { .product-grid { gap: 14px; } }
+@media (min-width: 640px)  { .product-grid { grid-template-columns: repeat(3, 1fr); gap: 16px; } }
 @media (min-width: 900px)  { .product-grid { grid-template-columns: repeat(4, 1fr); gap: 16px; } }
-@media (min-width: 1200px) { .product-grid { grid-template-columns: repeat(5, 1fr); gap: 16px; } }
+@media (min-width: 1200px) { .product-grid { grid-template-columns: repeat(5, 1fr); gap: 18px; } }
 @media (min-width: 1400px) { .product-grid { grid-template-columns: repeat(6, 1fr); gap: 18px; } }
 
 /* ── Mobile bottom padding ── */
@@ -73,7 +73,7 @@ img { max-width: 100%; display: block; }
 /* ── Animations ── */
 @keyframes skeletonPulse {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+  50%       { opacity: 0.4; }
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 .spin { animation: spin 0.8s linear infinite; }
@@ -82,18 +82,11 @@ img { max-width: 100%; display: block; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* ── Mobile product card improvements ── */
+/* ── Product card — bigger text on mobile ── */
 @media (max-width: 768px) {
-  /* Bigger text on cards */
-  .product-card-name  { font-size: 13px !important; }
-  .product-card-price { font-size: 16px !important; }
+  .product-card-name  { font-size: 13px !important; font-weight: 600 !important; }
+  .product-card-price { font-size: 16px !important; font-weight: 800 !important; }
   .product-card-brand { font-size: 10px !important; }
   .product-card-btn   { font-size: 12px !important; padding: 11px 0 !important; }
-
-  /* Cards with more depth */
-  .product-card {
-    border-radius: 14px !important;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.07) !important;
-    border: 1px solid #edf2f7 !important;
-  }
+  .product-card { border-radius: 14px !important; }
 }
