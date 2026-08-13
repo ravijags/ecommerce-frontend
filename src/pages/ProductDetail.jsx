@@ -151,7 +151,7 @@ export default function ProductDetail({ addToCart, addToWishlist, removeFromWish
       <div className="pd-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'clamp(24px,4vw,56px)', alignItems: 'start' }}>
 
         {/* ── LEFT: Images ── */}
-        <div style={{ position: 'sticky', top: 90 }}>
+        <div style={{ position: 'sticky', top: 24 }}>
           <div style={{ display: 'flex', gap: 10 }}>
             {/* Thumbnails */}
             {unique.length > 1 && (
@@ -458,9 +458,9 @@ export default function ProductDetail({ addToCart, addToWishlist, removeFromWish
               </ul>
               {descSentences.length > 4 && (
                 <button onClick={() => setShowFullDesc(!showFullDesc)}
-                  style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 12,
+                  style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 14,
                     background: 'none', border: 'none', color: '#C9A84C', fontSize: 13,
-                    fontWeight: 700, cursor: 'pointer' }}>
+                    fontWeight: 700, cursor: 'pointer', padding: '4px 0' }}>
                   {showFullDesc ? <><ChevronUp size={14} /> Show less</> : <><ChevronDown size={14} /> Show more</>}
                 </button>
               )}
@@ -529,7 +529,7 @@ export default function ProductDetail({ addToCart, addToWishlist, removeFromWish
                 </p>
               </div>
               <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
-                onClick={() => { addToCart(product); addToCart(related[0]); toast.success('Both items added!') }}
+                onClick={() => { addToCart({...product, _suppressToast: true}); addToCart({...related[0], _suppressToast: true}); toast.success('Both items added to cart! 🛒') }}
                 style={{ padding: '11px 22px', borderRadius: 12, border: 'none',
                   background: '#C9A84C', color: '#0f172a', fontSize: 13, fontWeight: 800,
                   cursor: 'pointer', whiteSpace: 'nowrap',
