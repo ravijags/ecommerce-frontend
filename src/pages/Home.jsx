@@ -239,7 +239,7 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
             </div>
 
             {/* Right: image — takes 45% */}
-            <div style={{ flex: '0 0 45%', display: 'flex', justifyContent: 'center' }}>
+            <div style={{ flex: '0 0 45%', display: 'flex', justifyContent: 'flex-end', paddingRight: 4 }}>
               <HeroImage active={active} cur={cur} glow={glow} size={Math.min(window.innerWidth * 0.4, 170)} />
             </div>
           </div>
@@ -378,9 +378,7 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
         </div>
       )}
 
-      {/* Fade to page */}
-      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 64,
-        background: 'linear-gradient(to top, #fafafa 0%, rgba(250,250,250,0.8) 40%, transparent 100%)', pointerEvents: 'none', zIndex: 3 }} />
+
     </div>
   )
 }
