@@ -21,16 +21,21 @@ export default function BottomNav({ cartCount, wishlistCount, onSearch }) {
     setQuery('')
   }
 
+  // Show first name if logged in
+  const storedName = localStorage.getItem('premia_uname') || ''
+  const firstName  = storedName.split(' ')[0] || 'Account'
+  const accountLabel = firstName.length > 7 ? firstName.slice(0, 6) + '…' : firstName
+
   const tabs = [
-    { to: '/',         label: 'Home',     
+    { to: '/',         label: 'Home',
       Icon: ({ active }) => <Home size={22} fill={active ? '#C9A84C' : 'none'} color={active ? '#C9A84C' : '#94a3b8'} strokeWidth={active ? 2.5 : 1.8} /> },
-    { to: null,        label: 'Search',   
+    { to: null,        label: 'Search',
       Icon: ({ active }) => <Search size={22} color={active ? '#C9A84C' : '#94a3b8'} strokeWidth={active ? 2.5 : 1.8} /> },
     { to: '/wishlist', label: 'Wishlist', count: wishlistCount,
       Icon: ({ active }) => <Heart size={22} fill={active ? '#C9A84C' : 'none'} color={active ? '#C9A84C' : '#94a3b8'} strokeWidth={active ? 2.5 : 1.8} /> },
     { to: '/cart',     label: 'Cart',     count: cartCount,
       Icon: ({ active }) => <ShoppingCart size={22} fill={active ? '#C9A84C' : 'none'} color={active ? '#C9A84C' : '#94a3b8'} strokeWidth={active ? 2.5 : 1.8} /> },
-    { to: '/account',  label: 'Account',  
+    { to: '/account',  label: accountLabel,
       Icon: ({ active }) => <User size={22} fill={active ? '#C9A84C' : 'none'} color={active ? '#C9A84C' : '#94a3b8'} strokeWidth={active ? 2.5 : 1.8} /> },
   ]
 

@@ -114,7 +114,7 @@ function ProductCard({
       {/* Info */}
       <div style={{ padding: '10px 12px 12px', display: 'flex', flexDirection: 'column', flex: 1 }}>
         {brand && (
-          <p className="product-card-brand" style={{ color: '#C9A84C', fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 3 }}>
+          <p className="product-card-brand" style={{ color: '#C9A84C', fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 4 }}>
             {brand}
           </p>
         )}

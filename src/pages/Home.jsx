@@ -217,7 +217,7 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
               <AnimatePresence mode="wait">
                 <motion.p key={`mn-${active}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                   transition={{ duration: 0.3 }}
-                  style={{ color: 'rgba(255,255,255,0.3)', fontSize: 10, margin: '0 0 14px',
+                  style={{ color: 'rgba(255,255,255,0.5)', fontSize: 10, margin: '0 0 14px',
                     fontWeight: 500, letterSpacing: '0.05em', textTransform: 'uppercase',
                     whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {cur.name}
@@ -236,7 +236,7 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
 
             {/* Right image */}
             <div style={{ flexShrink: 0 }}>
-              <HeroImage active={active} cur={cur} glow={glow} size={160} />
+              <HeroImage active={active} cur={cur} glow={glow} size={150} />
             </div>
           </div>
 
@@ -253,7 +253,7 @@ function LuxuryHero({ items, onCategoryClick, onExplore }) {
       ) : (
         /* ── DESKTOP: magazine split ── */
         <div style={{ maxWidth: 1300, margin: '0 auto', display: 'flex', alignItems: 'center',
-          minHeight: 600, padding: '0 80px', gap: 32, position: 'relative', zIndex: 2 }}>
+          minHeight: 560, padding: '0 80px', gap: 32, position: 'relative', zIndex: 2 }}>
 
           {/* LEFT: Text */}
           <div style={{ flex: '0 0 52%', paddingRight: 32 }}>
