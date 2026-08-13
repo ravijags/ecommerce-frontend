@@ -652,9 +652,7 @@ export default function ProductDetail({ addToCart, addToWishlist, removeFromWish
           .pd-reviews-grid { grid-template-columns: 1fr !important; gap: 16px !important; }
           .pd-thumbnails { display: none !important; }
           .pd-mobile-thumbs { display: flex !important; }
-          .fbt-container { flex-direction: column !important; align-items: flex-start !important; }
-          .fbt-container > div:last-child { margin-left: 0 !important; width: 100% !important; align-items: stretch !important; }
-          .fbt-container > div:last-child button { width: 100% !important; }
+
         }
       `}</style>
     </main>
