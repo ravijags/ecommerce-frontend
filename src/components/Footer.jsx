@@ -1,120 +1,79 @@
 import { Link } from 'react-router-dom'
-import { Mail, Phone, MapPin, ArrowRight } from 'lucide-react'
+import { Mail, Phone, MapPin, ArrowRight, Shield, Truck, RotateCcw } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useState } from 'react'
 
-// ── Real colored payment brand SVGs ──────────────────────────────────────
-const VisaLogo = () => (
-  <svg viewBox="0 0 60 20" width="48" height="16" xmlns="http://www.w3.org/2000/svg">
-    <text x="0" y="16" fontFamily="Arial" fontSize="18" fontWeight="900" fill="#1A1F71" letterSpacing="-1">VISA</text>
-  </svg>
-)
-
-const MastercardLogo = () => (
-  <svg viewBox="0 0 38 24" width="38" height="24" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="14" cy="12" r="10" fill="#EB001B" />
-    <circle cx="24" cy="12" r="10" fill="#F79E1B" />
-    <path d="M19 4.8a10 10 0 0 1 0 14.4A10 10 0 0 1 19 4.8z" fill="#FF5F00" />
-  </svg>
-)
-
-const RazorpayLogo = () => (
-  <svg viewBox="0 0 80 24" width="72" height="22" xmlns="http://www.w3.org/2000/svg">
-    <polygon points="12,2 20,10 14,10 22,22 8,22 16,12 10,12" fill="#2563EB" />
-    <text x="26" y="17" fontFamily="Arial" fontSize="13" fontWeight="700" fill="#2563EB">Razorpay</text>
-  </svg>
-)
-
-const UPILogo = () => (
-  <svg viewBox="0 0 60 24" width="48" height="24" xmlns="http://www.w3.org/2000/svg">
-    <rect width="60" height="24" rx="4" fill="#7C3AED" />
-    <text x="8" y="17" fontFamily="Arial" fontSize="13" fontWeight="900" fill="white">UPI</text>
-    <circle cx="48" cy="12" r="6" fill="#F59E0B" />
-    <text x="44" y="16" fontFamily="Arial" fontSize="9" fontWeight="700" fill="#7C3AED">₹</text>
-  </svg>
-)
-
-const RuPayLogo = () => (
-  <svg viewBox="0 0 72 24" width="64" height="24" xmlns="http://www.w3.org/2000/svg">
-    <rect width="72" height="24" rx="4" fill="#006BA6" />
-    <text x="6" y="16" fontFamily="Arial" fontSize="11" fontWeight="900" fill="white">RuPay</text>
-    <rect x="52" y="4" width="14" height="16" rx="2" fill="#F97316" />
-    <text x="54" y="16" fontFamily="Arial" fontSize="10" fontWeight="900" fill="white">✓</text>
-  </svg>
-)
-
-const NetBankingLogo = () => (
-  <svg viewBox="0 0 80 24" width="72" height="24" xmlns="http://www.w3.org/2000/svg">
-    <rect width="80" height="24" rx="4" fill="#0f172a" />
-    <text x="6" y="16" fontFamily="Arial" fontSize="9" fontWeight="700" fill="#C9A84C" letterSpacing="0.5">NET BANKING</text>
-  </svg>
-)
-
 const FOOTER_LINKS = {
   'Shop': [
-    { label: 'All Products',    to: '/' },
-    { label: 'New Arrivals',    to: '/?category=smartphones' },
-    { label: 'Best Sellers',    to: '/?sort=rating' },
-    { label: 'Watches',         to: '/?category=mens-watches' },
-    { label: 'Fragrances',      to: '/?category=fragrances' },
-    { label: 'Electronics',     to: '/?category=laptops' },
+    { label: 'All Products',      to: '/' },
+    { label: 'New Arrivals',      to: '/?category=smartphones' },
+    { label: 'Watches',           to: '/?category=mens-watches' },
+    { label: 'Fragrances',        to: '/?category=fragrances' },
+    { label: 'Electronics',       to: '/?category=laptops' },
+    { label: 'Fashion',           to: '/?category=mens-shirts' },
   ],
   'Account': [
-    { label: 'My Account',      to: '/account' },
-    { label: 'My Orders',       to: '/orders' },
-    { label: 'My Wishlist',     to: '/wishlist' },
-    { label: 'My Cart',         to: '/cart' },
-    { label: 'Track Order',     to: '/orders' },
+    { label: 'My Account',        to: '/account' },
+    { label: 'My Orders',         to: '/orders' },
+    { label: 'My Wishlist',       to: '/wishlist' },
+    { label: 'My Cart',           to: '/cart' },
   ],
   'Support': [
-    { label: 'Help Center',     to: '/' },
+    { label: 'Help Center',       to: '/' },
     { label: 'Returns & Refunds', to: '/' },
-    { label: 'Shipping Info',   to: '/' },
-    { label: 'Size Guide',      to: '/' },
-    { label: 'Contact Us',      to: '/' },
+    { label: 'Shipping Info',     to: '/' },
+    { label: 'Contact Us',        to: '/' },
   ],
   'Company': [
-    { label: 'About PREMIA',    to: '/' },
-    { label: 'Careers',         to: '/' },
-    { label: 'Press',           to: '/' },
-    { label: 'Privacy Policy',  to: '/' },
-    { label: 'Terms of Service', to: '/' },
+    { label: 'About PREMIA',      to: '/' },
+    { label: 'Privacy Policy',    to: '/' },
+    { label: 'Terms of Service',  to: '/' },
+    { label: 'Careers',           to: '/' },
   ],
 }
 
-// Social SVG icons inline — avoids lucide version issues
-const SocialIcons = {
-  Instagram: ({ color }) => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1" fill={color} stroke="none"/>
-    </svg>
-  ),
-  Twitter: ({ color }) => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill={color}>
-      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.736-8.857L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-    </svg>
-  ),
-  Youtube: ({ color }) => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill={color}>
-      <path d="M23 7s-.3-1.9-1.2-2.7c-1.1-1.2-2.4-1.2-3-1.3C16.2 3 12 3 12 3s-4.2 0-6.8.2c-.6 0-1.9.1-3 1.3C1.3 5.3 1 7 1 7S.7 9.1.7 11.2v2c0 2 .3 4.1.3 4.1s.3 1.9 1.2 2.7c1.1 1.2 2.6 1.1 3.3 1.2C7.2 21.3 12 21.3 12 21.3s4.2 0 6.8-.3c.6-.1 1.9-.1 3-1.3.9-.8 1.2-2.7 1.2-2.7S23.3 15.2 23.3 13.2v-2C23.3 9.1 23 7 23 7zM9.7 15.5v-7l6.6 3.5-6.6 3.5z"/>
-    </svg>
-  ),
-  Facebook: ({ color }) => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill={color}>
-      <path d="M24 12.07C24 5.41 18.63 0 12 0S0 5.41 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.51c-1.49 0-1.95.93-1.95 1.88v2.27h3.32l-.53 3.49h-2.79V24C19.61 23.1 24 18.1 24 12.07z"/>
-    </svg>
-  ),
+// ── Payment badge component ───────────────────────────────────────────────
+function PayBadge({ children, bg, color, border }) {
+  return (
+    <div style={{
+      background: bg || '#fff',
+      border: `1.5px solid ${border || '#e2e8f0'}`,
+      borderRadius: 8,
+      padding: '5px 12px',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      height: 32,
+      boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+    }}>
+      <span style={{ color: color || '#0f172a', fontSize: 12, fontWeight: 900, letterSpacing: '0.02em', whiteSpace: 'nowrap' }}>
+        {children}
+      </span>
+    </div>
+  )
 }
 
-const SOCIALS = [
-  { key: 'Instagram', label: 'Instagram', color: '#E1306C', href: '#' },
-  { key: 'Twitter',   label: 'Twitter',   color: '#1DA1F2', href: '#' },
-  { key: 'Youtube',   label: 'YouTube',   color: '#FF0000', href: '#' },
-  { key: 'Facebook',  label: 'Facebook',  color: '#1877F2', href: '#' },
-]
+// ── Social button ─────────────────────────────────────────────────────────
+function SocialBtn({ href, label, emoji, color }) {
+  return (
+    <motion.a href={href} target="_blank" rel="noopener noreferrer"
+      whileHover={{ scale: 1.12, y: -2 }} whileTap={{ scale: 0.95 }}
+      title={label}
+      style={{
+        width: 36, height: 36, borderRadius: 10,
+        background: 'rgba(255,255,255,0.06)',
+        border: '1px solid rgba(255,255,255,0.1)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: 16, textDecoration: 'none', transition: 'all 0.2s',
+        cursor: 'pointer',
+      }}
+      onMouseEnter={e => { e.currentTarget.style.background = `${color}20`; e.currentTarget.style.borderColor = `${color}50` }}
+      onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)' }}>
+      {emoji}
+    </motion.a>
+  )
+}
 
 export default function Footer() {
-  const [email, setEmail] = useState('')
+  const [email, setEmail]         = useState('')
   const [subscribed, setSubscribed] = useState(false)
 
   const handleSubscribe = () => {
@@ -124,112 +83,130 @@ export default function Footer() {
   }
 
   return (
-    <footer style={{ background: '#0a0f1e', fontFamily: 'Inter, system-ui, sans-serif' }}>
+    <footer style={{ background: '#080d1a', fontFamily: 'Inter, system-ui, sans-serif' }}>
 
-      {/* ── Newsletter strip ── */}
-      <div style={{ background: 'linear-gradient(135deg, #0f172a, #1e293b)', borderBottom: '1px solid rgba(255,255,255,0.06)', padding: 'clamp(24px,4vw,40px) clamp(20px,5vw,64px)' }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24, flexWrap: 'wrap' }}>
+      {/* ── Trust bar ── */}
+      <div style={{ background: '#0f172a', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '16px clamp(20px,5vw,64px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-around', gap: 16, flexWrap: 'wrap' }}>
+          {[
+            { Icon: Truck,     text: 'Free Delivery Above ₹999' },
+            { Icon: RotateCcw, text: '7-Day Easy Returns' },
+            { Icon: Shield,    text: '100% Secure Payments' },
+          ].map(({ Icon, text }) => (
+            <div key={text} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Icon size={14} color="#C9A84C" />
+              <span style={{ color: '#64748b', fontSize: 12, fontWeight: 600 }}>{text}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Newsletter ── */}
+      <div style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1a2744 100%)',
+        borderBottom: '1px solid rgba(255,255,255,0.05)',
+        padding: 'clamp(24px,4vw,40px) clamp(20px,5vw,64px)' }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          gap: 24, flexWrap: 'wrap' }}>
           <div>
-            <h3 style={{ color: '#fff', fontSize: 'clamp(16px,2.5vw,22px)', fontWeight: 800, margin: '0 0 4px', letterSpacing: '-0.3px' }}>
+            <h3 style={{ color: '#fff', fontSize: 'clamp(15px,2.5vw,20px)', fontWeight: 800,
+              margin: '0 0 4px', letterSpacing: '-0.3px' }}>
               Get exclusive deals & early access
             </h3>
-            <p style={{ color: '#475569', fontSize: 13, margin: 0 }}>
+            <p style={{ color: '#475569', fontSize: 12, margin: 0 }}>
               Join 50,000+ premium shoppers. No spam, ever.
             </p>
           </div>
           {subscribed ? (
-            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-              style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#C9A84C', fontWeight: 700, fontSize: 14 }}>
-              ✓ You're subscribed! Welcome to PREMIA.
-            </motion.div>
+            <motion.p initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+              style={{ color: '#C9A84C', fontWeight: 700, fontSize: 14, margin: 0 }}>
+              ✓ Welcome to PREMIA!
+            </motion.p>
           ) : (
-            <div style={{ display: 'flex', gap: 8, flex: '0 0 auto', width: 'clamp(280px, 40%, 420px)' }}>
+            <div style={{ display: 'flex', gap: 8, width: 'clamp(260px,38%,400px)', flexShrink: 0 }}>
               <input type="email" placeholder="Enter your email"
                 value={email} onChange={e => setEmail(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleSubscribe()}
-                style={{ flex: 1, padding: '11px 16px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.12)',
-                  background: 'rgba(255,255,255,0.06)', color: '#fff', fontSize: 13,
-                  outline: 'none', fontFamily: 'Inter, system-ui' }}
+                style={{ flex: 1, padding: '10px 14px', borderRadius: 10,
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  background: 'rgba(255,255,255,0.06)', color: '#fff',
+                  fontSize: 13, outline: 'none', fontFamily: 'Inter, system-ui',
+                  minWidth: 0 }}
                 onFocus={e => e.target.style.borderColor = '#C9A84C'}
                 onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'}
               />
-              <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }} onClick={handleSubscribe}
-                style={{ padding: '11px 20px', borderRadius: 10, border: 'none',
+              <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
+                onClick={handleSubscribe}
+                style={{ padding: '10px 18px', borderRadius: 10, border: 'none',
                   background: '#C9A84C', color: '#0f172a', fontSize: 13, fontWeight: 800,
-                  cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap' }}>
-                Subscribe <ArrowRight size={14} />
+                  cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6,
+                  whiteSpace: 'nowrap', flexShrink: 0 }}>
+                Subscribe <ArrowRight size={13} />
               </motion.button>
             </div>
           )}
         </div>
       </div>
 
-      {/* ── Main footer body ── */}
-      <div style={{ maxWidth: 1280, margin: '0 auto', padding: 'clamp(32px,5vw,56px) clamp(20px,5vw,64px)' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'clamp(180px,25%,260px) repeat(4, 1fr)', gap: 'clamp(24px,3vw,48px)', marginBottom: 48 }}
-          className="footer-grid">
+      {/* ── Main links ── */}
+      <div style={{ maxWidth: 1280, margin: '0 auto',
+        padding: 'clamp(36px,5vw,56px) clamp(20px,5vw,64px) clamp(24px,4vw,40px)' }}>
 
-          {/* Brand column */}
+        <div className="footer-grid" style={{ display: 'grid',
+          gridTemplateColumns: 'clamp(160px,22%,220px) repeat(4,1fr)',
+          gap: 'clamp(24px,3vw,48px)', marginBottom: 48 }}>
+
+          {/* Brand */}
           <div>
-            <div style={{ marginBottom: 20 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-                <div style={{ width: 36, height: 36, borderRadius: 10, background: '#C9A84C',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontWeight: 900, fontSize: 16, color: '#0f172a' }}>P</div>
-                <div>
-                  <div style={{ fontWeight: 900, fontSize: 16, color: '#fff', letterSpacing: '-0.3px' }}>PREMIA</div>
-                  <div style={{ fontSize: 9, color: '#C9A84C', letterSpacing: '0.2em', textTransform: 'uppercase', fontWeight: 600 }}>Premium Shopping</div>
-                </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+              <div style={{ width: 34, height: 34, borderRadius: 10, background: '#C9A84C',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontWeight: 900, fontSize: 15, color: '#0f172a' }}>P</div>
+              <div>
+                <div style={{ fontWeight: 900, fontSize: 15, color: '#fff', letterSpacing: '-0.3px' }}>PREMIA</div>
+                <div style={{ fontSize: 8, color: '#C9A84C', letterSpacing: '0.2em', textTransform: 'uppercase', fontWeight: 600 }}>Premium Shopping</div>
               </div>
-              <p style={{ color: '#475569', fontSize: 12, lineHeight: 1.7, margin: 0 }}>
-                Everything Premium. Delivered. India's finest curated marketplace for premium products.
-              </p>
             </div>
 
-            {/* Contact */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
+            <p style={{ color: '#475569', fontSize: 12, lineHeight: 1.75, margin: '0 0 16px' }}>
+              India's finest curated marketplace. Every item handpicked for quality and value.
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 7, marginBottom: 18 }}>
               {[
-                { Icon: Mail,    text: 'hello@premia.in' },
-                { Icon: Phone,   text: '+91 98765 43210' },
-                { Icon: MapPin,  text: 'New Delhi, India' },
+                { Icon: Mail,   text: 'hello@premia.in' },
+                { Icon: Phone,  text: '+91 98765 43210' },
+                { Icon: MapPin, text: 'New Delhi, India' },
               ].map(({ Icon, text }) => (
-                <div key={text} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <Icon size={12} color="#C9A84C" style={{ flexShrink: 0 }} />
+                <div key={text} style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                  <Icon size={11} color="#C9A84C" style={{ flexShrink: 0 }} />
                   <span style={{ fontSize: 11, color: '#475569' }}>{text}</span>
                 </div>
               ))}
             </div>
 
-            {/* Socials */}
+            {/* Social buttons */}
             <div style={{ display: 'flex', gap: 8 }}>
-              {SOCIALS.map(({ key, label, color, href }) => {
-                const SocialIcon = SocialIcons[key]
-                return (
-                  <motion.a key={label} href={href} whileHover={{ scale: 1.1, y: -2 }} whileTap={{ scale: 0.95 }}
-                    style={{ width: 32, height: 32, borderRadius: 8,
-                      background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
-                    onMouseEnter={e => e.currentTarget.style.background = `${color}20`}
-                    onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.06)'}>
-                    <SocialIcon color={color} />
-                  </motion.a>
-                )
-              })}
+              <SocialBtn href="#" label="Instagram" emoji="📸" color="#E1306C" />
+              <SocialBtn href="#" label="Twitter"   emoji="🐦" color="#1DA1F2" />
+              <SocialBtn href="#" label="YouTube"   emoji="▶️" color="#FF0000" />
+              <SocialBtn href="#" label="Facebook"  emoji="👥" color="#1877F2" />
             </div>
           </div>
 
           {/* Link columns */}
           {Object.entries(FOOTER_LINKS).map(([title, links]) => (
             <div key={title}>
-              <h4 style={{ color: '#fff', fontSize: 12, fontWeight: 800, letterSpacing: '0.12em',
-                textTransform: 'uppercase', margin: '0 0 16px' }}>
-                {title}
-              </h4>
-              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 9 }}>
+              <h4 style={{ color: '#fff', fontSize: 11, fontWeight: 800, letterSpacing: '0.15em',
+                textTransform: 'uppercase', margin: '0 0 16px' }}>{title}</h4>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0,
+                display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {links.map(({ label, to }) => (
                   <li key={label}>
                     <Link to={to}
-                      style={{ color: '#475569', fontSize: 12, textDecoration: 'none', transition: 'color 0.15s', fontWeight: 500 }}
+                      style={{ color: '#475569', fontSize: 12, textDecoration: 'none',
+                        fontWeight: 500, transition: 'color 0.15s' }}
                       onMouseEnter={e => e.target.style.color = '#C9A84C'}
                       onMouseLeave={e => e.target.style.color = '#475569'}>
                       {label}
@@ -245,39 +222,54 @@ export default function Footer() {
         <div style={{ paddingTop: 28, borderTop: '1px solid rgba(255,255,255,0.06)', marginBottom: 24 }}>
           <p style={{ color: '#334155', fontSize: 10, fontWeight: 700, letterSpacing: '0.15em',
             textTransform: 'uppercase', margin: '0 0 14px' }}>
-            Secure Payment Methods
+            🔒 Secure Payment Methods
           </p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-            {[VisaLogo, MastercardLogo, RazorpayLogo, UPILogo, RuPayLogo, NetBankingLogo].map((Logo, i) => (
-              <div key={i} style={{ background: '#fff', borderRadius: 8, padding: '6px 10px',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: '0 1px 4px rgba(0,0,0,0.15)' }}>
-                <Logo />
-              </div>
-            ))}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+            <PayBadge bg="#1A1F71" color="#fff" border="#1A1F71">
+              <span style={{ fontStyle: 'italic', fontSize: 14, fontWeight: 900, letterSpacing: '1px' }}>VISA</span>
+            </PayBadge>
+            <PayBadge bg="#fff" color="#fff" border="#e2e8f0">
+              <span style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
+                <span style={{ color: '#EB001B', fontWeight: 900, fontSize: 18 }}>●</span>
+                <span style={{ color: '#F79E1B', fontWeight: 900, fontSize: 18, marginLeft: -4 }}>●</span>
+                <span style={{ color: '#0f172a', fontSize: 10, fontWeight: 700, marginLeft: 4 }}>Mastercard</span>
+              </span>
+            </PayBadge>
+            <PayBadge bg="#528FF0" color="#fff" border="#528FF0">
+              ⚡ Razorpay
+            </PayBadge>
+            <PayBadge bg="#097939" color="#fff" border="#097939">
+              🇮🇳 UPI
+            </PayBadge>
+            <PayBadge bg="#006BA6" color="#fff" border="#006BA6">
+              RuPay
+            </PayBadge>
+            <PayBadge bg="#0f172a" color="#C9A84C" border="#C9A84C">
+              Net Banking
+            </PayBadge>
+            <PayBadge bg="#fff" color="#0f172a" border="#e2e8f0">
+              💳 Cards
+            </PayBadge>
           </div>
         </div>
 
         {/* ── Copyright ── */}
         <div style={{ paddingTop: 20, borderTop: '1px solid rgba(255,255,255,0.04)',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          flexWrap: 'wrap', gap: 10 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <div style={{ width: 20, height: 20, borderRadius: 6, background: '#C9A84C',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontWeight: 900, fontSize: 10, color: '#0f172a' }}>P</div>
-            <p style={{ color: '#334155', fontSize: 11, margin: 0 }}>
-              © {new Date().getFullYear()} <span style={{ color: '#C9A84C', fontWeight: 700 }}>PREMIA</span>
-              {' '}— Everything Premium. Delivered.
-              <span style={{ color: '#1e293b', margin: '0 6px' }}>·</span>
-              All rights reserved.
+              fontWeight: 900, fontSize: 10, color: '#0f172a', flexShrink: 0 }}>P</div>
+            <p style={{ color: '#334155', fontSize: 11, margin: 0, lineHeight: 1.5 }}>
+              © {new Date().getFullYear()}{' '}
+              <span style={{ color: '#C9A84C', fontWeight: 800 }}>PREMIA</span>
+              {' '}— Everything Premium. Delivered. All rights reserved.
             </p>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <span style={{ color: '#1e293b', fontSize: 11 }}>Made with</span>
-            <span style={{ color: '#ef4444', fontSize: 13 }}>♥</span>
-            <span style={{ color: '#1e293b', fontSize: 11 }}>in India</span>
-            <span style={{ fontSize: 14, marginLeft: 2 }}>🇮🇳</span>
-          </div>
+          <p style={{ color: '#1e293b', fontSize: 11, margin: 0 }}>
+            Made with <span style={{ color: '#ef4444' }}>♥</span> in India 🇮🇳
+          </p>
         </div>
       </div>
 
@@ -288,11 +280,8 @@ export default function Footer() {
             gap: 28px !important;
           }
           .footer-grid > div:first-child {
-            grid-column: 1 / -1;
+            grid-column: 1 / -1 !important;
           }
-        }
-        @media (max-width: 480px) {
-          .footer-grid { grid-template-columns: 1fr 1fr !important; }
         }
       `}</style>
     </footer>
