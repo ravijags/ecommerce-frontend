@@ -80,6 +80,8 @@ function ProductModal({ product, onClose, onSave, token }) {
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
+  const [imageFile, setImageFile] = useState(null)
+
   const handleSave = async () => {
     if (!form.name || !form.price || !form.category) {
       return setError('Name, price and category are required')
@@ -87,22 +89,31 @@ function ProductModal({ product, onClose, onSave, token }) {
     setSaving(true); setError('')
     try {
       const method = product?._id ? 'PUT' : 'POST'
-      const url    = product?._id ? `${API}/api/products/${product._id}` : `${API}/api/products`
+      const url    = product?._id
+        ? `${import.meta.env.VITE_API_URL}/api/admin/products/${product._id}`
+        : `${import.meta.env.VITE_API_URL}/api/admin/products`
+
+      const data = new FormData()
+      data.append('name',          form.name)
+      data.append('brand',         form.brand)
+      data.append('category',      form.category)
+      data.append('price',         Number(form.price))
+      data.append('originalPrice', Number(form.originalPrice) || Number(form.price))
+      data.append('discount',      Number(form.discount) || 0)
+      data.append('stock',         Number(form.stock) || 0)
+      data.append('description',   form.description)
+      data.append('image',         form.image)
+      if (imageFile) data.append('image', imageFile)
+
       const res = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json', authorization: token },
-        body: JSON.stringify({
-          ...form,
-          price: Number(form.price),
-          originalPrice: Number(form.originalPrice) || Number(form.price),
-          discount: Number(form.discount) || 0,
-          stock: Number(form.stock) || 0,
-        }),
+        headers: { authorization: token },
+        body: data,
       })
-      const data = await res.json()
-      if (!res.ok) return setError(data.message || 'Failed to save')
-      onSave(data.product)
-    } catch { setError('Network error') }
+      const json = await res.json()
+      if (!res.ok) return setError(json.message || json.error || 'Failed to save')
+      onSave(json.product)
+    } catch (e) { setError('Network error: ' + e.message) }
     finally { setSaving(false) }
   }
 
@@ -138,17 +149,38 @@ function ProductModal({ product, onClose, onSave, token }) {
         <div style={{ flex: 1, overflowY: 'auto', padding: 24 }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
 
-            {/* Image preview */}
+            {/* Image — URL or file upload */}
             <div style={{ gridColumn: '1 / -1' }}>
-              <label style={labelStyle}>Product Image URL</label>
-              <div style={{ display: 'flex', gap: 10 }}>
-                <input value={form.image} onChange={e => { set('image', e.target.value); setImgPreview(e.target.value) }}
-                  placeholder="https://example.com/image.jpg"
-                  style={inputStyle} />
+              <label style={labelStyle}>Product Image</label>
+              <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                <div style={{ flex: 1 }}>
+                  <input value={form.image} onChange={e => { set('image', e.target.value); setImgPreview(e.target.value) }}
+                    placeholder="Paste image URL — or upload file below"
+                    style={{ ...inputStyle, marginBottom: 8 }} />
+                  <div
+                    onClick={() => document.getElementById('prod-img-upload').click()}
+                    style={{ border: `2px dashed ${imageFile ? '#C9A84C' : '#e2e8f0'}`,
+                      borderRadius: 10, padding: '12px 16px', cursor: 'pointer',
+                      background: imageFile ? '#fef9ec' : '#fafafa',
+                      display: 'flex', alignItems: 'center', gap: 10, transition: 'all 0.15s' }}>
+                    <input id="prod-img-upload" type="file" accept="image/*" style={{ display: 'none' }}
+                      onChange={e => {
+                        const file = e.target.files[0]
+                        if (file) {
+                          setImageFile(file)
+                          setImgPreview(URL.createObjectURL(file))
+                        }
+                      }} />
+                    <Upload size={16} color={imageFile ? '#C9A84C' : '#94a3b8'} />
+                    <span style={{ fontSize: 12, color: imageFile ? '#C9A84C' : '#64748b', fontWeight: 600 }}>
+                      {imageFile ? `✓ ${imageFile.name}` : 'Or click to upload image file'}
+                    </span>
+                  </div>
+                </div>
                 {imgPreview && (
-                  <div style={{ width: 48, height: 48, borderRadius: 10, border: '1px solid #e2e8f0',
+                  <div style={{ width: 80, height: 80, borderRadius: 12, border: '1px solid #e2e8f0',
                     background: '#f4f6f8', overflow: 'hidden', flexShrink: 0 }}>
-                    <img src={imgPreview} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 4 }}
+                    <img src={imgPreview} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 6 }}
                       onError={() => setImgPreview('')} />
                   </div>
                 )}

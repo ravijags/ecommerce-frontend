@@ -96,7 +96,7 @@ export default function AdminOrders() {
   const updateStatus = async (orderId, newStatus) => {
     setUpdatingId(orderId)
     try {
-      const res = await fetch(`${API}/api/admin/orders/${orderId}/status`, {
+      const res = await fetch(`${API}/api/admin/orders/${orderId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', authorization: token },
         body: JSON.stringify({ status: newStatus }),
