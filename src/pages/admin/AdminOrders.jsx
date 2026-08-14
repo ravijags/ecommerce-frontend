@@ -1,3 +1,4 @@
+import React from 'react'
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -20,6 +21,7 @@ const NAV = [
 
 function Sidebar({ onClose }) {
   const navigate = useNavigate()
+  const { pathname } = useLocation()
   return (
     <div style={{ width: 220, background: '#0f172a', height: '100%', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
       <div style={{ padding: '20px 20px 16px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
@@ -33,7 +35,7 @@ function Sidebar({ onClose }) {
       </div>
       <nav style={{ flex: 1, padding: '12px 10px', overflowY: 'auto' }}>
         {NAV.map(({ to, icon: Icon, label }) => {
-          const isActive = window.location.pathname === to
+          const isActive = pathname === to
           return (
             <Link key={to} to={to} onClick={onClose}
               style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10, marginBottom: 3, textDecoration: 'none', transition: 'all 0.15s', background: isActive ? 'rgba(201,168,76,0.12)' : 'transparent', color: isActive ? '#C9A84C' : '#475569', fontWeight: isActive ? 700 : 500, fontSize: 13 }}>
@@ -202,7 +204,8 @@ export default function AdminOrders() {
                       const isExpanded = expandedId === order._id
                       return (
                         <>
-                          <motion.tr key={order._id}
+                          <React.Fragment key={order._id}>
+                        <motion.tr key={`row-${order._id}`}
                             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.02 }}
                             style={{ borderBottom: '1px solid #f8fafc', cursor: 'pointer', transition: 'background 0.1s', background: isExpanded ? '#fafafa' : 'transparent' }}
                             onClick={() => toggleExpand(order._id)}>
@@ -313,3 +316,4 @@ export default function AdminOrders() {
     </div>
   )
 }
+                        </React.Fragment>

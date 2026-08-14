@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, ShoppingBag, Package, Users,
@@ -20,7 +20,7 @@ const NAV = [
 
 function Sidebar({ onClose }) {
   const navigate = useNavigate()
-  const path = window.location.pathname
+  const { pathname } = useLocation()
   return (
     <div style={{ width: 220, background: '#0f172a', height: '100%', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
       <div style={{ padding: '20px 20px 16px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
@@ -35,7 +35,7 @@ function Sidebar({ onClose }) {
       <nav style={{ flex: 1, padding: '16px 10px', overflowY: 'auto' }}>
         <p style={{ fontSize: 9, fontWeight: 700, color: '#1e293b', textTransform: 'uppercase', letterSpacing: '0.15em', padding: '0 12px', margin: '0 0 8px' }}>Navigation</p>
         {NAV.map(({ to, icon: Icon, label }) => {
-          const isActive = path === to
+          const isActive = pathname === to
           return (
             <Link key={to} to={to} onClick={onClose}
               style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10, marginBottom: 2, textDecoration: 'none', transition: 'all 0.15s', background: isActive ? 'rgba(201,168,76,0.12)' : 'transparent', color: isActive ? '#C9A84C' : '#475569', fontWeight: isActive ? 700 : 500, fontSize: 13 }}>
