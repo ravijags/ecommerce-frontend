@@ -127,6 +127,10 @@ export default function AdminDashboard() {
   const [loading, setLoading]   = useState(true)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const token = localStorage.getItem('token')
+  const hour = new Date().getHours()
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
+  const adminName = localStorage.getItem('premia_uname') || 'Admin'
+
 
   useEffect(() => {
     Promise.all([
@@ -222,7 +226,7 @@ export default function AdminDashboard() {
             <Menu size={20} color="#0f172a" />
           </button>
           <div style={{ flex: 1 }}>
-            <h1 style={{ fontSize: 16, fontWeight: 800, color: '#0f172a', margin: 0, letterSpacing: '-0.3px' }}>Dashboard</h1>
+            <h1 style={{ fontSize: 16, fontWeight: 800, color: '#0f172a', margin: 0, letterSpacing: '-0.3px' }}>{greeting}, {adminName.split(' ')[0]} 👋</h1>
             <p style={{ fontSize: 11, color: '#94a3b8', margin: 0 }}>
               {new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
             </p>

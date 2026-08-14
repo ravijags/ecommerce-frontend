@@ -246,8 +246,12 @@ export default function AdminOrders() {
             <Menu size={20} color="#0f172a" />
           </button>
           <div style={{ flex: 1 }}>
-            <h1 style={{ fontSize: 16, fontWeight: 800, color: '#0f172a', margin: 0 }}>Orders</h1>
-            <p style={{ fontSize: 11, color: '#94a3b8', margin: 0 }}>{filtered.length} of {orders.length} orders · click row to expand</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+              <Link to="/admin" style={{ fontSize: 11, color: '#94a3b8', textDecoration: 'none', fontWeight: 500 }}>Dashboard</Link>
+              <span style={{ color: '#cbd5e1', fontSize: 10 }}>›</span>
+              <span style={{ fontSize: 11, color: '#0f172a', fontWeight: 700 }}>Orders</span>
+            </div>
+            <p style={{ fontSize: 11, color: '#94a3b8', margin: 0 }}>{filtered.length} of {orders.length} orders · click any row to expand</p>
           </div>
         </div>
 

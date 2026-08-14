@@ -104,7 +104,11 @@ export default function AdminUsers() {
             <Menu size={20} color="#0f172a" />
           </button>
           <div style={{ flex: 1 }}>
-            <h1 style={{ fontSize: 16, fontWeight: 800, color: '#0f172a', margin: 0 }}>Customers</h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+              <Link to="/admin" style={{ fontSize: 11, color: '#94a3b8', textDecoration: 'none', fontWeight: 500 }}>Dashboard</Link>
+              <span style={{ color: '#cbd5e1', fontSize: 10 }}>›</span>
+              <span style={{ fontSize: 11, color: '#0f172a', fontWeight: 700 }}>Customers</span>
+            </div>
             <p style={{ fontSize: 11, color: '#94a3b8', margin: 0 }}>{filtered.length} registered users</p>
           </div>
         </div>

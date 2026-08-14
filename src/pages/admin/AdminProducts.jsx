@@ -333,6 +333,8 @@ export default function AdminProducts() {
   const [deleteProduct, setDeleteProduct] = useState(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [toast, setToast]           = useState('')
+  const [page, setPage]             = useState(1)
+  const PAGE_SIZE = 20
   const token = localStorage.getItem('token')
 
   const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(''), 3000) }
@@ -356,6 +358,11 @@ export default function AdminProducts() {
     )
     setFiltered(res)
   }, [search, catFilter, stockFilter, products])
+
+  useEffect(() => { setPage(1) }, [search, catFilter, stockFilter])
+
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE)
+  const paginated  = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   const handleSave = (savedProduct) => {
     setProducts(prev => {
@@ -409,7 +416,12 @@ export default function AdminProducts() {
             <Menu size={20} color="#0f172a" />
           </button>
           <div style={{ flex: 1 }}>
-            <h1 style={{ fontSize: 16, fontWeight: 800, color: '#0f172a', margin: 0 }}>Products</h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+              <Link to="/admin" style={{ fontSize: 11, color: '#94a3b8', textDecoration: 'none', fontWeight: 500 }}>Dashboard</Link>
+              <span style={{ color: '#cbd5e1', fontSize: 10 }}>›</span>
+              <span style={{ fontSize: 11, color: '#0f172a', fontWeight: 700 }}>Products</span>
+            </div>
+            <h1 style={{ fontSize: 16, fontWeight: 800, color: '#0f172a', margin: 0, display: 'none' }}>Products</h1>
             <p style={{ fontSize: 11, color: '#94a3b8', margin: 0 }}>
               {filtered.length} of {products.length} products
               {lowStock > 0 && <span style={{ color: '#f97316', marginLeft: 8 }}>· {lowStock} low stock</span>}
@@ -469,7 +481,7 @@ export default function AdminProducts() {
                 </thead>
                 <tbody>
                   <AnimatePresence>
-                    {filtered.map((product, i) => {
+                    {paginated.map((product, i) => {
                       const isLow  = product.stock > 0 && product.stock <= 10
                       const isOut  = product.stock === 0
                       return (
@@ -553,7 +565,7 @@ export default function AdminProducts() {
                                 onMouseLeave={e => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.background = '#fff' }}>
                                 <Trash2 size={13} color="#ef4444" />
                               </motion.button>
-                              <motion.a whileHover={{ scale: 1.08 }} href={`/products/${product._id}`} target="_blank"
+                              <motion.a whileHover={{ scale: 1.08 }} href={`/products/${product._id}`} target="_blank" rel="noopener noreferrer"
                                 style={{ width: 32, height: 32, borderRadius: 8, border: '1px solid #e2e8f0',
                                   background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
                                   transition: 'all 0.15s', textDecoration: 'none' }}
@@ -582,6 +594,35 @@ export default function AdminProducts() {
               )}
             </div>
           </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 16, flexWrap: 'wrap', gap: 10 }}>
+              <p style={{ fontSize: 12, color: '#94a3b8', margin: 0 }}>
+                Showing {(page-1)*PAGE_SIZE+1}–{Math.min(page*PAGE_SIZE, filtered.length)} of {filtered.length} products
+              </p>
+              <div style={{ display: 'flex', gap: 6 }}>
+                <button onClick={() => setPage(p => Math.max(1, p-1))} disabled={page === 1}
+                  style={{ padding: '6px 14px', borderRadius: 8, border: '1.5px solid #e2e8f0', background: '#fff', fontSize: 12, fontWeight: 600, cursor: page === 1 ? 'not-allowed' : 'pointer', color: page === 1 ? '#cbd5e1' : '#0f172a' }}>
+                  ← Prev
+                </button>
+                {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                  const p = page <= 3 ? i+1 : page+i-2
+                  if (p < 1 || p > totalPages) return null
+                  return (
+                    <button key={p} onClick={() => setPage(p)}
+                      style={{ width: 34, height: 34, borderRadius: 8, border: '1.5px solid', borderColor: p === page ? '#C9A84C' : '#e2e8f0', background: p === page ? '#fef9ec' : '#fff', fontSize: 12, fontWeight: p === page ? 800 : 500, cursor: 'pointer', color: p === page ? '#C9A84C' : '#64748b' }}>
+                      {p}
+                    </button>
+                  )
+                })}
+                <button onClick={() => setPage(p => Math.min(totalPages, p+1))} disabled={page === totalPages}
+                  style={{ padding: '6px 14px', borderRadius: 8, border: '1.5px solid #e2e8f0', background: '#fff', fontSize: 12, fontWeight: 600, cursor: page === totalPages ? 'not-allowed' : 'pointer', color: page === totalPages ? '#cbd5e1' : '#0f172a' }}>
+                  Next →
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
