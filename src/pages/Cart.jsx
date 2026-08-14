@@ -163,7 +163,7 @@ export default function Cart({ cartItems, setCartItems }) {
         <div className="cart-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: 24, alignItems: 'start' }}>
 
           {/* ── LEFT: Cart items ── */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div className="cart-items-col" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <AnimatePresence>
               {cartItems.map((item) => (
                 <motion.div key={item._id}
@@ -178,7 +178,7 @@ export default function Cart({ cartItems, setCartItems }) {
 
                   {/* Product image */}
                   <Link to={`/products/${item._id}`} style={{ flexShrink: 0 }}>
-                    <div style={{ width: 'clamp(80px,12vw,110px)', height: 'clamp(80px,12vw,110px)',
+                    <div style={{ width: 'clamp(90px,20vw,110px)', height: 'clamp(90px,20vw,110px)',
                       borderRadius: 12, background: '#f4f6f8', overflow: 'hidden',
                       border: '1px solid #e8ecf0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <img src={item.image || item.thumbnail}
@@ -278,8 +278,9 @@ export default function Cart({ cartItems, setCartItems }) {
 
             {/* Continue shopping */}
             <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 6,
-              color: '#64748b', fontSize: 13, fontWeight: 600, textDecoration: 'none',
-              padding: '10px 0', transition: 'color 0.15s' }}
+              color: '#0f172a', fontSize: 13, fontWeight: 700, textDecoration: 'none',
+              padding: '10px 0', transition: 'color 0.15s',
+              display: 'inline-flex', alignItems: 'center', gap: 4 }}
               onMouseEnter={e => e.currentTarget.style.color = '#C9A84C'}
               onMouseLeave={e => e.currentTarget.style.color = '#64748b'}>
               ← Continue Shopping
@@ -287,7 +288,7 @@ export default function Cart({ cartItems, setCartItems }) {
           </div>
 
           {/* ── RIGHT: Order summary ── */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <div className="cart-summary-col" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
 
             {/* Coupon */}
             <div style={{ background: '#fff', borderRadius: 16, padding: 20,
@@ -436,9 +437,12 @@ export default function Cart({ cartItems, setCartItems }) {
 
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes spin { to { transform: rotate(360deg); } }
         @media (max-width: 768px) {
           .cart-grid { grid-template-columns: 1fr !important; }
           .cart-item-total { display: none !important; }
+          .cart-items-col { order: 1; }
+          .cart-summary-col { order: 2; }
         }
       `}</style>
     </div>
