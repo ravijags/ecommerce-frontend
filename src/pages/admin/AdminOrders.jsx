@@ -41,9 +41,12 @@ function OrderRow({ order, onUpdateStatus, updatingId }) {
         <td style={{ padding: '12px 16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             {expanded ? <ChevronUp size={12} color="#94a3b8" /> : <ChevronDown size={12} color="#94a3b8" />}
-            <span style={{ fontSize: 12, fontWeight: 700, color: '#C9A84C', fontFamily: 'monospace' }}>
+            <a href={`/admin/orders/${order._id}`} onClick={e => e.stopPropagation()}
+              style={{ fontSize: 12, fontWeight: 700, color: '#C9A84C', fontFamily: 'monospace', textDecoration: 'none' }}
+              onMouseEnter={e => e.target.style.textDecoration='underline'}
+              onMouseLeave={e => e.target.style.textDecoration='none'}>
               #{(order._id || '').slice(-6).toUpperCase()}
-            </span>
+            </a>
           </div>
         </td>
         <td style={{ padding: '12px 16px' }}>

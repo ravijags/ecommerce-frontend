@@ -1,11 +1,12 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { LayoutDashboard, ShoppingBag, Package, Users, Eye, LogOut, X } from 'lucide-react'
+import { LayoutDashboard, ShoppingBag, Package, Users, Eye, LogOut, X, TrendingUp } from 'lucide-react'
 
 const NAV = [
-  { to: '/admin',          icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/admin/orders',   icon: ShoppingBag,     label: 'Orders' },
-  { to: '/admin/products', icon: Package,          label: 'Products' },
-  { to: '/admin/users',    icon: Users,            label: 'Users' },
+  { to: '/admin',            icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/admin/analytics',  icon: TrendingUp,      label: 'Analytics' },
+  { to: '/admin/orders',     icon: ShoppingBag,     label: 'Orders' },
+  { to: '/admin/products',   icon: Package,          label: 'Products' },
+  { to: '/admin/users',      icon: Users,            label: 'Users' },
 ]
 
 export default function AdminSidebar({ onClose }) {
