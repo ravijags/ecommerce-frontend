@@ -181,24 +181,38 @@ export default function Footer() {
               ))}
             </div>
 
-            {/* Social — minimal dots style */}
-            <div style={{ display: 'flex', gap: 6 }}>
-              {[
-                { label: 'IG', color: '#E1306C' },
-                { label: 'TW', color: '#1DA1F2' },
-                { label: 'YT', color: '#FF0000' },
-                { label: 'FB', color: '#1877F2' },
-              ].map(({ label, color }) => (
-                <motion.div key={label}
-                  whileHover={{ scale: 1.1, y: -2 }} whileTap={{ scale: 0.95 }}
-                  style={{ width: 32, height: 32, borderRadius: 8, cursor: 'pointer',
-                    background: 'rgba(255,255,255,0.04)',
-                    border: '1px solid rgba(255,255,255,0.08)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 9, fontWeight: 900, color: color, letterSpacing: '0.05em' }}>
-                  {label}
-                </motion.div>
-              ))}
+            {/* Social icons — brand colored */}
+            <div style={{ display: 'flex', gap: 8 }}>
+              {/* Instagram */}
+              <motion.a href="#" whileHover={{ scale: 1.12, y: -2 }} whileTap={{ scale: 0.95 }}
+                style={{ width: 34, height: 34, borderRadius: 8, background: 'linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="2" width="20" height="20" rx="5"/>
+                  <circle cx="12" cy="12" r="5"/>
+                  <circle cx="17.5" cy="6.5" r="1" fill="white" stroke="none"/>
+                </svg>
+              </motion.a>
+              {/* X (Twitter) */}
+              <motion.a href="#" whileHover={{ scale: 1.12, y: -2 }} whileTap={{ scale: 0.95 }}
+                style={{ width: 34, height: 34, borderRadius: 8, background: '#000', border: '1px solid #333', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="white">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.736-8.857L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                </svg>
+              </motion.a>
+              {/* Facebook */}
+              <motion.a href="#" whileHover={{ scale: 1.12, y: -2 }} whileTap={{ scale: 0.95 }}
+                style={{ width: 34, height: 34, borderRadius: 8, background: '#1877F2', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+                  <path d="M24 12.07C24 5.41 18.63 0 12 0S0 5.41 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.51c-1.49 0-1.95.93-1.95 1.88v2.27h3.32l-.53 3.49h-2.79V24C19.61 23.1 24 18.1 24 12.07z"/>
+                </svg>
+              </motion.a>
+              {/* YouTube */}
+              <motion.a href="#" whileHover={{ scale: 1.12, y: -2 }} whileTap={{ scale: 0.95 }}
+                style={{ width: 34, height: 34, borderRadius: 8, background: '#FF0000', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+                  <path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.38.55A3.02 3.02 0 0 0 .5 6.19C0 8.07 0 12 0 12s0 3.93.5 5.81a3.02 3.02 0 0 0 2.12 2.14C4.5 20.5 12 20.5 12 20.5s7.5 0 9.38-.55a3.02 3.02 0 0 0 2.12-2.14C24 15.93 24 12 24 12s0-3.93-.5-5.81zM9.75 15.5v-7l6.25 3.5-6.25 3.5z"/>
+                </svg>
+              </motion.a>
             </div>
           </div>
 
@@ -231,40 +245,44 @@ export default function Footer() {
         {/* ── Divider ── */}
         <div style={{ height: 1, background: 'linear-gradient(to right, transparent, rgba(255,255,255,0.08), transparent)', marginBottom: 28 }} />
 
-        {/* ── Payment methods ── */}
+        {/* ── Payment methods — small brand-colored rectangles ── */}
         <div style={{ marginBottom: 28 }}>
-          <p style={{ color: '#1e293b', fontSize: 10, fontWeight: 700,
-            letterSpacing: '0.2em', textTransform: 'uppercase', margin: '0 0 12px' }}>
-            Secure Payments
-          </p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-            {/* VISA — classic navy italic */}
-            <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 6, padding: '4px 12px', height: 30, display: 'flex', alignItems: 'center' }}>
-              <span style={{ color: '#1A1F71', fontSize: 13, fontWeight: 900, fontStyle: 'italic', letterSpacing: '1px' }}>VISA</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+            <span style={{ color: '#334155', fontSize: 11, fontWeight: 500, marginRight: 2 }}>We accept:</span>
+
+            {/* VISA */}
+            <div style={{ background: '#1A1F71', borderRadius: 5, padding: '3px 10px', height: 26, display: 'flex', alignItems: 'center' }}>
+              <span style={{ color: '#fff', fontSize: 12, fontWeight: 900, fontStyle: 'italic', letterSpacing: '1.5px' }}>VISA</span>
             </div>
-            {/* Mastercard — red + yellow circles */}
-            <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 6, padding: '4px 10px', height: 30, display: 'flex', alignItems: 'center', gap: 2 }}>
-              <div style={{ width: 16, height: 16, borderRadius: '50%', background: '#EB001B' }} />
-              <div style={{ width: 16, height: 16, borderRadius: '50%', background: '#F79E1B', marginLeft: -6 }} />
-              <span style={{ color: '#231F20', fontSize: 9, fontWeight: 700, marginLeft: 4, letterSpacing: '0.02em' }}>mastercard</span>
+
+            {/* Mastercard */}
+            <div style={{ background: '#fff', border: '1px solid #ddd', borderRadius: 5, padding: '3px 8px', height: 26, display: 'flex', alignItems: 'center', gap: 5 }}>
+              <div style={{ position: 'relative', width: 26, height: 16, display: 'flex', alignItems: 'center' }}>
+                <div style={{ width: 16, height: 16, borderRadius: '50%', background: '#EB001B', position: 'absolute', left: 0 }} />
+                <div style={{ width: 16, height: 16, borderRadius: '50%', background: '#F79E1B', position: 'absolute', left: 10, opacity: 0.95 }} />
+              </div>
             </div>
-            {/* Razorpay — blue */}
-            <div style={{ background: '#2563EB', border: '1px solid #2563EB', borderRadius: 6, padding: '4px 10px', height: 30, display: 'flex', alignItems: 'center', gap: 5 }}>
-              <span style={{ color: '#fff', fontSize: 10, fontWeight: 900, letterSpacing: '0.05em' }}>Razorpay</span>
+
+            {/* UPI */}
+            <div style={{ background: '#fff', border: '1px solid #ddd', borderRadius: 5, padding: '3px 8px', height: 26, display: 'flex', alignItems: 'center', gap: 1 }}>
+              <span style={{ color: '#097939', fontSize: 12, fontWeight: 900, lineHeight: 1 }}>U</span>
+              <span style={{ color: '#EB3D3D', fontSize: 12, fontWeight: 900, lineHeight: 1 }}>P</span>
+              <span style={{ color: '#F7941D', fontSize: 12, fontWeight: 900, lineHeight: 1 }}>I</span>
             </div>
-            {/* UPI — purple/multicolor */}
-            <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 6, padding: '4px 10px', height: 30, display: 'flex', alignItems: 'center', gap: 3 }}>
-              <span style={{ color: '#097939', fontSize: 11, fontWeight: 900 }}>U</span>
-              <span style={{ color: '#EB3D3D', fontSize: 11, fontWeight: 900 }}>P</span>
-              <span style={{ color: '#F7941D', fontSize: 11, fontWeight: 900 }}>I</span>
+
+            {/* RuPay */}
+            <div style={{ background: '#006BA6', borderRadius: 5, padding: '3px 10px', height: 26, display: 'flex', alignItems: 'center' }}>
+              <span style={{ color: '#fff', fontSize: 11, fontWeight: 800, letterSpacing: '0.3px' }}>RuPay</span>
             </div>
-            {/* RuPay — blue */}
-            <div style={{ background: '#006BA6', border: '1px solid #006BA6', borderRadius: 6, padding: '4px 10px', height: 30, display: 'flex', alignItems: 'center' }}>
-              <span style={{ color: '#fff', fontSize: 10, fontWeight: 900, letterSpacing: '0.05em' }}>RuPay</span>
+
+            {/* Razorpay */}
+            <div style={{ background: '#2563EB', borderRadius: 5, padding: '3px 10px', height: 26, display: 'flex', alignItems: 'center' }}>
+              <span style={{ color: '#fff', fontSize: 11, fontWeight: 800 }}>Razorpay</span>
             </div>
-            {/* Net Banking — gold on dark */}
-            <div style={{ background: '#0f172a', border: '1px solid rgba(201,168,76,0.3)', borderRadius: 6, padding: '4px 10px', height: 30, display: 'flex', alignItems: 'center' }}>
-              <span style={{ color: '#C9A84C', fontSize: 9, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Net Banking</span>
+
+            {/* EMI */}
+            <div style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 5, padding: '3px 10px', height: 26, display: 'flex', alignItems: 'center' }}>
+              <span style={{ color: '#94a3b8', fontSize: 11, fontWeight: 700 }}>EMI</span>
             </div>
           </div>
         </div>
