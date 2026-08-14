@@ -76,7 +76,7 @@ export default function AdminOrders() {
   const token = localStorage.getItem('token')
 
   useEffect(() => {
-    fetch(`${API}/api/orders/all`, { headers: { authorization: token } })
+    fetch(`${API}/api/admin/orders`, { headers: { authorization: token } })
       .then(r => r.json())
       .then(d => { setOrders(d.orders || []); setFiltered(d.orders || []); setLoading(false) })
       .catch(() => setLoading(false))
@@ -96,7 +96,7 @@ export default function AdminOrders() {
   const updateStatus = async (orderId, newStatus) => {
     setUpdatingId(orderId)
     try {
-      const res = await fetch(`${API}/api/orders/${orderId}/status`, {
+      const res = await fetch(`${API}/api/admin/orders/${orderId}/status`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', authorization: token },
         body: JSON.stringify({ status: newStatus }),

@@ -119,9 +119,9 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (!token) return
     Promise.all([
-      fetch(`${API}/api/orders/all`, { headers: { authorization: token } }).then(r => r.json()),
+      fetch(`${API}/api/admin/orders`, { headers: { authorization: token } }).then(r => r.json()),
       fetch(`${API}/api/products?limit=500`, { headers: { authorization: token } }).then(r => r.json()),
-      fetch(`${API}/api/auth/users`, { headers: { authorization: token } }).then(r => r.json()).catch(() => ({ users: [] })),
+      fetch(`${API}/api/admin/users`, { headers: { authorization: token } }).then(r => r.json()).catch(() => ({ users: [] })),
     ]).then(([ordersData, productsData, usersData]) => {
       const allOrders   = ordersData.orders || []
       const allProducts = productsData.products || []

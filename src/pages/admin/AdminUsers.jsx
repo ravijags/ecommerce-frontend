@@ -57,7 +57,7 @@ export default function AdminUsers() {
   const token = localStorage.getItem('token')
 
   useEffect(() => {
-    fetch(`${API}/api/auth/users`, { headers: { authorization: token } })
+    fetch(`${API}/api/admin/users`, { headers: { authorization: token } })
       .then(r => r.json())
       .then(d => { setUsers(d.users || []); setFiltered(d.users || []); setLoading(false) })
       .catch(() => setLoading(false))
