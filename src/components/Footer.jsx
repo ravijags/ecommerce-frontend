@@ -238,12 +238,34 @@ export default function Footer() {
             Secure Payments
           </p>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-            <PayBadge label="VISA"        bg="#1A1F71" textColor="#fff" />
-            <PayBadge label="MASTERCARD"  bg="#1f1f1f" textColor="#F79E1B" accent="#333" />
-            <PayBadge label="RAZORPAY"    bg="#2563EB" textColor="#fff" />
-            <PayBadge label="UPI"         bg="#097939" textColor="#fff" />
-            <PayBadge label="RUPAY"       bg="#006BA6" textColor="#fff" />
-            <PayBadge label="NET BANKING" bg="transparent" textColor="#475569" accent="rgba(255,255,255,0.1)" />
+            {/* VISA — classic navy italic */}
+            <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 6, padding: '4px 12px', height: 30, display: 'flex', alignItems: 'center' }}>
+              <span style={{ color: '#1A1F71', fontSize: 13, fontWeight: 900, fontStyle: 'italic', letterSpacing: '1px' }}>VISA</span>
+            </div>
+            {/* Mastercard — red + yellow circles */}
+            <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 6, padding: '4px 10px', height: 30, display: 'flex', alignItems: 'center', gap: 2 }}>
+              <div style={{ width: 16, height: 16, borderRadius: '50%', background: '#EB001B' }} />
+              <div style={{ width: 16, height: 16, borderRadius: '50%', background: '#F79E1B', marginLeft: -6 }} />
+              <span style={{ color: '#231F20', fontSize: 9, fontWeight: 700, marginLeft: 4, letterSpacing: '0.02em' }}>mastercard</span>
+            </div>
+            {/* Razorpay — blue */}
+            <div style={{ background: '#2563EB', border: '1px solid #2563EB', borderRadius: 6, padding: '4px 10px', height: 30, display: 'flex', alignItems: 'center', gap: 5 }}>
+              <span style={{ color: '#fff', fontSize: 10, fontWeight: 900, letterSpacing: '0.05em' }}>Razorpay</span>
+            </div>
+            {/* UPI — purple/multicolor */}
+            <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 6, padding: '4px 10px', height: 30, display: 'flex', alignItems: 'center', gap: 3 }}>
+              <span style={{ color: '#097939', fontSize: 11, fontWeight: 900 }}>U</span>
+              <span style={{ color: '#EB3D3D', fontSize: 11, fontWeight: 900 }}>P</span>
+              <span style={{ color: '#F7941D', fontSize: 11, fontWeight: 900 }}>I</span>
+            </div>
+            {/* RuPay — blue */}
+            <div style={{ background: '#006BA6', border: '1px solid #006BA6', borderRadius: 6, padding: '4px 10px', height: 30, display: 'flex', alignItems: 'center' }}>
+              <span style={{ color: '#fff', fontSize: 10, fontWeight: 900, letterSpacing: '0.05em' }}>RuPay</span>
+            </div>
+            {/* Net Banking — gold on dark */}
+            <div style={{ background: '#0f172a', border: '1px solid rgba(201,168,76,0.3)', borderRadius: 6, padding: '4px 10px', height: 30, display: 'flex', alignItems: 'center' }}>
+              <span style={{ color: '#C9A84C', fontSize: 9, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Net Banking</span>
+            </div>
           </div>
         </div>
 
