@@ -75,7 +75,7 @@ function RevenueBarChart({ orders }) {
   const max = Math.max(...days.map(d => d.rev), 1)
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, height: 80, marginBottom: 8 }}>
+      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 2, height: 90, marginBottom: 8 }}>
         {days.map(({ label, rev }, i) => (
           <motion.div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
             <motion.div
@@ -163,6 +163,17 @@ export default function AdminDashboard() {
   const outOfStock    = products.filter(p => p.stock === 0)
   const avgOrder      = orders.length ? Math.round(totalRevenue / orders.length) : 0
   const recent        = [...orders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 8)
+
+  // Real trend calculations — last 7 days vs previous 7 days
+  const now = new Date()
+  const last7  = orders.filter(o => (now - new Date(o.createdAt)) < 7  * 864e5)
+  const prev7  = orders.filter(o => { const d = now - new Date(o.createdAt); return d >= 7 * 864e5 && d < 14 * 864e5 })
+  const revLast = last7.reduce((s, o) => s + (o.totalAmount || 0), 0)
+  const revPrev = prev7.reduce((s, o) => s + (o.totalAmount || 0), 0)
+  const revTrend = revPrev > 0 ? `${revLast >= revPrev ? '+' : ''}${Math.round((revLast - revPrev) / revPrev * 100)}%` : 'New'
+  const ordTrend = prev7.length > 0 ? `${last7.length >= prev7.length ? '+' : ''}${Math.round((last7.length - prev7.length) / prev7.length * 100)}%` : 'New'
+  const revTrendUp = revLast >= revPrev
+  const ordTrendUp = last7.length >= prev7.length
 
   // Category breakdown
   const catRevenue = {}

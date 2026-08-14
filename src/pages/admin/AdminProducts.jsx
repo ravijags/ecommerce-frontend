@@ -58,15 +58,15 @@ function Sidebar({ onClose }) {
 // ── Product Form Modal ────────────────────────────────────────────────────
 function ProductModal({ product, onClose, onSave, token }) {
   const [form, setForm] = useState({
-    name: product?.name || '',
-    brand: product?.brand || '',
-    category: product?.category || '',
-    price: product?.price || '',
-    originalPrice: product?.originalPrice || '',
-    discount: product?.discount || '',
-    stock: product?.stock || '',
-    description: product?.description || '',
-    image: product?.image || product?.thumbnail || '',
+    name:          product?.name          || '',
+    brand:         product?.brand         || '',
+    category:      product?.category      || '',
+    price:         product?.price         || '',
+    originalPrice: product?.originalPrice || product?.price || '',
+    discount:      product?.discount      || '',
+    stock:         product?.stock         ?? '',
+    description:   product?.description   || '',
+    image:         product?.image         || product?.thumbnail || '',
   })
   const [saving, setSaving]   = useState(false)
   const [error, setError]     = useState('')

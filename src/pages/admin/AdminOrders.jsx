@@ -103,8 +103,15 @@ export default function AdminOrders() {
       })
       if (res.ok) {
         setOrders(prev => prev.map(o => o._id === orderId ? { ...o, status: newStatus } : o))
+        toast.success(`Order status updated to ${newStatus}`)
+      } else {
+        toast.error('Failed to update status')
       }
     } finally { setUpdatingId(null) }
+  }
+
+  const toggleExpand = (orderId) => {
+    setExpandedId(prev => prev === orderId ? null : orderId)
   }
 
   const cancelOrder = async (orderId) => {
@@ -198,7 +205,7 @@ export default function AdminOrders() {
                           <motion.tr key={order._id}
                             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.02 }}
                             style={{ borderBottom: '1px solid #f8fafc', cursor: 'pointer', transition: 'background 0.1s', background: isExpanded ? '#fafafa' : 'transparent' }}
-                            onClick={() => setExpandedId(isExpanded ? null : order._id)}>
+                            onClick={() => toggleExpand(order._id)}>
                             <td style={{ padding: '12px 16px' }}>
                               <span style={{ fontSize: 12, fontWeight: 700, color: '#C9A84C', fontFamily: 'monospace' }}>
                                 #{(order._id || '').slice(-6).toUpperCase()}

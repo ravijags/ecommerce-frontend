@@ -120,6 +120,10 @@ export default function AdminUsers() {
           </div>
 
           {/* Users grid */}
+          {/* Stats row */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginBottom: 16 }}>
+            {[{label:'Total Users',value:users.length,color:'#3b82f6'},{label:'Admins',value:users.filter(u=>u.role==='admin').length,color:'#C9A84C'},{label:'This Month',value:users.filter(u=>new Date(u.createdAt).getMonth()===new Date().getMonth()).length,color:'#10b981'}].map(({label,value,color})=>(<div key={label} style={{background:'#fff',borderRadius:14,padding:'14px 18px',border:'1px solid #ebebeb',boxShadow:'0 2px 8px rgba(0,0,0,0.05)'}}><div style={{fontSize:26,fontWeight:900,color,marginBottom:2}}>{value}</div><div style={{fontSize:11,color:'#94a3b8',fontWeight:500}}>{label}</div></div>))}
+          </div>
           <div className="users-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14 }}>
             {filtered.map((user, i) => (
               <motion.div key={user._id}
