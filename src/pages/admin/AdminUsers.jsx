@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
+import AdminSidebar from './AdminSidebar'
 import { motion } from 'framer-motion'
 import { LayoutDashboard, ShoppingBag, Package, Users, Search, Eye, LogOut, X, Menu, Shield, User, Mail, Phone, Calendar, Trash2 } from 'lucide-react'
 
@@ -10,44 +11,6 @@ const NAV = [
   { to: '/admin/products', icon: Package, label: 'Products' },
   { to: '/admin/users', icon: Users, label: 'Users' },
 ]
-
-function Sidebar({ onClose }) {
-  const navigate = useNavigate()
-  const { pathname } = useLocation()
-  return (
-    <div style={{ width: 220, background: '#0f172a', height: '100%', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
-      <div style={{ padding: '20px 20px 16px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div>
-            <div style={{ fontWeight: 900, fontSize: 18, color: '#C9A84C' }}>PREMIA</div>
-            <div style={{ fontSize: 9, color: '#334155', letterSpacing: '0.15em', textTransform: 'uppercase', fontWeight: 600 }}>Admin Panel</div>
-          </div>
-          {onClose && <button onClick={onClose} style={{ border: 'none', background: 'none', color: '#475569', cursor: 'pointer' }}><X size={18} /></button>}
-        </div>
-      </div>
-      <nav style={{ flex: 1, padding: '12px 10px' }}>
-        {NAV.map(({ to, icon: Icon, label }) => {
-          const isActive = pathname === to
-          return (
-            <Link key={to} to={to} onClick={onClose}
-              style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10, marginBottom: 3, textDecoration: 'none', background: isActive ? 'rgba(201,168,76,0.12)' : 'transparent', color: isActive ? '#C9A84C' : '#475569', fontWeight: isActive ? 700 : 500, fontSize: 13 }}>
-              <Icon size={16} />{label}
-            </Link>
-          )
-        })}
-      </nav>
-      <div style={{ padding: '12px 10px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10, textDecoration: 'none', color: '#475569', fontSize: 13, fontWeight: 500, marginBottom: 4 }}>
-          <Eye size={16} /> View Store
-        </Link>
-        <button onClick={() => { localStorage.removeItem('token'); navigate('/login') }}
-          style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '10px 12px', borderRadius: 10, border: 'none', background: 'transparent', color: '#ef4444', fontSize: 13, fontWeight: 500, cursor: 'pointer' }}>
-          <LogOut size={16} /> Logout
-        </button>
-      </div>
-    </div>
-  )
-}
 
 export default function AdminUsers() {
   const [users, setUsers]       = useState([])
@@ -87,13 +50,13 @@ export default function AdminUsers() {
 
   return (
     <div style={{ display: 'flex', height: '100vh', background: '#f8fafc', overflow: 'hidden', fontFamily: 'Inter, system-ui' }}>
-      <div className="admin-sidebar-desktop" style={{ height: '100vh' }}><Sidebar /></div>
+      <div className="admin-sidebar-desktop" style={{ height: '100vh' }}><AdminSidebar /></div>
       {sidebarOpen && (
         <>
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} onClick={() => setSidebarOpen(false)}
             style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 40 }} />
           <motion.div initial={{ x: -220 }} animate={{ x: 0 }} style={{ position: 'fixed', left: 0, top: 0, bottom: 0, zIndex: 41, height: '100vh' }}>
-            <Sidebar onClose={() => setSidebarOpen(false)} />
+            <AdminSidebar onClose={() => setSidebarOpen(false)} />
           </motion.div>
         </>
       )}

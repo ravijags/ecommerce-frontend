@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
+import AdminSidebar from './AdminSidebar'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, ShoppingBag, Package, Users,
@@ -23,52 +24,6 @@ const CATEGORIES = [
   'beauty','skin-care','fragrances','mens-watches','furniture',
   'groceries','sports-accessories','sunglasses','tablets','kitchen-accessories'
 ]
-
-function Sidebar({ onClose }) {
-  const navigate = useNavigate()
-  const { pathname } = useLocation()
-  return (
-    <div style={{ width: 220, background: '#0f172a', height: '100%', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
-      <div style={{ padding: '20px 20px 16px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 32, height: 32, borderRadius: 9, background: '#C9A84C', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 15, color: '#0f172a' }}>P</div>
-            <div>
-              <div style={{ fontWeight: 900, fontSize: 15, color: '#fff', letterSpacing: '-0.3px' }}>PREMIA</div>
-              <div style={{ fontSize: 8, color: '#334155', letterSpacing: '0.18em', textTransform: 'uppercase', fontWeight: 600 }}>Admin Panel</div>
-            </div>
-          </div>
-          {onClose && <button onClick={onClose} style={{ border: 'none', background: 'none', color: '#475569', cursor: 'pointer', padding: 4 }}><X size={16} /></button>}
-        </div>
-      </div>
-      <nav style={{ flex: 1, padding: '14px 10px', overflowY: 'auto' }}>
-        {NAV.map(({ to, icon: Icon, label }) => {
-          const isActive = pathname === to
-          return (
-            <Link key={to} to={to} onClick={onClose}
-              style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10, marginBottom: 3, textDecoration: 'none', transition: 'all 0.15s', background: isActive ? 'rgba(201,168,76,0.12)' : 'transparent', color: isActive ? '#C9A84C' : '#475569', fontWeight: isActive ? 700 : 500, fontSize: 13 }}>
-              <Icon size={16} />{label}
-              {isActive && <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#C9A84C', marginLeft: 'auto', flexShrink: 0 }} />}
-            </Link>
-          )
-        })}
-      </nav>
-      <div style={{ padding: '12px 10px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <Link to="/" target="_blank" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10, textDecoration: 'none', color: '#475569', fontSize: 13, fontWeight: 500, marginBottom: 4, transition: 'color 0.15s' }}
-          onMouseEnter={e => e.currentTarget.style.color = '#94a3b8'}
-          onMouseLeave={e => e.currentTarget.style.color = '#475569'}>
-          <Eye size={16} /> View Store ↗
-        </Link>
-        <button onClick={() => { localStorage.removeItem('token'); navigate('/login') }}
-          style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '10px 12px', borderRadius: 10, border: 'none', background: 'transparent', color: '#ef4444', fontSize: 13, fontWeight: 500, cursor: 'pointer', textAlign: 'left', transition: 'background 0.15s' }}
-          onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.08)'}
-          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-          <LogOut size={16} /> Logout
-        </button>
-      </div>
-    </div>
-  )
-}
 
 // ── Tooltip wrapper ───────────────────────────────────────────────────────
 function Tip({ label, children }) {
@@ -356,7 +311,7 @@ export default function AdminProducts() {
 
   return (
     <div style={{ display: 'flex', height: '100vh', background: '#f8fafc', overflow: 'hidden', fontFamily: 'Inter, system-ui' }}>
-      <div className="admin-sidebar-desktop" style={{ height: '100vh', flexShrink: 0 }}><Sidebar /></div>
+      <div className="admin-sidebar-desktop" style={{ height: '100vh', flexShrink: 0 }}><AdminSidebar /></div>
 
       <AnimatePresence>
         {sidebarOpen && (
@@ -366,7 +321,7 @@ export default function AdminProducts() {
               style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 40 }} />
             <motion.div initial={{ x: -220 }} animate={{ x: 0 }} exit={{ x: -220 }} transition={{ type: 'tween', duration: 0.22 }}
               style={{ position: 'fixed', left: 0, top: 0, bottom: 0, zIndex: 41, height: '100vh' }}>
-              <Sidebar onClose={() => setSidebarOpen(false)} />
+              <AdminSidebar onClose={() => setSidebarOpen(false)} />
             </motion.div>
           </>
         )}

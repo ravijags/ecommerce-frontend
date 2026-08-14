@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
+import AdminSidebar from './AdminSidebar'
 import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 import {
@@ -23,45 +24,6 @@ const STATUS_CONFIG = {
   shipped:    { bg: '#e0f2fe', color: '#0369a1', icon: Truck,       label: 'Shipped' },
   delivered:  { bg: '#dcfce7', color: '#166534', icon: CheckCircle, label: 'Delivered' },
   cancelled:  { bg: '#fee2e2', color: '#991b1b', icon: XCircle,     label: 'Cancelled' },
-}
-
-function Sidebar({ onClose }) {
-  const navigate = useNavigate()
-  const { pathname } = useLocation()
-  return (
-    <div style={{ width: 220, background: '#0f172a', height: '100%', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
-      <div style={{ padding: '20px 20px 16px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div>
-            <div style={{ fontWeight: 900, fontSize: 18, color: '#C9A84C' }}>PREMIA</div>
-            <div style={{ fontSize: 9, color: '#334155', letterSpacing: '0.15em', textTransform: 'uppercase', fontWeight: 600 }}>Admin Panel</div>
-          </div>
-          {onClose && <button onClick={onClose} style={{ border: 'none', background: 'none', color: '#475569', cursor: 'pointer' }}><X size={18} /></button>}
-        </div>
-      </div>
-      <nav style={{ flex: 1, padding: '12px 10px', overflowY: 'auto' }}>
-        {NAV.map(({ to, icon: Icon, label }) => {
-          const isActive = pathname === to
-          return (
-            <Link key={to} to={to} onClick={onClose}
-              style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10, marginBottom: 3, textDecoration: 'none', transition: 'all 0.15s', background: isActive ? 'rgba(201,168,76,0.12)' : 'transparent', color: isActive ? '#C9A84C' : '#475569', fontWeight: isActive ? 700 : 500, fontSize: 13 }}>
-              <Icon size={16} />{label}
-              {isActive && <div style={{ width: 4, height: 4, borderRadius: '50%', background: '#C9A84C', marginLeft: 'auto' }} />}
-            </Link>
-          )
-        })}
-      </nav>
-      <div style={{ padding: '12px 10px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10, textDecoration: 'none', color: '#475569', fontSize: 13, fontWeight: 500, marginBottom: 4 }}>
-          <Eye size={16} /> View Store
-        </Link>
-        <button onClick={() => { localStorage.removeItem('token'); navigate('/login') }}
-          style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '10px 12px', borderRadius: 10, border: 'none', background: 'transparent', color: '#ef4444', fontSize: 13, fontWeight: 500, cursor: 'pointer' }}>
-          <LogOut size={16} /> Logout
-        </button>
-      </div>
-    </div>
-  )
 }
 
 // ── Expandable order row ──────────────────────────────────────────────────
@@ -223,7 +185,7 @@ export default function AdminOrders() {
 
   return (
     <div style={{ display: 'flex', height: '100vh', background: '#f8fafc', overflow: 'hidden', fontFamily: 'Inter, system-ui' }}>
-      <div className="admin-sidebar-desktop" style={{ height: '100vh' }}><Sidebar /></div>
+      <div className="admin-sidebar-desktop" style={{ height: '100vh' }}><AdminSidebar /></div>
       <AnimatePresence>
         {sidebarOpen && (
           <>
@@ -232,7 +194,7 @@ export default function AdminOrders() {
               style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 40 }} />
             <motion.div initial={{ x: -220 }} animate={{ x: 0 }} exit={{ x: -220 }} transition={{ type: 'tween', duration: 0.22 }}
               style={{ position: 'fixed', left: 0, top: 0, bottom: 0, zIndex: 41, height: '100vh' }}>
-              <Sidebar onClose={() => setSidebarOpen(false)} />
+              <AdminSidebar onClose={() => setSidebarOpen(false)} />
             </motion.div>
           </>
         )}
