@@ -224,15 +224,22 @@ export default function AdminOrders() {
                                 {new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' })}
                               </span>
                             </td>
-                            <td style={{ padding: '12px 16px' }}>
-                              <div style={{ display: 'flex', gap: 6 }} onClick={e => e.stopPropagation()}>
-                                <select value={order.status}
-                                  onChange={e => updateStatus(order._id, e.target.value)}
-                                  disabled={updatingId === order._id}
-                                  style={{ fontSize: 11, padding: '4px 8px', borderRadius: 8, border: '1px solid #e2e8f0', background: '#fff', cursor: 'pointer', color: '#0f172a', outline: 'none' }}>
-                                  {Object.entries(STATUS_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
-                                </select>
-                              </div>
+                            <td style={{ padding: '12px 16px' }} onClick={e => e.stopPropagation()}>
+                              <select value={order.status}
+                                onChange={e => updateStatus(order._id, e.target.value)}
+                                disabled={updatingId === order._id}
+                                style={{
+                                  fontSize: 11, padding: '6px 10px', borderRadius: 8,
+                                  border: '1.5px solid #e2e8f0', background: updatingId === order._id ? '#f8fafc' : '#fff',
+                                  cursor: updatingId === order._id ? 'wait' : 'pointer',
+                                  color: '#0f172a', outline: 'none', fontWeight: 600,
+                                  fontFamily: 'Inter, system-ui',
+                                  transition: 'border-color 0.15s',
+                                }}
+                                onMouseEnter={e => { if (updatingId !== order._id) e.target.style.borderColor = '#C9A84C' }}
+                                onMouseLeave={e => { e.target.style.borderColor = '#e2e8f0' }}>
+                                {Object.entries(STATUS_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+                              </select>
                             </td>
                           </motion.tr>
                           {/* Expanded row */}

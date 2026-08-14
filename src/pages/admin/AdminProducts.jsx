@@ -146,7 +146,7 @@ function ProductModal({ product, onClose, onSave, token }) {
         </div>
 
         {/* Body */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: 24 }}>
+        <div className="prod-modal" style={{ flex: 1, overflowY: 'auto', padding: 24 }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
 
             {/* Image — URL or file upload */}
@@ -286,7 +286,7 @@ function ProductModal({ product, onClose, onSave, token }) {
 }
 
 const labelStyle = { display: 'block', fontSize: 11, fontWeight: 700, color: '#475569', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }
-const inputStyle = { width: '100%', padding: '10px 12px', borderRadius: 10, border: '1.5px solid #e2e8f0', fontSize: 13, color: '#0f172a', outline: 'none', fontFamily: 'Inter, system-ui', background: '#fafafa', boxSizing: 'border-box', transition: 'border-color 0.15s' }
+const inputStyle = { width: '100%', padding: '10px 12px', borderRadius: 10, border: '1.5px solid #e2e8f0', fontSize: 13, color: '#0f172a', outline: 'none', fontFamily: 'Inter, system-ui', background: '#fafafa', boxSizing: 'border-box', transition: 'border-color 0.15s', cursor: 'pointer' }
 
 // ── Delete confirm ────────────────────────────────────────────────────────
 function DeleteConfirm({ product, onConfirm, onCancel }) {
@@ -612,6 +612,7 @@ export default function AdminProducts() {
 
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
+        .prod-modal input:focus, .prod-modal textarea:focus, .prod-modal select:focus { border-color: #C9A84C !important; box-shadow: 0 0 0 3px rgba(201,168,76,0.12) !important; }
         @media (max-width: 768px) {
           .admin-sidebar-desktop { display: none !important; }
           .admin-menu-btn { display: block !important; }

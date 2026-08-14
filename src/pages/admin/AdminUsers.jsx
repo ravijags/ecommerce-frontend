@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { LayoutDashboard, ShoppingBag, Package, Users, Search, Eye, LogOut, X, Menu, Shield, User, Mail, Phone, Calendar } from 'lucide-react'
+import { LayoutDashboard, ShoppingBag, Package, Users, Search, Eye, LogOut, X, Menu, Shield, User, Mail, Phone, Calendar, Trash2 } from 'lucide-react'
 
 const API = import.meta.env.VITE_API_URL
 const NAV = [
@@ -55,6 +55,19 @@ export default function AdminUsers() {
   const [loading, setLoading]   = useState(true)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const token = localStorage.getItem('token')
+
+  const deleteUser = async (userId) => {
+    if (!window.confirm('Delete this user permanently?')) return
+    try {
+      const res = await fetch(`${API}/api/admin/users/${userId}`, {
+        method: 'DELETE', headers: { authorization: token }
+      })
+      if (res.ok) {
+        setUsers(prev => prev.filter(u => u._id !== userId))
+        setFiltered(prev => prev.filter(u => u._id !== userId))
+      }
+    } catch {}
+  }
 
   useEffect(() => {
     fetch(`${API}/api/admin/users`, { headers: { authorization: token } })
@@ -114,36 +127,53 @@ export default function AdminUsers() {
                 transition={{ delay: i * 0.03 }}
                 style={{ background: '#fff', borderRadius: 14, padding: 16,
                   border: '1px solid #ebebeb', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 14 }}>
                   <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'linear-gradient(135deg,#0f172a,#1e293b)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontSize: 16, fontWeight: 900, color: '#C9A84C', flexShrink: 0 }}>
                     {(user.name || 'U')[0].toUpperCase()}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                       <p style={{ fontSize: 14, fontWeight: 700, color: '#0f172a', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {user.name}
                       </p>
-                      {user.role === 'admin' && (
-                        <span style={{ background: '#fef9ec', border: '1px solid #C9A84C', color: '#C9A84C', fontSize: 9, fontWeight: 800, padding: '1px 6px', borderRadius: 20 }}>ADMIN</span>
-                      )}
+                      {user.role === 'admin'
+                        ? <span style={{ background: '#fef9ec', border: '1px solid #C9A84C', color: '#C9A84C', fontSize: 9, fontWeight: 800, padding: '2px 7px', borderRadius: 20, flexShrink: 0 }}>ADMIN</span>
+                        : <span style={{ background: '#f1f5f9', color: '#64748b', fontSize: 9, fontWeight: 700, padding: '2px 7px', borderRadius: 20, flexShrink: 0 }}>USER</span>
+                      }
                     </div>
-                    <p style={{ fontSize: 11, color: '#94a3b8', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</p>
+                    <p style={{ fontSize: 11, color: '#94a3b8', margin: '2px 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</p>
                   </div>
+                  {user.role !== 'admin' && (
+                    <button onClick={() => deleteUser(user._id)}
+                      style={{ width: 28, height: 28, borderRadius: 8, border: '1px solid #fee2e2',
+                        background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center',
+                        justifyContent: 'center', flexShrink: 0, transition: 'all 0.15s' }}
+                      onMouseEnter={e => { e.currentTarget.style.background = '#fef2f2' }}
+                      onMouseLeave={e => { e.currentTarget.style.background = '#fff' }}>
+                      <Trash2 size={12} color="#ef4444" />
+                    </button>
+                  )}
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingTop: 10, borderTop: '1px solid #f8fafc' }}>
                   {user.phone && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
                       <Phone size={11} color="#94a3b8" />
                       <span style={{ fontSize: 11, color: '#64748b' }}>{user.phone}</span>
                     </div>
                   )}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                    <Calendar size={11} color="#94a3b8" />
-                    <span style={{ fontSize: 11, color: '#64748b' }}>
-                      Joined {new Date(user.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                    </span>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                      <Calendar size={11} color="#94a3b8" />
+                      <span style={{ fontSize: 11, color: '#64748b' }}>
+                        Joined {new Date(user.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      </span>
+                    </div>
+                    <a href={`mailto:${user.email}`}
+                      style={{ fontSize: 11, color: '#C9A84C', fontWeight: 600, textDecoration: 'none' }}>
+                      Contact →
+                    </a>
                   </div>
                 </div>
               </motion.div>

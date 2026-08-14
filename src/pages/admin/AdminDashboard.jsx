@@ -127,7 +127,7 @@ export default function AdminDashboard() {
       const allProducts = productsData.products || []
       const allUsers    = usersData.users || []
 
-      const totalRevenue = allOrders.filter(o => o.paymentStatus === 'paid').reduce((s, o) => s + (o.totalAmount || 0), 0)
+      const totalRevenue = allOrders.reduce((s, o) => s + (o.totalAmount || 0), 0)
       const pendingOrders = allOrders.filter(o => o.status === 'pending' || o.status === 'processing').length
       const lowStock = allProducts.filter(p => p.stock > 0 && p.stock <= 10)
 
@@ -138,7 +138,7 @@ export default function AdminDashboard() {
         totalProducts: allProducts.length,
         pendingOrders,
         lowStockCount: lowStock.length,
-        avgOrderValue: allOrders.length ? Math.round(totalRevenue / allOrders.filter(o => o.paymentStatus === 'paid').length || 0) : 0,
+        avgOrderValue: allOrders.length ? Math.round(totalRevenue / allOrders.length) : 0,
       })
       setOrders(allOrders.slice(0, 8))
       setProducts(lowStock.slice(0, 5))
