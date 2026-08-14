@@ -1,217 +1,174 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Search, Trash2, Shield, User, Mail, Calendar } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import toast from 'react-hot-toast'
-import AdminLayout from './AdminLayout'
+import { LayoutDashboard, ShoppingBag, Package, Users, Search, Eye, LogOut, X, Menu, Shield, User, Mail, Phone, Calendar } from 'lucide-react'
+
+const API = import.meta.env.VITE_API_URL
+const NAV = [
+  { to: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/admin/orders', icon: ShoppingBag, label: 'Orders' },
+  { to: '/admin/products', icon: Package, label: 'Products' },
+  { to: '/admin/users', icon: Users, label: 'Users' },
+]
+
+function Sidebar({ onClose }) {
+  const navigate = useNavigate()
+  return (
+    <div style={{ width: 220, background: '#0f172a', height: '100%', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
+      <div style={{ padding: '20px 20px 16px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div>
+            <div style={{ fontWeight: 900, fontSize: 18, color: '#C9A84C' }}>PREMIA</div>
+            <div style={{ fontSize: 9, color: '#334155', letterSpacing: '0.15em', textTransform: 'uppercase', fontWeight: 600 }}>Admin Panel</div>
+          </div>
+          {onClose && <button onClick={onClose} style={{ border: 'none', background: 'none', color: '#475569', cursor: 'pointer' }}><X size={18} /></button>}
+        </div>
+      </div>
+      <nav style={{ flex: 1, padding: '12px 10px' }}>
+        {NAV.map(({ to, icon: Icon, label }) => {
+          const isActive = window.location.pathname === to
+          return (
+            <Link key={to} to={to} onClick={onClose}
+              style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10, marginBottom: 3, textDecoration: 'none', background: isActive ? 'rgba(201,168,76,0.12)' : 'transparent', color: isActive ? '#C9A84C' : '#475569', fontWeight: isActive ? 700 : 500, fontSize: 13 }}>
+              <Icon size={16} />{label}
+            </Link>
+          )
+        })}
+      </nav>
+      <div style={{ padding: '12px 10px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10, textDecoration: 'none', color: '#475569', fontSize: 13, fontWeight: 500, marginBottom: 4 }}>
+          <Eye size={16} /> View Store
+        </Link>
+        <button onClick={() => { localStorage.removeItem('token'); navigate('/login') }}
+          style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '10px 12px', borderRadius: 10, border: 'none', background: 'transparent', color: '#ef4444', fontSize: 13, fontWeight: 500, cursor: 'pointer' }}>
+          <LogOut size={16} /> Logout
+        </button>
+      </div>
+    </div>
+  )
+}
 
 export default function AdminUsers() {
-  const [users, setUsers] = useState([])
+  const [users, setUsers]       = useState([])
   const [filtered, setFiltered] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [search, setSearch] = useState('')
-  const navigate = useNavigate()
+  const [search, setSearch]     = useState('')
+  const [loading, setLoading]   = useState(true)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const token = localStorage.getItem('token')
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
-    if (!token) { navigate('/login'); return }
-    fetch(`${import.meta.env.VITE_API_URL}/api/admin/users`, { headers: { authorization: token } })
+    fetch(`${API}/api/auth/users`, { headers: { authorization: token } })
       .then(r => r.json())
       .then(d => { setUsers(d.users || []); setFiltered(d.users || []); setLoading(false) })
       .catch(() => setLoading(false))
   }, [])
 
   useEffect(() => {
-    if (!search) { setFiltered(users); return }
-    const q = search.toLowerCase()
+    if (!search) return setFiltered(users)
     setFiltered(users.filter(u =>
-      u.name?.toLowerCase().includes(q) || u.email?.toLowerCase().includes(q)
+      u.name?.toLowerCase().includes(search.toLowerCase()) ||
+      u.email?.toLowerCase().includes(search.toLowerCase())
     ))
   }, [search, users])
 
-  const deleteUser = async (userId) => {
-    if (!window.confirm('Delete this user? This cannot be undone.')) return
-    const token = localStorage.getItem('token')
-    try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/users/${userId}`, {
-        method: 'DELETE', headers: { authorization: token }
-      })
-      if (res.ok) {
-        toast.success('User deleted')
-        setUsers(prev => prev.filter(u => u._id !== userId))
-      } else toast.error('Failed to delete user')
-    } catch { toast.error('Something went wrong') }
-  }
-
-  const getInitials = (name) => name ? name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '?'
-
-  const COLORS = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#ef4444', '#06b6d4']
-
-  if (loading) return (
-    <AdminLayout>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 300 }}>
-        <div style={{ width: 32, height: 32, border: '3px solid #C9A84C', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-        <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
-      </div>
-    </AdminLayout>
-  )
-
   return (
-    <AdminLayout>
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, gap: 16, flexWrap: 'wrap' }}>
-        <div>
-          <h2 style={{ fontSize: 20, fontWeight: 800, color: '#0f172a', margin: 0 }}>Users</h2>
-          <p style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>{users.length} registered accounts</p>
-        </div>
-      </div>
+    <div style={{ display: 'flex', height: '100vh', background: '#f8fafc', overflow: 'hidden', fontFamily: 'Inter, system-ui' }}>
+      <div className="admin-sidebar-desktop" style={{ height: '100vh' }}><Sidebar /></div>
+      {sidebarOpen && (
+        <>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} onClick={() => setSidebarOpen(false)}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 40 }} />
+          <motion.div initial={{ x: -220 }} animate={{ x: 0 }} style={{ position: 'fixed', left: 0, top: 0, bottom: 0, zIndex: 41, height: '100vh' }}>
+            <Sidebar onClose={() => setSidebarOpen(false)} />
+          </motion.div>
+        </>
+      )}
 
-      {/* Search */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: '#fff', borderRadius: 12, border: '1px solid #e2e8f0', marginBottom: 20, maxWidth: 400 }}>
-        <Search size={15} color="#94a3b8" />
-        <input value={search} onChange={e => setSearch(e.target.value)}
-          placeholder="Search by name or email..."
-          style={{ border: 'none', outline: 'none', fontSize: 13, color: '#0f172a', width: '100%', background: 'transparent' }}
-        />
-      </div>
-
-      {/* Stats row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 24 }} className="users-stats-grid">
-        {[
-          { label: 'Total Users', value: users.length, color: '#3b82f6', bg: '#dbeafe' },
-          { label: 'This Month', value: users.filter(u => { const d = new Date(u.createdAt); const now = new Date(); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear() }).length, color: '#16a34a', bg: '#dcfce7' },
-          { label: 'Admins', value: users.filter(u => u.role === 'admin').length, color: '#7c3aed', bg: '#ede9fe' },
-        ].map(({ label, value, color, bg }) => (
-          <div key={label} style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 14, padding: '16px 20px' }}>
-            <div style={{ fontSize: 28, fontWeight: 900, color, marginBottom: 4 }}>{value}</div>
-            <div style={{ fontSize: 12, color: '#64748b', fontWeight: 500 }}>{label}</div>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
+        <div style={{ background: '#fff', borderBottom: '1px solid #f1f5f9', padding: '0 clamp(16px,3vw,28px)', height: 60, display: 'flex', alignItems: 'center', gap: 16, flexShrink: 0 }}>
+          <button className="admin-menu-btn" onClick={() => setSidebarOpen(true)} style={{ display: 'none', border: 'none', background: 'none', cursor: 'pointer' }}>
+            <Menu size={20} color="#0f172a" />
+          </button>
+          <div style={{ flex: 1 }}>
+            <h1 style={{ fontSize: 16, fontWeight: 800, color: '#0f172a', margin: 0 }}>Customers</h1>
+            <p style={{ fontSize: 11, color: '#94a3b8', margin: 0 }}>{filtered.length} registered users</p>
           </div>
-        ))}
-      </div>
-
-      {/* Users table */}
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-        className="users-table-wrap"
-        style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 16, overflow: 'hidden' }}>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                {['User', 'Email', 'Role', 'Joined', 'Action'].map(h => (
-                  <th key={h} style={{ padding: '13px 20px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((user, i) => {
-                const color = COLORS[i % COLORS.length]
-                const isAdmin = user.role === 'admin'
-                return (
-                  <motion.tr key={user._id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.03 }}
-                    style={{ borderBottom: '1px solid #f1f5f9' }}
-                    onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'}
-                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                    <td style={{ padding: '14px 20px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                        <div style={{ width: 38, height: 38, borderRadius: '50%', background: color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800, color: '#fff', flexShrink: 0 }}>
-                          {getInitials(user.name)}
-                        </div>
-                        <span style={{ fontSize: 14, fontWeight: 600, color: '#0f172a' }}>{user.name || 'Unknown'}</span>
-                      </div>
-                    </td>
-                    <td style={{ padding: '14px 20px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <Mail size={13} color="#94a3b8" />
-                        <span style={{ fontSize: 13, color: '#64748b' }}>{user.email}</span>
-                      </div>
-                    </td>
-                    <td style={{ padding: '14px 20px' }}>
-                      <span style={{
-                        display: 'inline-flex', alignItems: 'center', gap: 4,
-                        fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 20,
-                        background: isAdmin ? '#ede9fe' : '#f1f5f9',
-                        color: isAdmin ? '#7c3aed' : '#64748b',
-                      }}>
-                        {isAdmin ? <Shield size={10} /> : <User size={10} />}
-                        {user.role || 'user'}
-                      </span>
-                    </td>
-                    <td style={{ padding: '14px 20px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <Calendar size={12} color="#94a3b8" />
-                        <span style={{ fontSize: 12, color: '#64748b' }}>
-                          {user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
-                        </span>
-                      </div>
-                    </td>
-                    <td style={{ padding: '14px 20px' }}>
-                      {!isAdmin && (
-                        <button onClick={() => deleteUser(user._id)}
-                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, borderRadius: 8, border: 'none', background: 'transparent', cursor: 'pointer', color: '#94a3b8', transition: 'all 0.15s' }}
-                          onMouseEnter={e => { e.currentTarget.style.background = '#fee2e2'; e.currentTarget.style.color = '#dc2626' }}
-                          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#94a3b8' }}>
-                          <Trash2 size={15} />
-                        </button>
-                      )}
-                    </td>
-                  </motion.tr>
-                )
-              })}
-              {filtered.length === 0 && (
-                <tr><td colSpan={5} style={{ padding: '48px', textAlign: 'center', color: '#94a3b8', fontSize: 13 }}>No users found</td></tr>
-              )}
-            </tbody>
-          </table>
         </div>
-      </motion.div>
 
-      {/* Mobile cards */}
-      <div className="users-cards-wrap" style={{ display: 'none', flexDirection: 'column', gap: 10 }}>
-        {filtered.map((user, i) => {
-          const color = COLORS[i % COLORS.length]
-          const isAdmin = user.role === 'admin'
-          return (
-            <div key={user._id} style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 14, padding: 16 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <div style={{ width: 42, height: 42, borderRadius: '50%', background: color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 800, color: '#fff', flexShrink: 0 }}>
-                    {getInitials(user.name)}
+        <div style={{ flex: 1, overflowY: 'auto', padding: 'clamp(16px,3vw,24px)' }}>
+
+          {/* Search */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#fff',
+            border: '1.5px solid #e2e8f0', borderRadius: 10, padding: '0 14px', marginBottom: 16, maxWidth: 400 }}>
+            <Search size={14} color="#94a3b8" />
+            <input value={search} onChange={e => setSearch(e.target.value)}
+              placeholder="Search by name or email..."
+              style={{ flex: 1, border: 'none', outline: 'none', fontSize: 13, padding: '11px 0', background: 'transparent', color: '#0f172a', fontFamily: 'Inter, system-ui' }} />
+          </div>
+
+          {/* Users grid */}
+          <div className="users-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14 }}>
+            {filtered.map((user, i) => (
+              <motion.div key={user._id}
+                initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.03 }}
+                style={{ background: '#fff', borderRadius: 14, padding: 16,
+                  border: '1px solid #ebebeb', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
+                  <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'linear-gradient(135deg,#0f172a,#1e293b)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 16, fontWeight: 900, color: '#C9A84C', flexShrink: 0 }}>
+                    {(user.name || 'U')[0].toUpperCase()}
                   </div>
-                  <div>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: '#0f172a' }}>{user.name || 'Unknown'}</div>
-                    <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>{user.email}</div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <p style={{ fontSize: 14, fontWeight: 700, color: '#0f172a', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {user.name}
+                      </p>
+                      {user.role === 'admin' && (
+                        <span style={{ background: '#fef9ec', border: '1px solid #C9A84C', color: '#C9A84C', fontSize: 9, fontWeight: 800, padding: '1px 6px', borderRadius: 20 }}>ADMIN</span>
+                      )}
+                    </div>
+                    <p style={{ fontSize: 11, color: '#94a3b8', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</p>
                   </div>
                 </div>
-                <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 20, background: isAdmin ? '#ede9fe' : '#f1f5f9', color: isAdmin ? '#7c3aed' : '#64748b' }}>
-                  {user.role || 'user'}
-                </span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 12, paddingTop: 12, borderTop: '1px solid #f1f5f9' }}>
-                <span style={{ fontSize: 11, color: '#94a3b8' }}>
-                  Joined: {user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
-                </span>
-                {!isAdmin && (
-                  <button onClick={() => deleteUser(user._id)}
-                    style={{ fontSize: 12, color: '#ef4444', background: '#fee2e2', border: 'none', borderRadius: 8, padding: '5px 12px', cursor: 'pointer', fontWeight: 600 }}>
-                    Delete
-                  </button>
-                )}
-              </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {user.phone && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                      <Phone size={11} color="#94a3b8" />
+                      <span style={{ fontSize: 11, color: '#64748b' }}>{user.phone}</span>
+                    </div>
+                  )}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                    <Calendar size={11} color="#94a3b8" />
+                    <span style={{ fontSize: 11, color: '#64748b' }}>
+                      Joined {new Date(user.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </span>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          {filtered.length === 0 && !loading && (
+            <div style={{ textAlign: 'center', padding: '60px' }}>
+              <div style={{ fontSize: 40, marginBottom: 12 }}>👥</div>
+              <p style={{ color: '#94a3b8', fontSize: 14, fontWeight: 600 }}>No users found</p>
             </div>
-          )
-        })}
-        {filtered.length === 0 && (
-          <div style={{ textAlign: 'center', padding: 40, color: '#94a3b8', fontSize: 13 }}>No users found</div>
-        )}
+          )}
+        </div>
       </div>
 
       <style>{`
-        @media (max-width: 640px) {
-          .users-stats-grid { grid-template-columns: 1fr 1fr !important; }
-          .users-table-wrap { display: none !important; }
-          .users-cards-wrap { display: flex !important; }
+        @media (max-width: 768px) {
+          .admin-sidebar-desktop { display: none !important; }
+          .admin-menu-btn { display: block !important; }
+        }
+        @media (min-width: 769px) {
+          .admin-sidebar-desktop { display: block !important; }
+          .admin-menu-btn { display: none !important; }
         }
       `}</style>
-    </AdminLayout>
+    </div>
   )
 }
