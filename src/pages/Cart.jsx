@@ -1,383 +1,446 @@
-import { useState as useStateCart, useRef, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Trash2, ShoppingBag, ArrowLeft, Tag, ChevronRight, Package, ShoppingCart, Check } from 'lucide-react'
+import { Trash2, Plus, Minus, ShoppingBag, Tag, ChevronRight, Shield, Truck, RotateCcw, ArrowRight } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 
-const VALID_COUPONS = {
-  'PREMIA10': 10,
-  'SAVE20': 20,
-  'FIRST15': 15,
-}
-
-function CouponSection({ onApply }) {
-  const [code, setCode] = useStateCart('')
-  const [applied, setApplied] = useStateCart(null)
-
-  const handleApply = () => {
-    const discount = VALID_COUPONS[code.toUpperCase()]
-    if (discount) {
-      setApplied({ code: code.toUpperCase(), discount })
-      onApply(discount)
-      toast.success(`Coupon applied! ${discount}% off`)
-    } else {
-      toast.error('Invalid coupon code')
-    }
-  }
-
-  const handleRemove = () => {
-    setApplied(null)
-    setCode('')
-    onApply(0)
-    toast('Coupon removed')
-  }
-
-  return (
-    <div style={{ marginBottom: 16, padding: '12px 0', borderTop: '1px solid #f1f5f9' }}>
-      <p style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 10px' }}>Promo Code</p>
-      {applied ? (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 10 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Check size={14} color="#16a34a" />
-            <span style={{ fontSize: 13, fontWeight: 700, color: '#16a34a' }}>{applied.code}</span>
-            <span style={{ fontSize: 12, color: '#16a34a' }}>— {applied.discount}% off applied!</span>
-          </div>
-          <button onClick={handleRemove} style={{ fontSize: 12, color: '#dc2626', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Remove</button>
-        </div>
-      ) : (
-        <div style={{ display: 'flex', gap: 8 }}>
-          <input
-            id="coupon-code" name="coupon"
-            value={code}
-            onChange={e => setCode(e.target.value.toUpperCase())}
-            onKeyDown={e => e.key === 'Enter' && handleApply()}
-            placeholder="Enter coupon code"
-            style={{ flex: 1, padding: '10px 12px', borderRadius: 10, border: '1.5px solid #e2e8f0', fontSize: 13, color: '#0f172a', outline: 'none', letterSpacing: '0.06em', fontWeight: 600, boxSizing: 'border-box' }}
-            onFocus={e => e.target.style.borderColor = '#C9A84C'}
-            onBlur={e => e.target.style.borderColor = '#e2e8f0'}
-          />
-          <button onClick={handleApply} style={{ padding: '10px 16px', borderRadius: 10, border: 'none', background: '#0f172a', color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer', flexShrink: 0 }}>
-            Apply
-          </button>
-        </div>
-      )}
-      <p style={{ fontSize: 10, color: '#94a3b8', margin: '6px 0 0' }}>Try: PREMIA10, SAVE20, FIRST15</p>
-    </div>
-  )
-}
-
-// Swipeable cart item — swipe left to reveal delete on mobile
-function SwipeableCartItem({ children, onDelete }) {
-  const [swipeX, setSwipeX] = useStateCart(0)
-  const startX = useRef(null)
-  const threshold = 80
-
-  const onTouchStart = (e) => { startX.current = e.touches[0].clientX }
-  const onTouchMove = (e) => {
-    if (startX.current === null) return
-    const diff = e.touches[0].clientX - startX.current
-    if (diff < 0) setSwipeX(Math.max(diff, -threshold - 20))
-  }
-  const onTouchEnd = () => {
-    if (swipeX < -threshold / 2) setSwipeX(-threshold)
-    else setSwipeX(0)
-    startX.current = null
-  }
-
-  return (
-    <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 16 }}>
-      {/* Delete button revealed on swipe */}
-      <div style={{
-        position: 'absolute', right: 0, top: 0, bottom: 0,
-        width: threshold, background: '#ef4444',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        borderRadius: '0 16px 16px 0',
-      }}>
-        <button onClick={onDelete} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-          <Trash2 size={20} color="#fff" />
-          <span style={{ fontSize: 10, color: '#fff', fontWeight: 700 }}>Remove</span>
-        </button>
-      </div>
-      {/* Content slides left */}
-      <div
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
-        onClick={() => swipeX !== 0 && setSwipeX(0)}
-        style={{ transform: `translateX(${swipeX}px)`, transition: startX.current ? 'none' : 'transform 0.3s ease', willChange: 'transform' }}
-      >
-        {children}
-      </div>
-    </div>
-  )
-}
+const API = import.meta.env.VITE_API_URL
 
 export default function Cart({ cartItems, setCartItems }) {
-  const navigate = useNavigate()
-  const [couponDiscount, setCouponDiscount] = useStateCart(0)
+  const navigate  = useNavigate()
+  const token     = localStorage.getItem('token')
+  const [coupon, setCoupon]           = useState('')
+  const [couponApplied, setCouponApplied] = useState(false)
+  const [couponDiscount, setCouponDiscount] = useState(0)
+  const [couponError, setCouponError] = useState('')
+  const [loading, setLoading]         = useState(false)
+  const [removingId, setRemovingId]   = useState(null)
 
-  const removeFromCart = async (index) => {
-    const token = localStorage.getItem('token')
-    const item = cartItems[index]
+  const subtotal    = cartItems.reduce((sum, i) => sum + i.price * (i.quantity || 1), 0)
+  const discount    = cartItems.reduce((sum, i) => {
+    const orig = i.originalPrice || i.price
+    return sum + (orig - i.price) * (i.quantity || 1)
+  }, 0)
+  const couponAmt   = couponApplied ? Math.round(subtotal * couponDiscount / 100) : 0
+  const delivery    = subtotal > 999 ? 0 : 99
+  const total       = subtotal - couponAmt + delivery
+
+  const updateQty = async (item, delta) => {
+    const newQty = (item.quantity || 1) + delta
+    if (newQty < 1) return
+    setCartItems(prev => prev.map(i => i._id === item._id ? { ...i, quantity: newQty } : i))
     if (token) {
-      try {
-        await fetch(`${import.meta.env.VITE_API_URL}/api/cart/${item._id}`, {
-          method: 'DELETE', headers: { authorization: token }
-        })
-      } catch { toast.error('Failed to remove'); return }
+      fetch(`${API}/api/cart`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', authorization: token },
+        body: JSON.stringify({ productId: item._id, quantity: delta }),
+      }).catch(() => {})
     }
-    setCartItems(cartItems.filter((_, i) => i !== index))
-    toast.success('Item removed')
   }
 
-  const totalPrice = cartItems.reduce((t, i) => t + (i.price * (i.quantity || 1)), 0)
-  const totalOriginal = cartItems.reduce((t, i) => t + ((i.originalPrice || i.price) * (i.quantity || 1)), 0)
-  const savedFromDiscount = totalOriginal - totalPrice
-  const couponAmount = couponDiscount > 0 ? Math.round(totalPrice * couponDiscount / 100) : 0
-  const saved = savedFromDiscount + couponAmount
-  const finalPrice = totalPrice - couponAmount
-  const delivery = finalPrice >= 999 ? 0 : 99
+  const removeItem = async (item) => {
+    setRemovingId(item._id)
+    setTimeout(() => {
+      setCartItems(prev => prev.filter(i => i._id !== item._id))
+      setRemovingId(null)
+      toast.success('Item removed')
+    }, 300)
+    if (token) {
+      fetch(`${API}/api/cart/${item._id}`, {
+        method: 'DELETE', headers: { authorization: token },
+      }).catch(() => {})
+    }
+  }
+
+  const applyCoupon = () => {
+    setCouponError('')
+    if (!coupon.trim()) return setCouponError('Enter a coupon code')
+    if (coupon.toUpperCase() === 'PREMIA10') {
+      setCouponApplied(true); setCouponDiscount(10)
+      toast.success('Coupon applied! 10% off 🎉')
+    } else if (coupon.toUpperCase() === 'SAVE20') {
+      setCouponApplied(true); setCouponDiscount(20)
+      toast.success('Coupon applied! 20% off 🎉')
+    } else {
+      setCouponError('Invalid coupon code')
+    }
+  }
 
   const handleCheckout = async () => {
-    const token = localStorage.getItem('token')
-    if (!token) { toast.error('Please sign in to checkout'); navigate('/login'); return }
+    if (!token) { toast.error('Please login to checkout'); navigate('/login'); return }
+    if (cartItems.length === 0) return
+    setLoading(true)
     try {
-      const orderRes = await fetch(`${import.meta.env.VITE_API_URL}/api/orders`, {
+      const res  = await fetch(`${API}/api/orders/create-razorpay-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', authorization: token },
         body: JSON.stringify({
-          items: cartItems.map(i => ({ product: i._id, quantity: 1, price: i.price })),
-          totalAmount: finalPrice + delivery,
-          shippingAddress: 'Default Address',
+          items: cartItems.map(i => ({ product: i._id, quantity: i.quantity || 1, price: i.price })),
+          totalAmount: total,
+          couponCode: couponApplied ? coupon : null,
         }),
       })
-      const orderData = await orderRes.json()
-      if (!orderRes.ok) { toast.error('Failed to create order'); return }
+      const data = await res.json()
+      if (!res.ok) { toast.error(data.message || 'Checkout failed'); setLoading(false); return }
 
-      const payRes = await fetch(`${import.meta.env.VITE_API_URL}/api/payment/create-order`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', authorization: token },
-        body: JSON.stringify({ orderId: orderData.order._id }),
-      })
-      const payData = await payRes.json()
-      if (!payRes.ok) { toast.error('Payment setup failed'); return }
-
-      const rzp = new window.Razorpay({
-        key: payData.keyId,
-        amount: payData.amount,
-        currency: payData.currency,
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount: data.order.amount,
+        currency: 'INR',
         name: 'PREMIA',
-        order_id: payData.razorpayOrderId,
+        description: 'Everything Premium. Delivered.',
+        order_id: data.order.id,
         handler: async (response) => {
-          const vRes = await fetch(`${import.meta.env.VITE_API_URL}/api/payment/verify`, {
+          const verifyRes = await fetch(`${API}/api/orders/verify-payment`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', authorization: token },
-            body: JSON.stringify({ ...response, orderId: orderData.order._id }),
+            body: JSON.stringify({ ...response, items: cartItems, totalAmount: total }),
           })
-          const vData = await vRes.json()
-          if (vData.success) {
-            if (token) await fetch(`${import.meta.env.VITE_API_URL}/api/cart`, { method: 'DELETE', headers: { authorization: token } })
-            toast.success('Order placed! 🎉')
+          const verifyData = await verifyRes.json()
+          if (verifyRes.ok) {
+            toast.success('Order placed successfully! 🎉')
             setCartItems([])
             navigate('/orders')
-          } else toast.error('Payment verification failed')
+          } else {
+            toast.error(verifyData.message || 'Payment verification failed')
+          }
         },
-        theme: { color: '#0f172a' },
-      })
+        prefill: { name: '', email: '', contact: '' },
+        theme: { color: '#C9A84C' },
+      }
+      const rzp = new window.Razorpay(options)
       rzp.open()
-    } catch { toast.error('Something went wrong') }
+    } catch (err) {
+      toast.error('Something went wrong')
+    } finally {
+      setLoading(false)
+    }
   }
 
-  // ── EMPTY STATE ──
-  if (cartItems.length === 0) {
-    return (
-      <main style={{ minHeight: 'calc(100vh - 140px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '60px 24px', fontFamily: 'Inter, sans-serif' }}>
-        <div style={{ textAlign: 'center', maxWidth: 400 }}>
-          <div style={{
-            width: 96, height: 96, borderRadius: '50%',
-            background: '#f1f5f9', display: 'flex',
-            alignItems: 'center', justifyContent: 'center',
-            margin: '0 auto 24px',
-          }}>
-            <ShoppingCart size={40} color="#cbd5e1" />
-          </div>
-          <h2 style={{ fontSize: 24, fontWeight: 900, color: '#0f172a', margin: '0 0 8px' }}>Your cart is empty</h2>
-          <p style={{ fontSize: 14, color: '#64748b', margin: '0 0 32px', lineHeight: 1.6 }}>
-            Looks like you haven't added anything yet.<br />Start browsing our premium collection.
-          </p>
-          <Link to="/" style={{
-            display: 'inline-flex', alignItems: 'center', gap: 8,
-            padding: '13px 28px', borderRadius: 12,
-            background: '#0f172a', color: '#fff',
-            fontSize: 14, fontWeight: 700, textDecoration: 'none',
-          }}>
-            <ArrowLeft size={16} /> Continue Shopping
-          </Link>
-        </div>
-      </main>
-    )
-  }
+  // ── Empty cart ────────────────────────────────────────────────────────
+  if (cartItems.length === 0) return (
+    <div style={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 20px', background: '#fafafa' }}>
+      <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}
+        style={{ textAlign: 'center', maxWidth: 400 }}>
+        <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+          style={{ fontSize: 72, marginBottom: 20 }}>🛒</motion.div>
+        <h2 style={{ fontSize: 24, fontWeight: 900, color: '#0f172a', marginBottom: 8, letterSpacing: '-0.5px' }}>
+          Your cart is empty
+        </h2>
+        <p style={{ color: '#64748b', fontSize: 14, lineHeight: 1.7, marginBottom: 28 }}>
+          Looks like you haven't added anything yet. Explore our premium collection and find something you'll love.
+        </p>
+        <Link to="/">
+          <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
+            style={{ background: 'linear-gradient(135deg,#C9A84C,#e8b84b)', color: '#0f172a',
+              border: 'none', borderRadius: 14, padding: '14px 36px',
+              fontSize: 14, fontWeight: 800, letterSpacing: '0.06em',
+              textTransform: 'uppercase', cursor: 'pointer',
+              boxShadow: '0 8px 24px rgba(201,168,76,0.35)' }}>
+            Explore Products →
+          </motion.button>
+        </Link>
+      </motion.div>
+    </div>
+  )
 
-  // ── CART WITH ITEMS ──
   return (
-    <main style={{ maxWidth: 1100, margin: '0 auto', padding: '24px 16px 80px', fontFamily: 'Inter, sans-serif', boxSizing: 'border-box', width: '100%', overflow: 'hidden' }}>
+    <div style={{ background: '#fafafa', minHeight: '100vh', padding: 'clamp(16px,3vw,32px) clamp(12px,4vw,24px) 64px' }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto' }}>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28 }}>
-        <h1 style={{ fontSize: 24, fontWeight: 900, color: '#0f172a', margin: 0 }}>My Cart</h1>
-        <span style={{ fontSize: 12, fontWeight: 600, padding: '3px 10px', borderRadius: 20, background: '#f1f5f9', color: '#64748b' }}>
-          {cartItems.reduce((t, i) => t + (i.quantity || 1), 0)} {cartItems.reduce((t, i) => t + (i.quantity || 1), 0) === 1 ? 'item' : 'items'}
-        </span>
-      </div>
-
-      <div className="cart-grid" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 16, alignItems: 'start', width: '100%' }}>
-        <style>{`
-          .cart-grid { width: 100%; box-sizing: border-box; overflow: hidden; }
-          .cart-grid > * { min-width: 0; max-width: 100%; box-sizing: border-box; }
-          @media (min-width: 768px) { .cart-grid { grid-template-columns: 1fr 320px !important; gap: 24px !important; } }
-          .cart-summary-row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
-          .cart-summary-row span:last-child { text-align: right; flex-shrink: 0; }
-        `}</style>
-
-        {/* Items */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {cartItems.map((item, index) => (
-            <SwipeableCartItem key={`${item._id}-${index}`} onDelete={() => removeFromCart(index)}>
-            <div style={{
-              display: 'flex', gap: 12, padding: '14px 12px',
-              background: '#fff', borderRadius: 16,
-              border: '1px solid #e2e8f0',
-              boxSizing: 'border-box', width: '100%',
-              position: 'relative',
-            }}>
-              <Link to={`/products/${item._id}`}>
-                <div style={{ width: 76, height: 76, borderRadius: 12, background: '#f8fafc', overflow: 'hidden', flexShrink: 0 }}>
-                  <img src={item.image?.startsWith('http') ? item.image : 'https://placehold.co/76x76'} alt={item.name}
-                    style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 6 }} />
-                </div>
-              </Link>
-
-              <div style={{ flex: 1, minWidth: 0, paddingRight: 32 }}>
-                <Link to={`/products/${item._id}`} style={{ textDecoration: 'none' }}>
-                  <p style={{ fontSize: 14, fontWeight: 600, color: '#0f172a', margin: '0 0 4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</p>
-                </Link>
-                {item.brand && <p style={{ fontSize: 11, color: '#94a3b8', margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{item.brand}</p>}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 6 }}>
-                  <span style={{ fontSize: 16, fontWeight: 800, color: '#0f172a' }}>₹{(item.price * (item.quantity || 1))?.toLocaleString('en-IN')}</span>
-                  {item.quantity > 1 && (
-                    <span style={{ fontSize: 11, color: '#64748b' }}>₹{item.price?.toLocaleString('en-IN')} × {item.quantity}</span>
-                  )}
-                  {item.originalPrice > item.price && (
-                    <span style={{ fontSize: 12, color: '#94a3b8', textDecoration: 'line-through' }}>₹{(item.originalPrice * (item.quantity || 1))?.toLocaleString('en-IN')}</span>
-                  )}
-                </div>
-                {/* Quantity controls */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', border: '1px solid #e2e8f0', borderRadius: 8, overflow: 'hidden' }}>
-                    <button
-                      onClick={() => {
-                        const qty = (item.quantity || 1) - 1
-                        if (qty < 1) { removeFromCart(index); return }
-                        setCartItems(prev => prev.map((ci, i) => i === index ? { ...ci, quantity: qty } : ci))
-                        const token = localStorage.getItem('token')
-                        if (token) fetch(`${import.meta.env.VITE_API_URL}/api/cart`, { method: 'POST', headers: { 'Content-Type': 'application/json', authorization: token }, body: JSON.stringify({ productId: item._id, quantity: -1 }) }).catch(() => {})
-                      }}
-                      style={{ padding: '4px 10px', border: 'none', background: '#f8fafc', cursor: 'pointer', fontSize: 14, fontWeight: 700, color: '#0f172a' }}
-                    >−</button>
-                    <span style={{ padding: '4px 10px', fontSize: 13, fontWeight: 700, color: '#0f172a', borderLeft: '1px solid #e2e8f0', borderRight: '1px solid #e2e8f0' }}>{item.quantity || 1}</span>
-                    <button
-                      onClick={() => {
-                        const qty = (item.quantity || 1) + 1
-                        setCartItems(prev => prev.map((ci, i) => i === index ? { ...ci, quantity: qty } : ci))
-                        const token = localStorage.getItem('token')
-                        if (token) fetch(`${import.meta.env.VITE_API_URL}/api/cart`, { method: 'POST', headers: { 'Content-Type': 'application/json', authorization: token }, body: JSON.stringify({ productId: item._id, quantity: 1 }) }).catch(() => {})
-                      }}
-                      style={{ padding: '4px 10px', border: 'none', background: '#f8fafc', cursor: 'pointer', fontSize: 14, fontWeight: 700, color: '#0f172a' }}
-                    >+</button>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <Package size={11} color="#22c55e" />
-                    <span style={{ fontSize: 11, color: '#22c55e', fontWeight: 600 }}>Free delivery</span>
-                  </div>
-                </div>
-              </div>
-
-              <button onClick={() => removeFromCart(index)} style={{
-                position: 'absolute', top: 12, right: 12,
-                padding: 6, borderRadius: 8,
-                border: 'none', background: 'transparent', cursor: 'pointer', color: '#94a3b8',
-              }}
-                onMouseEnter={e => { e.currentTarget.style.background = '#fef2f2'; e.currentTarget.style.color = '#ef4444' }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#94a3b8' }}>
-                <Trash2 size={15} />
-              </button>
-            </div>
-            </SwipeableCartItem>
-          ))}
+        {/* Header */}
+        <div style={{ marginBottom: 24 }}>
+          <h1 style={{ fontSize: 'clamp(20px,3.5vw,28px)', fontWeight: 900, color: '#0f172a',
+            margin: '0 0 4px', letterSpacing: '-0.5px' }}>
+            My Cart
+          </h1>
+          <p style={{ color: '#94a3b8', fontSize: 13, margin: 0 }}>
+            {cartItems.length} item{cartItems.length !== 1 ? 's' : ''} in your cart
+          </p>
         </div>
 
-        {/* Summary */}
-        <div style={{
-          background: '#fff', borderRadius: 16,
-          border: '1px solid #e2e8f0', padding: '18px 14px',
-          position: 'sticky', top: 24,
-          boxSizing: 'border-box', width: '100%',
-          minWidth: 0, overflow: 'hidden',
-        }}>
-          <p style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 14px' }}>Order Summary</p>
+        {/* Main grid */}
+        <div className="cart-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: 24, alignItems: 'start' }}>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 14, paddingBottom: 14, borderBottom: '1px solid #f1f5f9' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: '#64748b', gap: 8 }}>
-              <span style={{ flexShrink: 0 }}>Subtotal ({cartItems.reduce((t, i) => t + (i.quantity || 1), 0)} items)</span>
-              <span style={{ fontWeight: 500, color: '#0f172a', textAlign: 'right' }}>₹{totalOriginal.toLocaleString('en-IN')}</span>
-            </div>
-            {savedFromDiscount > 0 && (
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, gap: 8 }}>
-                <span style={{ color: '#64748b', flexShrink: 0 }}>Product Discount</span>
-                <span style={{ fontWeight: 600, color: '#22c55e', textAlign: 'right' }}>− ₹{savedFromDiscount.toLocaleString('en-IN')}</span>
+          {/* ── LEFT: Cart items ── */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <AnimatePresence>
+              {cartItems.map((item) => (
+                <motion.div key={item._id}
+                  layout
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: removingId === item._id ? 0 : 1, x: removingId === item._id ? 40 : 0, y: 0 }}
+                  exit={{ opacity: 0, x: 40, height: 0, marginBottom: 0 }}
+                  transition={{ duration: 0.25 }}
+                  style={{ background: '#fff', borderRadius: 16, padding: 'clamp(12px,2vw,20px)',
+                    border: '1px solid #ebebeb', boxShadow: '0 2px 12px rgba(0,0,0,0.05)',
+                    display: 'flex', gap: 'clamp(12px,2vw,20px)', alignItems: 'flex-start' }}>
+
+                  {/* Product image */}
+                  <Link to={`/products/${item._id}`} style={{ flexShrink: 0 }}>
+                    <div style={{ width: 'clamp(80px,12vw,110px)', height: 'clamp(80px,12vw,110px)',
+                      borderRadius: 12, background: '#f4f6f8', overflow: 'hidden',
+                      border: '1px solid #e8ecf0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <img src={item.image || item.thumbnail}
+                        alt={item.name}
+                        style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 8 }}
+                        onError={e => { e.target.src = 'https://placehold.co/110x110/f4f6f8/94a3b8?text=?' }} />
+                    </div>
+                  </Link>
+
+                  {/* Item details */}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    {item.brand && (
+                      <p style={{ color: '#C9A84C', fontSize: 10, fontWeight: 700,
+                        letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 4px' }}>
+                        {item.brand}
+                      </p>
+                    )}
+                    <Link to={`/products/${item._id}`} style={{ textDecoration: 'none' }}>
+                      <h3 style={{ color: '#0f172a', fontSize: 'clamp(13px,1.8vw,15px)', fontWeight: 600,
+                        lineHeight: 1.4, margin: '0 0 8px',
+                        display: '-webkit-box', WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                        {item.name}
+                      </h3>
+                    </Link>
+
+                    {/* Price row */}
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 12 }}>
+                      <span style={{ fontSize: 'clamp(15px,2vw,18px)', fontWeight: 800, color: '#0f172a' }}>
+                        ₹{item.price?.toLocaleString('en-IN')}
+                      </span>
+                      {item.originalPrice > item.price && (
+                        <span style={{ fontSize: 12, color: '#c4c4c4', textDecoration: 'line-through' }}>
+                          ₹{item.originalPrice?.toLocaleString('en-IN')}
+                        </span>
+                      )}
+                      {item.originalPrice > item.price && (
+                        <span style={{ fontSize: 11, color: '#16a34a', fontWeight: 700 }}>
+                          {Math.round((item.originalPrice - item.price) / item.originalPrice * 100)}% off
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Qty + Remove */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                      <div style={{ display: 'flex', alignItems: 'center',
+                        border: '1.5px solid #e2e8f0', borderRadius: 10, overflow: 'hidden' }}>
+                        <button onClick={() => updateQty(item, -1)}
+                          style={{ width: 34, height: 34, border: 'none', background: '#f8fafc',
+                            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            color: '#0f172a', transition: 'background 0.15s' }}
+                          onMouseEnter={e => e.currentTarget.style.background = '#f1f5f9'}
+                          onMouseLeave={e => e.currentTarget.style.background = '#f8fafc'}>
+                          <Minus size={13} />
+                        </button>
+                        <span style={{ width: 36, textAlign: 'center', fontWeight: 800,
+                          fontSize: 14, color: '#0f172a', borderLeft: '1px solid #e2e8f0',
+                          borderRight: '1px solid #e2e8f0', lineHeight: '34px' }}>
+                          {item.quantity || 1}
+                        </span>
+                        <button onClick={() => updateQty(item, 1)}
+                          style={{ width: 34, height: 34, border: 'none', background: '#f8fafc',
+                            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            color: '#0f172a', transition: 'background 0.15s' }}
+                          onMouseEnter={e => e.currentTarget.style.background = '#f1f5f9'}
+                          onMouseLeave={e => e.currentTarget.style.background = '#f8fafc'}>
+                          <Plus size={13} />
+                        </button>
+                      </div>
+
+                      <button onClick={() => removeItem(item)}
+                        style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px',
+                          border: '1px solid #fee2e2', borderRadius: 8, background: '#fff',
+                          color: '#ef4444', fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                          transition: 'all 0.15s' }}
+                        onMouseEnter={e => { e.currentTarget.style.background = '#fef2f2' }}
+                        onMouseLeave={e => { e.currentTarget.style.background = '#fff' }}>
+                        <Trash2 size={13} /> Remove
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Item total — desktop */}
+                  <div className="cart-item-total" style={{ flexShrink: 0, textAlign: 'right' }}>
+                    <p style={{ fontSize: 16, fontWeight: 900, color: '#0f172a', margin: 0 }}>
+                      ₹{(item.price * (item.quantity || 1)).toLocaleString('en-IN')}
+                    </p>
+                    {(item.quantity || 1) > 1 && (
+                      <p style={{ fontSize: 11, color: '#94a3b8', margin: '3px 0 0' }}>
+                        ₹{item.price?.toLocaleString('en-IN')} × {item.quantity}
+                      </p>
+                    )}
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+
+            {/* Continue shopping */}
+            <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 6,
+              color: '#64748b', fontSize: 13, fontWeight: 600, textDecoration: 'none',
+              padding: '10px 0', transition: 'color 0.15s' }}
+              onMouseEnter={e => e.currentTarget.style.color = '#C9A84C'}
+              onMouseLeave={e => e.currentTarget.style.color = '#64748b'}>
+              ← Continue Shopping
+            </Link>
+          </div>
+
+          {/* ── RIGHT: Order summary ── */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+
+            {/* Coupon */}
+            <div style={{ background: '#fff', borderRadius: 16, padding: 20,
+              border: '1px solid #ebebeb', boxShadow: '0 2px 12px rgba(0,0,0,0.05)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                <Tag size={14} color="#C9A84C" />
+                <span style={{ fontSize: 13, fontWeight: 700, color: '#0f172a' }}>Apply Coupon</span>
               </div>
-            )}
-            {couponAmount > 0 && (
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, gap: 8 }}>
-                <span style={{ color: '#64748b', flexShrink: 0 }}>Coupon ({couponDiscount}% off)</span>
-                <span style={{ fontWeight: 700, color: '#16a34a', textAlign: 'right' }}>− ₹{couponAmount.toLocaleString('en-IN')}</span>
+              {couponApplied ? (
+                <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '10px 14px', background: '#f0fdf4', border: '1.5px solid #bbf7d0',
+                    borderRadius: 10 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontSize: 16 }}>🎉</span>
+                    <div>
+                      <p style={{ fontSize: 12, fontWeight: 700, color: '#16a34a', margin: 0 }}>
+                        {coupon.toUpperCase()} applied!
+                      </p>
+                      <p style={{ fontSize: 11, color: '#16a34a', margin: 0 }}>
+                        You save ₹{couponAmt.toLocaleString('en-IN')}
+                      </p>
+                    </div>
+                  </div>
+                  <button onClick={() => { setCouponApplied(false); setCouponDiscount(0); setCoupon('') }}
+                    style={{ border: 'none', background: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: 16 }}>
+                    ×
+                  </button>
+                </motion.div>
+              ) : (
+                <>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <input value={coupon} onChange={e => { setCoupon(e.target.value); setCouponError('') }}
+                      onKeyDown={e => e.key === 'Enter' && applyCoupon()}
+                      placeholder="PREMIA10 or SAVE20"
+                      style={{ flex: 1, padding: '10px 12px', borderRadius: 10,
+                        border: `1.5px solid ${couponError ? '#fca5a5' : '#e2e8f0'}`,
+                        fontSize: 12, color: '#0f172a', outline: 'none',
+                        background: '#fafafa', fontFamily: 'Inter, system-ui' }}
+                      onFocus={e => e.target.style.borderColor = '#C9A84C'}
+                      onBlur={e => e.target.style.borderColor = couponError ? '#fca5a5' : '#e2e8f0'}
+                    />
+                    <button onClick={applyCoupon}
+                      style={{ padding: '10px 16px', borderRadius: 10, border: 'none',
+                        background: '#0f172a', color: '#fff', fontSize: 12, fontWeight: 700,
+                        cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                      Apply
+                    </button>
+                  </div>
+                  {couponError && (
+                    <p style={{ color: '#ef4444', fontSize: 11, margin: '6px 0 0', fontWeight: 500 }}>
+                      {couponError}
+                    </p>
+                  )}
+                </>
+              )}
+            </div>
+
+            {/* Price summary */}
+            <div style={{ background: '#fff', borderRadius: 16, padding: 20,
+              border: '1px solid #ebebeb', boxShadow: '0 2px 12px rgba(0,0,0,0.05)' }}>
+              <h3 style={{ fontSize: 14, fontWeight: 800, color: '#0f172a', margin: '0 0 16px',
+                textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                Price Details
+              </h3>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
+                {[
+                  { label: `Price (${cartItems.length} item${cartItems.length !== 1 ? 's' : ''})`, value: `₹${subtotal.toLocaleString('en-IN')}`, color: '#0f172a' },
+                  discount > 0 && { label: 'Discount', value: `-₹${discount.toLocaleString('en-IN')}`, color: '#16a34a' },
+                  couponApplied && { label: `Coupon (${coupon.toUpperCase()})`, value: `-₹${couponAmt.toLocaleString('en-IN')}`, color: '#16a34a' },
+                  { label: 'Delivery', value: delivery === 0 ? 'FREE' : `₹${delivery}`, color: delivery === 0 ? '#16a34a' : '#0f172a' },
+                ].filter(Boolean).map(({ label, value, color }) => (
+                  <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: 13, color: '#475569' }}>{label}</span>
+                    <span style={{ fontSize: 13, fontWeight: 600, color }}>{value}</span>
+                  </div>
+                ))}
               </div>
-            )}
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, gap: 8 }}>
-              <span style={{ color: '#64748b', flexShrink: 0 }}>Delivery</span>
-              <span style={{ fontWeight: 600, color: delivery === 0 ? '#22c55e' : '#0f172a', textAlign: 'right' }}>{delivery === 0 ? 'FREE' : `₹${delivery}`}</span>
+
+              <div style={{ height: 1, background: '#f1f5f9', margin: '0 0 14px' }} />
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                <span style={{ fontSize: 15, fontWeight: 800, color: '#0f172a' }}>Total Amount</span>
+                <span style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.5px' }}>
+                  ₹{total.toLocaleString('en-IN')}
+                </span>
+              </div>
+
+              {discount + couponAmt > 0 && (
+                <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 10,
+                  padding: '8px 12px', marginBottom: 16, textAlign: 'center' }}>
+                  <p style={{ color: '#16a34a', fontSize: 12, fontWeight: 700, margin: 0 }}>
+                    🎉 You save ₹{(discount + couponAmt).toLocaleString('en-IN')} on this order!
+                  </p>
+                </div>
+              )}
+
+              {/* ── CHECKOUT BUTTON — gold, prominent ── */}
+              <motion.button
+                whileHover={{ scale: 1.02, boxShadow: '0 16px 40px rgba(201,168,76,0.5)' }}
+                whileTap={{ scale: 0.97 }}
+                onClick={handleCheckout}
+                disabled={loading}
+                style={{
+                  width: '100%', padding: '16px',
+                  background: loading ? '#92702a' : 'linear-gradient(135deg, #C9A84C 0%, #e8b84b 100%)',
+                  color: '#0f172a', border: 'none', borderRadius: 14,
+                  fontSize: 15, fontWeight: 800, letterSpacing: '0.06em',
+                  textTransform: 'uppercase', cursor: loading ? 'not-allowed' : 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  boxShadow: '0 8px 24px rgba(201,168,76,0.35)',
+                  transition: 'all 0.2s',
+                }}>
+                {loading
+                  ? <><div style={{ width: 18, height: 18, border: '2.5px solid #0f172a40', borderTopColor: '#0f172a', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} /> Processing...</>
+                  : <><ShoppingBag size={17} /> Proceed to Checkout</>
+                }
+              </motion.button>
+
+              {/* Secure badge */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
+                gap: 6, marginTop: 12 }}>
+                <Shield size={12} color="#16a34a" />
+                <span style={{ fontSize: 11, color: '#64748b' }}>Secured by Razorpay · 100% safe</span>
+              </div>
+            </div>
+
+            {/* Trust badges */}
+            <div style={{ background: '#fff', borderRadius: 16, padding: '14px 18px',
+              border: '1px solid #ebebeb', display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {[
+                { Icon: Truck,     text: 'Free delivery on orders above ₹999' },
+                { Icon: RotateCcw, text: '7-day hassle-free returns' },
+                { Icon: Shield,    text: '100% authentic products guaranteed' },
+              ].map(({ Icon, text }) => (
+                <div key={text} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <Icon size={14} color="#C9A84C" style={{ flexShrink: 0 }} />
+                  <span style={{ fontSize: 12, color: '#64748b' }}>{text}</span>
+                </div>
+              ))}
             </div>
           </div>
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4, gap: 8 }}>
-            <span style={{ fontSize: 15, fontWeight: 700, color: '#0f172a', flexShrink: 0 }}>Total</span>
-            <span style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', textAlign: 'right' }}>₹{(finalPrice + delivery).toLocaleString('en-IN')}</span>
-          </div>
-          {saved > 0 && <p style={{ fontSize: 12, fontWeight: 600, color: '#22c55e', margin: '0 0 16px', textAlign: 'right' }}>You save ₹{saved.toLocaleString('en-IN')}</p>}
-
-          {/* Coupon code */}
-          <CouponSection onApply={(disc) => setCouponDiscount(disc)} />
-
-          <button onClick={handleCheckout} style={{
-            width: '100%', padding: '14px', borderRadius: 12, border: 'none',
-            background: '#0f172a', color: '#fff', fontSize: 14, fontWeight: 700,
-            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-          }}>
-            Proceed to Checkout <ChevronRight size={16} />
-          </button>
-
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, marginTop: 12 }}>
-            <Tag size={11} color="#94a3b8" />
-            <span style={{ fontSize: 11, color: '#94a3b8' }}>Safe &amp; Secure Payments</span>
-          </div>
-
-          {totalPrice < 999 && (
-            <div style={{ marginTop: 16, padding: '10px 14px', borderRadius: 10, background: '#fefce8', border: '1px solid #fde68a', textAlign: 'center' }}>
-              <span style={{ fontSize: 12, color: '#92400e', fontWeight: 500 }}>
-                Add <strong>₹{(999 - totalPrice).toLocaleString()}</strong> more for free delivery
-              </span>
-            </div>
-          )}
         </div>
       </div>
-    </main>
+
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @media (max-width: 768px) {
+          .cart-grid { grid-template-columns: 1fr !important; }
+          .cart-item-total { display: none !important; }
+        }
+      `}</style>
+    </div>
   )
 }
