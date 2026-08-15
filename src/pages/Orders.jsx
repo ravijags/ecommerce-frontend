@@ -1,253 +1,245 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
-import { Package, ChevronRight, Clock, CheckCircle, Truck, XCircle, ShoppingBag, ArrowLeft, Printer, ChevronDown, ChevronUp } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
+import {
+  Package, ChevronDown, ChevronUp, FileText,
+  Truck, CheckCircle, Clock, XCircle, RefreshCw,
+  ArrowRight, ShoppingBag
+} from 'lucide-react'
+
+const API = import.meta.env.VITE_API_URL
 
 const STATUS_CONFIG = {
-  pending:    { icon: Clock,       color: '#d97706', bg: '#fef3c7', label: 'Pending',    step: 0 },
-  processing: { icon: Package,     color: '#2563eb', bg: '#dbeafe', label: 'Processing', step: 1 },
-  shipped:    { icon: Truck,       color: '#7c3aed', bg: '#ede9fe', label: 'Shipped',    step: 2 },
-  delivered:  { icon: CheckCircle, color: '#16a34a', bg: '#dcfce7', label: 'Delivered',  step: 3 },
-  cancelled:  { icon: XCircle,     color: '#dc2626', bg: '#fee2e2', label: 'Cancelled',  step: -1 },
+  pending:    { color: '#f59e0b', bg: '#fef9c3', icon: Clock,       label: 'Pending',    step: 0 },
+  processing: { color: '#3b82f6', bg: '#dbeafe', icon: RefreshCw,   label: 'Processing', step: 1 },
+  shipped:    { color: '#06b6d4', bg: '#e0f2fe', icon: Truck,       label: 'Shipped',    step: 2 },
+  delivered:  { color: '#10b981', bg: '#dcfce7', icon: CheckCircle, label: 'Delivered',  step: 3 },
+  cancelled:  { color: '#ef4444', bg: '#fee2e2', icon: XCircle,     label: 'Cancelled',  step: -1 },
 }
 
-const TIMELINE_STEPS = [
-  { label: 'Order Placed',  icon: ShoppingBag, step: 0 },
-  { label: 'Processing',    icon: Package,     step: 1 },
-  { label: 'Shipped',       icon: Truck,       step: 2 },
-  { label: 'Delivered',     icon: CheckCircle, step: 3 },
-]
+const STEPS = ['Order Placed', 'Processing', 'Shipped', 'Delivered']
 
-function StatusBadge({ status }) {
-  const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.pending
-  const Icon = cfg.icon
-  return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 700, background: cfg.bg, color: cfg.color }}>
-      <Icon size={12} /> {cfg.label}
-    </span>
-  )
-}
+function OrderCard({ order, onCancel }) {
+  const [expanded, setExpanded] = useState(false)
+  const s = STATUS_CONFIG[order.status] || STATUS_CONFIG.pending
+  const Icon = s.icon
+  const isCancelled = order.status === 'cancelled'
+  const canCancel = ['pending', 'processing'].includes(order.status)
 
-function OrderTimeline({ status }) {
-  if (status === 'cancelled') return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 0' }}>
-      <XCircle size={18} color="#dc2626" />
-      <span style={{ fontSize: 13, color: '#dc2626', fontWeight: 600 }}>Order Cancelled</span>
-    </div>
-  )
-  const currentStep = STATUS_CONFIG[status]?.step ?? 0
   return (
-    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 0, padding: '16px 0 8px', overflowX: 'auto' }}>
-      {TIMELINE_STEPS.map(({ label, icon: Icon, step }, i) => {
-        const done = currentStep >= step
-        const active = currentStep === step
-        return (
-          <div key={step} style={{ display: 'flex', alignItems: 'center', flex: 1, minWidth: 72 }}>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
-              <div style={{
-                width: 36, height: 36, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: done ? '#0f172a' : '#f1f5f9',
-                border: active ? '3px solid #C9A84C' : done ? '3px solid #0f172a' : '3px solid #e2e8f0',
-                transition: 'all 0.3s',
-              }}>
-                <Icon size={15} color={done ? '#fff' : '#94a3b8'} />
-              </div>
-              <span style={{ fontSize: 10, fontWeight: done ? 700 : 500, color: done ? '#0f172a' : '#94a3b8', marginTop: 6, textAlign: 'center', lineHeight: 1.3 }}>
-                {label}
+    <motion.div layout initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+      style={{ background: '#fff', borderRadius: 16, border: '1px solid #ebebeb', boxShadow: '0 2px 12px rgba(0,0,0,0.06)', overflow: 'hidden' }}>
+
+      {/* Order header */}
+      <div style={{ padding: 'clamp(14px,3vw,20px)' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 14 }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 5, flexWrap: 'wrap' }}>
+              <span style={{ fontSize: 13, fontWeight: 800, color: '#C9A84C', fontFamily: 'monospace' }}>#{(order._id||'').slice(-8).toUpperCase()}</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 4, background: s.bg, color: s.color, fontSize: 10, fontWeight: 700, padding: '3px 9px', borderRadius: 20 }}>
+                <Icon size={10} />{s.label}
               </span>
+              {order.paymentStatus === 'paid' && (
+                <span style={{ background: '#dcfce7', color: '#16a34a', fontSize: 10, fontWeight: 700, padding: '3px 9px', borderRadius: 20 }}>✓ Paid</span>
+              )}
+              {order.paymentStatus !== 'paid' && (
+                <span style={{ background: '#fef9c3', color: '#92400e', fontSize: 10, fontWeight: 700, padding: '3px 9px', borderRadius: 20 }}>Pending Payment</span>
+              )}
             </div>
-            {i < TIMELINE_STEPS.length - 1 && (
-              <div style={{ flex: 1, height: 3, background: currentStep > step ? '#0f172a' : '#e2e8f0', margin: '0 4px', marginBottom: 20, minWidth: 20, transition: 'background 0.3s' }} />
-            )}
+            <p style={{ fontSize: 12, color: '#94a3b8', margin: 0 }}>
+              {new Date(order.createdAt).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
+              {' · '}{order.items?.length || 0} item{order.items?.length !== 1 ? 's' : ''}
+            </p>
           </div>
-        )
-      })}
-    </div>
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: 'clamp(18px,3vw,22px)', fontWeight: 900, color: '#0f172a', letterSpacing: '-0.5px' }}>₹{(order.totalAmount||0).toLocaleString('en-IN')}</div>
+          </div>
+        </div>
+
+        {/* Timeline */}
+        {!isCancelled && (
+          <div style={{ display: 'flex', alignItems: 'center', marginBottom: 14 }}>
+            {STEPS.map((step, i) => {
+              const done = s.step >= i
+              const active = s.step === i
+              return (
+                <div key={step} style={{ display: 'flex', alignItems: 'center', flex: i < STEPS.length - 1 ? 1 : 'none' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                    <motion.div animate={{ scale: active ? 1.15 : 1 }}
+                      style={{ width: 28, height: 28, borderRadius: '50%', background: done ? '#C9A84C' : '#f1f5f9', border: `2px solid ${done ? '#C9A84C' : '#e2e8f0'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: active ? '0 0 0 3px rgba(201,168,76,0.2)' : 'none', flexShrink: 0 }}>
+                      {done ? <CheckCircle size={13} color="#0f172a" /> : <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#cbd5e1' }} />}
+                    </motion.div>
+                    <span style={{ fontSize: 9, fontWeight: done ? 700 : 500, color: done ? '#0f172a' : '#94a3b8', whiteSpace: 'nowrap', textAlign: 'center' }}>{step}</span>
+                  </div>
+                  {i < STEPS.length - 1 && (
+                    <div style={{ flex: 1, height: 2, background: s.step > i ? '#C9A84C' : '#f1f5f9', margin: '0 4px', marginBottom: 14, borderRadius: 1 }} />
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        )}
+
+        {isCancelled && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', background: '#fef2f2', borderRadius: 10, marginBottom: 14 }}>
+            <XCircle size={14} color="#ef4444" />
+            <span style={{ fontSize: 12, color: '#ef4444', fontWeight: 600 }}>This order has been cancelled</span>
+          </div>
+        )}
+
+        {/* Actions */}
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <button onClick={() => setExpanded(!expanded)}
+            style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '7px 14px', borderRadius: 9, border: '1.5px solid #e2e8f0', background: '#fff', fontSize: 12, fontWeight: 600, color: '#64748b', cursor: 'pointer' }}>
+            {expanded ? <><ChevronUp size={13} /> Hide items</> : <><ChevronDown size={13} /> Show {order.items?.length || 0} item{order.items?.length !== 1 ? 's' : ''}</>}
+          </button>
+          <button style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '7px 14px', borderRadius: 9, border: '1.5px solid #e2e8f0', background: '#fff', fontSize: 12, fontWeight: 600, color: '#64748b', cursor: 'pointer' }}>
+            <FileText size={13} /> Invoice
+          </button>
+          {canCancel && (
+            <button onClick={() => onCancel(order._id)}
+              style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '7px 14px', borderRadius: 9, border: '1.5px solid #fca5a5', background: '#fff', fontSize: 12, fontWeight: 600, color: '#ef4444', cursor: 'pointer' }}>
+              <XCircle size={13} /> Cancel Order
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Expanded items */}
+      <AnimatePresence>
+        {expanded && (
+          <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} style={{ overflow: 'hidden' }}>
+            <div style={{ borderTop: '1px solid #f1f5f9', padding: 'clamp(12px,3vw,20px)', display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {(order.items || []).map((item, j) => (
+                <div key={j} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <Link to={item.product?._id ? `/products/${item.product._id}` : '#'} style={{ flexShrink: 0 }}>
+                    <div style={{ width: 52, height: 52, borderRadius: 10, background: '#f4f6f8', border: '1px solid #e8ecf0', overflow: 'hidden' }}>
+                      {item.product?.image ? (
+                        <img src={item.product.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 4 }} onError={e => e.target.style.display='none'} />
+                      ) : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Package size={18} color="#cbd5e1" /></div>}
+                    </div>
+                  </Link>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontSize: 13, fontWeight: 600, color: '#0f172a', margin: '0 0 2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {item.product?.name || 'Product'}
+                    </p>
+                    <p style={{ fontSize: 11, color: '#94a3b8', margin: 0 }}>Qty: {item.quantity || 1} · ₹{(item.price||0).toLocaleString('en-IN')} each</p>
+                  </div>
+                  <span style={{ fontSize: 14, fontWeight: 800, color: '#0f172a', flexShrink: 0 }}>
+                    ₹{((item.price||0) * (item.quantity||1)).toLocaleString('en-IN')}
+                  </span>
+                </div>
+              ))}
+              <div style={{ paddingTop: 10, borderTop: '1px solid #f8fafc', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: 13, color: '#64748b' }}>Order Total</span>
+                <span style={{ fontSize: 16, fontWeight: 900, color: '#0f172a' }}>₹{(order.totalAmount||0).toLocaleString('en-IN')}</span>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   )
 }
 
 export default function Orders() {
-  const [orders, setOrders] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [expanded, setExpanded] = useState({})
-  const navigate = useNavigate()
+  const navigate  = useNavigate()
+  const token     = localStorage.getItem('token')
+  const [orders, setOrders]       = useState([])
+  const [loading, setLoading]     = useState(true)
+  const [filter, setFilter]       = useState('all')
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
     if (!token) { navigate('/login'); return }
-    fetch(`${import.meta.env.VITE_API_URL}/api/orders`, { headers: { authorization: token } })
+    fetch(`${API}/api/orders`, { headers: { authorization: token } })
       .then(r => r.json())
-      .then(d => { setOrders(d.order || []); setLoading(false) })
+      .then(d => { setOrders(d.orders || []); setLoading(false) })
       .catch(() => setLoading(false))
   }, [])
 
-  const toggleExpand = (id) => setExpanded(prev => ({ ...prev, [id]: !prev[id] }))
-
-  const cancelOrder = async (orderId) => {
-    if (!window.confirm('Cancel this order? This cannot be undone.')) return
-    const token = localStorage.getItem('token')
+  const handleCancel = async (orderId) => {
+    if (!window.confirm('Cancel this order?')) return
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/orders/${orderId}/cancel`, {
-        method: 'PUT',
-        headers: { authorization: token },
+      const res = await fetch(`${API}/api/orders/${orderId}/cancel`, {
+        method: 'PUT', headers: { authorization: token }
       })
       if (res.ok) {
         setOrders(prev => prev.map(o => o._id === orderId ? { ...o, status: 'cancelled' } : o))
         toast.success('Order cancelled')
-      } else {
-        toast.error('Cannot cancel this order')
-      }
-    } catch {
-      toast.error('Something went wrong')
-    }
+      } else toast.error('Could not cancel order')
+    } catch { toast.error('Network error') }
   }
 
-  const printInvoice = (order) => {
-    const win = window.open('', '_blank')
-    win.document.write(`
-      <html><head><title>Invoice #${order._id.slice(-8).toUpperCase()}</title>
-      <style>
-        body { font-family: Inter, sans-serif; padding: 40px; color: #0f172a; max-width: 600px; margin: 0 auto; }
-        h1 { font-size: 28px; font-weight: 900; color: #0f172a; margin: 0 0 4px; }
-        .gold { color: #C9A84C; }
-        table { width: 100%; border-collapse: collapse; margin: 24px 0; }
-        th { background: #f8fafc; padding: 10px 12px; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; }
-        td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
-        .total { font-size: 18px; font-weight: 900; }
-        .footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid #e2e8f0; font-size: 12px; color: #94a3b8; }
-      </style></head><body>
-      <h1>PREMIA<span class="gold">.</span></h1>
-      <p style="color:#64748b;margin:0 0 24px">Tax Invoice / Bill of Supply</p>
-      <div style="display:flex;justify-content:space-between;margin-bottom:24px">
-        <div><strong>Order ID:</strong> #${order._id.slice(-8).toUpperCase()}<br>
-        <strong>Date:</strong> ${new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}<br>
-        <strong>Status:</strong> ${order.status}</div>
-        <div style="text-align:right"><strong>Sold by:</strong><br>PREMIA Official Store<br>New Delhi, India<br>support@premia.in</div>
-      </div>
-      <table>
-        <tr><th>Product</th><th>Qty</th><th>Price</th></tr>
-        ${(order.items || []).map(i => `<tr><td>${i.product?.name || 'Product'}</td><td>${i.quantity || 1}</td><td>₹${i.price?.toLocaleString('en-IN')}</td></tr>`).join('')}
-        <tr><td colspan="2" style="text-align:right"><strong>Total</strong></td><td class="total">₹${order.totalAmount?.toLocaleString('en-IN')}</td></tr>
-      </table>
-      <div class="footer">Thank you for shopping with PREMIA. For support: support@premia.in | 1800-PREMIA</div>
-      </body></html>
-    `)
-    win.document.close()
-    win.print()
-  }
+  const filtered = filter === 'all' ? orders : orders.filter(o => o.status === filter)
+  const counts = ['pending','processing','shipped','delivered','cancelled'].reduce((acc, s) => {
+    acc[s] = orders.filter(o => o.status === s).length; return acc
+  }, {})
 
   if (loading) return (
     <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ width: 32, height: 32, border: '3px solid #C9A84C', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+      <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+        style={{ width: 36, height: 36, border: '3px solid #f1f5f9', borderTopColor: '#C9A84C', borderRadius: '50%' }} />
     </div>
   )
 
   return (
-    <main style={{ maxWidth: 720, margin: '0 auto', padding: '24px 16px 80px', fontFamily: 'Inter, sans-serif' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-        <h1 style={{ fontSize: 22, fontWeight: 900, color: '#0f172a', margin: 0 }}>My Orders</h1>
-        <Link to="/" style={{ fontSize: 13, fontWeight: 600, color: '#C9A84C', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4 }}>
-          Shop more <ChevronRight size={14} />
-        </Link>
-      </div>
+    <div style={{ background: '#fafafa', minHeight: '100vh', padding: 'clamp(20px,4vw,36px) clamp(16px,5vw,24px) 80px', fontFamily: 'Inter, system-ui' }}>
+      <div style={{ maxWidth: 900, margin: '0 auto' }}>
 
-      {orders.length === 0 ? (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-          style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 20, padding: '60px 24px', textAlign: 'center' }}>
-          <div style={{ width: 80, height: 80, borderRadius: '50%', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
-            <ShoppingBag size={34} color="#cbd5e1" />
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
+          <div>
+            <h1 style={{ fontSize: 'clamp(20px,3.5vw,26px)', fontWeight: 900, color: '#0f172a', margin: '0 0 4px', letterSpacing: '-0.5px', display: 'flex', alignItems: 'center', gap: 10 }}>
+              <ShoppingBag size={22} color="#0f172a" /> My Orders
+            </h1>
+            <p style={{ color: '#94a3b8', fontSize: 13, margin: 0 }}>{orders.length} total orders</p>
           </div>
-          <h2 style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', margin: '0 0 8px' }}>No orders yet</h2>
-          <p style={{ fontSize: 14, color: '#64748b', margin: '0 0 28px' }}>Your order history will appear here.</p>
-          <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '12px 24px', borderRadius: 12, background: '#0f172a', color: '#fff', fontSize: 14, fontWeight: 700, textDecoration: 'none' }}>
-            <ArrowLeft size={15} /> Start Shopping
+          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 13, color: '#C9A84C', fontWeight: 700, textDecoration: 'none' }}>
+            Shop more <ArrowRight size={14} />
           </Link>
-        </motion.div>
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {orders.map((order, i) => (
-            <motion.div key={order._id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}
-              style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 18, overflow: 'hidden' }}>
+        </div>
 
-              {/* Order header */}
-              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', padding: '16px 18px', borderBottom: '1px solid #f1f5f9' }}>
-                <div>
-                  <p style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 3px' }}>Order ID</p>
-                  <p style={{ fontSize: 14, fontWeight: 800, fontFamily: 'monospace', color: '#0f172a', margin: 0 }}>#{order._id.slice(-8).toUpperCase()}</p>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <p style={{ fontSize: 11, color: '#94a3b8', margin: '0 0 6px' }}>
-                    {new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                  </p>
-                  <StatusBadge status={order.status} />
-                </div>
-              </div>
-
-              {/* Timeline */}
-              <div style={{ padding: '0 18px' }}>
-                <OrderTimeline status={order.status} />
-              </div>
-
-              {/* Items - collapsible */}
-              <div style={{ padding: '0 18px' }}>
-                <button onClick={() => toggleExpand(order._id)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 0', border: 'none', background: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600, color: '#64748b', width: '100%' }}>
-                  {expanded[order._id] ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                  {expanded[order._id] ? 'Hide' : 'Show'} {order.items?.length} item{order.items?.length !== 1 ? 's' : ''}
-                </button>
-                <AnimatePresence>
-                  {expanded[order._id] && (
-                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} style={{ overflow: 'hidden' }}>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, paddingBottom: 12 }}>
-                        {order.items?.map((item, idx) => (
-                          <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', background: '#f8fafc', borderRadius: 10 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-                              <Package size={13} color="#94a3b8" style={{ flexShrink: 0 }} />
-                              <span style={{ fontSize: 13, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                {item.product?.name || 'Product (unavailable)'}
-                              </span>
-                              <span style={{ fontSize: 11, color: '#94a3b8', flexShrink: 0 }}>×{item.quantity || 1}</span>
-                            </div>
-                            <span style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', flexShrink: 0, marginLeft: 8 }}>
-                              ₹{item.price?.toLocaleString('en-IN')}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
-              {/* Footer */}
-              <div style={{ padding: '12px 18px', background: '#f8fafc', borderTop: '1px solid #f1f5f9' }}>
-                {/* Top row: payment status + action buttons */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 20, background: order.paymentStatus === 'paid' ? '#dcfce7' : '#fef3c7', color: order.paymentStatus === 'paid' ? '#15803d' : '#92400e' }}>
-                      {order.paymentStatus === 'paid' ? '✓ Paid' : 'Pending Payment'}
-                    </span>
-                    <button onClick={() => printInvoice(order)} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 20, border: '1px solid #e2e8f0', background: '#fff', color: '#64748b', fontSize: 11, fontWeight: 600, cursor: 'pointer' }}>
-                      <Printer size={11} /> Invoice
-                    </button>
-                  </div>
-                  {['pending', 'processing'].includes(order.status) && (
-                    <button onClick={() => cancelOrder(order._id)} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 20, border: '1px solid #fee2e2', background: '#fff', color: '#ef4444', fontSize: 11, fontWeight: 600, cursor: 'pointer', flexShrink: 0 }}>
-                      <XCircle size={11} /> Cancel Order
-                    </button>
-                  )}
-                </div>
-                {/* Bottom row: total */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: 13, color: '#64748b', fontWeight: 500 }}>Order Total</span>
-                  <span style={{ fontSize: 20, fontWeight: 900, color: '#0f172a' }}>₹{order.totalAmount?.toLocaleString('en-IN')}</span>
-                </div>
-              </div>
-            </motion.div>
+        {/* Filter tabs */}
+        <div style={{ display: 'flex', gap: 6, marginBottom: 20, flexWrap: 'wrap' }}>
+          {[{ key: 'all', label: `All (${orders.length})` },
+            { key: 'pending',    label: `Pending (${counts.pending||0})` },
+            { key: 'processing', label: `Processing (${counts.processing||0})` },
+            { key: 'shipped',    label: `Shipped (${counts.shipped||0})` },
+            { key: 'delivered',  label: `Delivered (${counts.delivered||0})` },
+            { key: 'cancelled',  label: `Cancelled (${counts.cancelled||0})` },
+          ].map(({ key, label }) => (
+            <button key={key} onClick={() => setFilter(key)}
+              style={{ padding: '7px 14px', borderRadius: 20, border: filter === key ? 'none' : '1px solid #e2e8f0', background: filter === key ? '#0f172a' : '#fff', color: filter === key ? '#fff' : '#64748b', fontSize: 12, fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s', whiteSpace: 'nowrap' }}>
+              {label}
+            </button>
           ))}
         </div>
-      )}
-    </main>
+
+        {/* Orders */}
+        {filtered.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '60px 20px', background: '#fff', borderRadius: 16, border: '1px solid #ebebeb' }}>
+            <div style={{ fontSize: 48, marginBottom: 12 }}>📦</div>
+            <h3 style={{ fontSize: 18, fontWeight: 800, color: '#0f172a', margin: '0 0 8px' }}>{filter === 'all' ? 'No orders yet' : `No ${filter} orders`}</h3>
+            <p style={{ color: '#94a3b8', margin: '0 0 24px' }}>
+              {filter === 'all' ? 'Place your first order to see it here' : `You have no ${filter} orders`}
+            </p>
+            <Link to="/" style={{ background: 'linear-gradient(135deg,#C9A84C,#e8b84b)', color: '#0f172a', padding: '12px 28px', borderRadius: 12, textDecoration: 'none', fontSize: 14, fontWeight: 800, boxShadow: '0 4px 16px rgba(201,168,76,0.3)' }}>
+              Shop Now
+            </Link>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <AnimatePresence>
+              {filtered.map((order, i) => (
+                <motion.div key={order._id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}>
+                  <OrderCard order={order} onCancel={handleCancel} />
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        )}
+      </div>
+    </div>
   )
 }
