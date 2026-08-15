@@ -239,6 +239,10 @@ function App() {
           <Route path="/admin/orders"          element={<AdminOrders />} />
           <Route path="/admin/products"        element={<AdminProducts />} />
           <Route path="/admin/users"           element={<AdminUsers />} />
+          <Route path="/admin/analytics"       element={<AdminAnalytics />} />
+          <Route path="/admin/orders/:id"      element={<AdminOrderDetail />} />
+          <Route path="/admin/coupons"         element={<AdminCoupons />} />
+          <Route path="/admin/settings"        element={<AdminSettings />} />
           <Route path="*"                      element={<PageWrapper><NotFound /></PageWrapper>} />
         </Routes>
       </AnimatePresence>
