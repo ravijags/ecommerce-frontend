@@ -12,7 +12,9 @@ export default function Cart({ cartItems, setCartItems }) {
   const [coupon, setCoupon]           = useState('')
   const [couponApplied, setCouponApplied] = useState(false)
   const [couponDiscount, setCouponDiscount] = useState(0)
-  const [couponError, setCouponError] = useState('')
+  const [couponType, setCouponType]         = useState('percent')
+  const [couponFixed, setCouponFixed]       = useState(0)
+  const [couponError, setCouponError]       = useState('')
   const [loading, setLoading]         = useState(false)
   const [removingId, setRemovingId]   = useState(null)
 
@@ -21,7 +23,7 @@ export default function Cart({ cartItems, setCartItems }) {
     const orig = i.originalPrice || i.price
     return sum + (orig - i.price) * (i.quantity || 1)
   }, 0)
-  const couponAmt   = couponApplied ? Math.round(subtotal * couponDiscount / 100) : 0
+  const couponAmt   = couponApplied ? (couponType === 'fixed' ? couponFixed : Math.round(subtotal * couponDiscount / 100)) : 0
   const delivery    = subtotal > 999 ? 0 : 99
   const total       = subtotal - couponAmt + delivery
 
@@ -54,16 +56,48 @@ export default function Cart({ cartItems, setCartItems }) {
 
   const applyCoupon = () => {
     setCouponError('')
-    if (!coupon.trim()) return setCouponError('Enter a coupon code')
-    if (coupon.toUpperCase() === 'PREMIA10') {
-      setCouponApplied(true); setCouponDiscount(10)
-      toast.success('Coupon applied! 10% off 🎉')
-    } else if (coupon.toUpperCase() === 'SAVE20') {
-      setCouponApplied(true); setCouponDiscount(20)
-      toast.success('Coupon applied! 20% off 🎉')
-    } else {
-      setCouponError('Invalid coupon code')
-    }
+    const code = coupon.trim().toUpperCase()
+    if (!code) return setCouponError('Enter a coupon code')
+
+    // Load coupons from admin localStorage
+    const DEFAULT_COUPONS = [
+      { code: 'PREMIA10', type: 'percent', value: 10, minOrder: 999,  active: true, expiry: '2099-12-31' },
+      { code: 'SAVE20',   type: 'percent', value: 20, minOrder: 1999, active: true, expiry: '2099-12-31' },
+    ]
+    let allCoupons = DEFAULT_COUPONS
+    try {
+      const stored = localStorage.getItem('premia_admin_coupons')
+      if (stored) allCoupons = JSON.parse(stored)
+    } catch {}
+
+    const found = allCoupons.find(c => c.code === code)
+
+    if (!found) return setCouponError('Invalid coupon code')
+    if (!found.active) return setCouponError('This coupon is inactive')
+    if (new Date(found.expiry) < new Date()) return setCouponError('This coupon has expired')
+    if (found.minOrder && subtotal < found.minOrder) return setCouponError(`Minimum order ₹${found.minOrder.toLocaleString('en-IN')} required`)
+    if (found.maxUses && found.uses >= found.maxUses) return setCouponError('This coupon has reached its usage limit')
+
+    const discountAmt = found.type === 'percent'
+      ? found.value
+      : Math.round((found.value / subtotal) * 100) // convert fixed to percent for consistency
+
+    setCouponApplied(true)
+    setCouponDiscount(discountAmt)
+    setCouponType(found.type)
+    setCouponFixed(found.type === 'fixed' ? found.value : 0)
+    toast.success(`Coupon applied! ${found.type === 'percent' ? `${found.value}% off` : `₹${found.value} off`} 🎉`)
+
+    // Increment usage count
+    try {
+      const stored = localStorage.getItem('premia_admin_coupons')
+      if (stored) {
+        const updated = JSON.parse(stored).map(c =>
+          c.code === code ? { ...c, uses: (c.uses || 0) + 1 } : c
+        )
+        localStorage.setItem('premia_admin_coupons', JSON.stringify(updated))
+      }
+    } catch {}
   }
 
   const handleCheckout = async () => {
@@ -313,7 +347,7 @@ export default function Cart({ cartItems, setCartItems }) {
                       </p>
                     </div>
                   </div>
-                  <button onClick={() => { setCouponApplied(false); setCouponDiscount(0); setCoupon('') }}
+                  <button onClick={() => { setCouponApplied(false); setCouponDiscount(0); setCouponType('percent'); setCouponFixed(0); setCoupon('') }}
                     style={{ border: 'none', background: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: 16 }}>
                     ×
                   </button>
