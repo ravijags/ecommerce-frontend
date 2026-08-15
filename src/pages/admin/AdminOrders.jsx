@@ -27,18 +27,21 @@ const STATUS_CONFIG = {
 }
 
 // ── Expandable order row ──────────────────────────────────────────────────
-function OrderRow({ order, onUpdateStatus, updatingId }) {
+function OrderRow({ order, onUpdateStatus, updatingId, isSelected, onToggle }) {
   const [expanded, setExpanded] = useState(false)
   const s = STATUS_CONFIG[order.status] || STATUS_CONFIG.pending
 
   return (
     <>
       <tr
-        onClick={() => setExpanded(e => !e)}
-        style={{ borderBottom: expanded ? 'none' : '1px solid #f8fafc', cursor: 'pointer', transition: 'background 0.1s', background: expanded ? '#fafafa' : 'transparent' }}
-        onMouseEnter={e => { if (!expanded) e.currentTarget.style.background = '#fafafa' }}
-        onMouseLeave={e => { if (!expanded) e.currentTarget.style.background = 'transparent' }}>
-        <td style={{ padding: '12px 16px' }}>
+        style={{ borderBottom: expanded ? 'none' : '1px solid #f8fafc', cursor: 'pointer', transition: 'background 0.1s', background: isSelected ? '#fef9ec' : expanded ? '#fafafa' : 'transparent' }}
+        onMouseEnter={e => { if (!expanded && !isSelected) e.currentTarget.style.background = '#fafafa' }}
+        onMouseLeave={e => { if (!expanded && !isSelected) e.currentTarget.style.background = 'transparent' }}>
+        <td style={{ padding: '12px 16px' }} onClick={e => e.stopPropagation()}>
+          <input type="checkbox" checked={isSelected} onChange={onToggle}
+            style={{ cursor: 'pointer', width: 15, height: 15, accentColor: '#C9A84C' }} />
+        </td>
+        <td style={{ padding: '12px 16px' }} onClick={() => setExpanded(e => !e)}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             {expanded ? <ChevronUp size={12} color="#94a3b8" /> : <ChevronDown size={12} color="#94a3b8" />}
             <a href={`/admin/orders/${order._id}`} onClick={e => e.stopPropagation()}
@@ -139,7 +142,10 @@ export default function AdminOrders() {
   const [search, setSearch]         = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [updatingId, setUpdatingId] = useState(null)
+  const [updatingId, setUpdatingId]   = useState(null)
+  const [selected, setSelected]       = useState(new Set())
+  const [bulkStatus, setBulkStatus]   = useState('')
+  const [bulkLoading, setBulkLoading] = useState(false)
   const token = localStorage.getItem('token')
 
   useEffect(() => {
@@ -181,10 +187,44 @@ export default function AdminOrders() {
     }
   }
 
+  const toggleSelect = (id) => setSelected(prev => {
+    const n = new Set(prev)
+    n.has(id) ? n.delete(id) : n.add(id)
+    return n
+  })
+
+  const toggleSelectAll = () => {
+    if (selected.size === filtered.length) setSelected(new Set())
+    else setSelected(new Set(filtered.map(o => o._id)))
+  }
+
+  const handleBulkUpdate = async () => {
+    if (!bulkStatus || selected.size === 0) return
+    setBulkLoading(true)
+    let count = 0
+    for (const id of selected) {
+      try {
+        const res = await fetch(`${API}/api/admin/orders/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', authorization: token },
+          body: JSON.stringify({ status: bulkStatus }),
+        })
+        if (res.ok) count++
+      } catch {}
+    }
+    setOrders(prev => prev.map(o => selected.has(o._id) ? { ...o, status: bulkStatus } : o))
+    toast.success(`✓ Updated ${count} orders to ${bulkStatus}`)
+    setSelected(new Set())
+    setBulkStatus('')
+    setBulkLoading(false)
+  }
+
   const counts = Object.keys(STATUS_CONFIG).reduce((acc, s) => {
     acc[s] = orders.filter(o => o.status === s).length
     return acc
   }, {})
+
+  const TH_STYLE = { padding: '12px 16px', textAlign: 'left', fontSize: 10, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', borderBottom: '1px solid #f1f5f9', whiteSpace: 'nowrap' }
 
   return (
     <div style={{ display: 'flex', height: '100vh', background: '#f8fafc', overflow: 'hidden', fontFamily: 'Inter, system-ui' }}>
@@ -254,14 +294,46 @@ export default function AdminOrders() {
             ))}
           </div>
 
+          {/* Bulk action bar */}
+          <AnimatePresence>
+            {selected.size > 0 && (
+              <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
+                style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', background: '#0f172a', borderRadius: 12, marginBottom: 10, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: 13, fontWeight: 700, color: '#C9A84C' }}>{selected.size} orders selected</span>
+                <button onClick={() => setSelected(new Set())}
+                  style={{ fontSize: 11, color: '#64748b', background: 'none', border: 'none', cursor: 'pointer' }}>
+                  Clear
+                </button>
+                <div style={{ flex: 1 }} />
+                <select value={bulkStatus} onChange={e => setBulkStatus(e.target.value)}
+                  style={{ padding: '7px 12px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.08)', color: '#fff', fontSize: 12, fontWeight: 600, cursor: 'pointer', outline: 'none', fontFamily: 'Inter, system-ui' }}>
+                  <option value="">Update Status To...</option>
+                  {Object.entries(STATUS_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+                </select>
+                <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
+                  onClick={handleBulkUpdate} disabled={!bulkStatus || bulkLoading}
+                  style={{ padding: '7px 16px', borderRadius: 8, border: 'none', background: bulkStatus ? '#C9A84C' : '#334155', color: bulkStatus ? '#0f172a' : '#fff', fontSize: 12, fontWeight: 700, cursor: bulkStatus ? 'pointer' : 'not-allowed' }}>
+                  {bulkLoading ? 'Updating...' : 'Apply'}
+                </motion.button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {/* Orders table */}
           <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #ebebeb', boxShadow: '0 2px 12px rgba(0,0,0,0.05)', overflow: 'hidden' }}>
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 620 }}>
                 <thead>
                   <tr style={{ background: '#fafafa' }}>
-                    {['Order ID', 'Customer', 'Items', 'Amount', 'Status', 'Date', 'Update'].map(h => (
-                      <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontSize: 10, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', borderBottom: '1px solid #f1f5f9', whiteSpace: 'nowrap' }}>{h}</th>
+                    {['', 'Order ID', 'Customer', 'Items', 'Amount', 'Status', 'Date', 'Update'].map((h, hi) => h === '' ? (
+                      <th key='cb' style={{ ...TH_STYLE, width: 44 }}>
+                        <input type="checkbox"
+                          checked={filtered.length > 0 && selected.size === filtered.length}
+                          onChange={toggleSelectAll}
+                          style={{ cursor: 'pointer', width: 15, height: 15, accentColor: '#C9A84C' }} />
+                      </th>
+                    ) : (
+                      <th key={h} style={TH_STYLE}>{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -274,7 +346,7 @@ export default function AdminOrders() {
                       <p style={{ color: '#94a3b8', fontSize: 14, fontWeight: 600, margin: 0 }}>No orders found</p>
                     </td></tr>
                   ) : filtered.map(order => (
-                    <OrderRow key={order._id} order={order} onUpdateStatus={updateStatus} updatingId={updatingId} />
+                    <OrderRow key={order._id} order={order} onUpdateStatus={updateStatus} updatingId={updatingId} isSelected={selected.has(order._id)} onToggle={() => toggleSelect(order._id)} />
                   ))}
                 </tbody>
               </table>

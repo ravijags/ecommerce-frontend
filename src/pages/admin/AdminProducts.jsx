@@ -239,9 +239,40 @@ export default function AdminProducts() {
   const [deleteProduct, setDeleteProduct] = useState(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [toastMsg, setToastMsg]       = useState('')
+  const [selected, setSelected]       = useState(new Set())
+  const [bulkAction, setBulkAction]   = useState('')
   const token = localStorage.getItem('token')
 
   const showToast = (msg) => { setToastMsg(msg); setTimeout(() => setToastMsg(''), 3000) }
+
+  const toggleSelect = (id) => setSelected(prev => {
+    const n = new Set(prev)
+    n.has(id) ? n.delete(id) : n.add(id)
+    return n
+  })
+
+  const toggleSelectAll = () => {
+    if (selected.size === paginated.length) setSelected(new Set())
+    else setSelected(new Set(paginated.map(p => p._id)))
+  }
+
+  const handleBulkAction = async () => {
+    if (!bulkAction || selected.size === 0) return
+    if (bulkAction === 'delete') {
+      if (!window.confirm(`Delete ${selected.size} products? This cannot be undone.`)) return
+      let count = 0
+      for (const id of selected) {
+        try {
+          await fetch(`${API}/api/admin/products/${id}`, { method: 'DELETE', headers: { authorization: token } })
+          count++
+        } catch {}
+      }
+      setProducts(prev => prev.filter(p => !selected.has(p._id)))
+      setSelected(new Set())
+      setBulkAction('')
+      showToast(`✓ Deleted ${count} products`)
+    }
+  }
 
   useEffect(() => {
     fetch(`${API}/api/products?limit=500`, { headers: { authorization: token } })
@@ -380,12 +411,43 @@ export default function AdminProducts() {
             </select>
           </div>
 
+          {/* Bulk action bar */}
+          <AnimatePresence>
+            {selected.size > 0 && (
+              <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
+                style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', background: '#0f172a', borderRadius: 12, marginBottom: 10, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: 13, fontWeight: 700, color: '#C9A84C' }}>{selected.size} selected</span>
+                <button onClick={() => setSelected(new Set())}
+                  style={{ fontSize: 11, color: '#64748b', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px', borderRadius: 6 }}>
+                  Clear
+                </button>
+                <div style={{ flex: 1 }} />
+                <select value={bulkAction} onChange={e => setBulkAction(e.target.value)}
+                  style={{ padding: '7px 12px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.08)', color: '#fff', fontSize: 12, fontWeight: 600, cursor: 'pointer', outline: 'none', fontFamily: 'Inter, system-ui' }}>
+                  <option value="">Bulk Actions</option>
+                  <option value="delete">🗑 Delete Selected</option>
+                </select>
+                <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
+                  onClick={handleBulkAction} disabled={!bulkAction}
+                  style={{ padding: '7px 16px', borderRadius: 8, border: 'none', background: bulkAction ? '#ef4444' : '#334155', color: '#fff', fontSize: 12, fontWeight: 700, cursor: bulkAction ? 'pointer' : 'not-allowed' }}>
+                  Apply
+                </motion.button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {/* Table */}
           <div style={{ background: '#fff', borderRadius: 14, border: '1px solid #ebebeb', boxShadow: '0 2px 12px rgba(0,0,0,0.05)', overflow: 'hidden', marginBottom: 14 }}>
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 700 }}>
                 <thead>
                   <tr style={{ background: '#fafafa', borderBottom: '1px solid #f1f5f9' }}>
+                    <th style={{ ...TH, width: 44 }}>
+                      <input type="checkbox"
+                        checked={paginated.length > 0 && selected.size === paginated.length}
+                        onChange={toggleSelectAll}
+                        style={{ cursor: 'pointer', width: 15, height: 15, accentColor: '#C9A84C' }} />
+                    </th>
                     <th style={TH}>Product</th>
                     <th style={TH} onClick={() => toggleSort('category')} className="sortable">
                       <div style={{ display: 'flex', alignItems: 'center', gap: 5, cursor: 'pointer' }}>Category <SortIcon k="category" /></div>
@@ -419,10 +481,15 @@ export default function AdminProducts() {
                     const isOut = product.stock === 0
                     return (
                       <motion.tr key={product._id}
+                        onClick={() => toggleSelect(product._id)}
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: Math.min(i * 0.02, 0.2) }}
-                        style={{ borderBottom: '1px solid #f8fafc', transition: 'background 0.1s', background: i % 2 === 0 ? '#fff' : '#fafafa' }}
-                        onMouseEnter={e => e.currentTarget.style.background = '#f0f7ff'}
-                        onMouseLeave={e => e.currentTarget.style.background = i % 2 === 0 ? '#fff' : '#fafafa'}>
+                        style={{ borderBottom: '1px solid #f8fafc', transition: 'background 0.1s', background: selected.has(product._id) ? '#fef9ec' : i % 2 === 0 ? '#fff' : '#fafafa', cursor: 'pointer' }}
+                        onMouseEnter={e => { if (!selected.has(product._id)) e.currentTarget.style.background = '#f0f7ff' }}
+                        onMouseLeave={e => { if (!selected.has(product._id)) e.currentTarget.style.background = i % 2 === 0 ? '#fff' : '#fafafa' }}>
+                        <td style={{ padding: '10px 16px' }} onClick={e => e.stopPropagation()}>
+                          <input type="checkbox" checked={selected.has(product._id)} onChange={() => toggleSelect(product._id)}
+                            style={{ cursor: 'pointer', width: 15, height: 15, accentColor: '#C9A84C' }} />
+                        </td>
                         <td style={{ padding: '10px 16px' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                             <div style={{ width: 42, height: 42, borderRadius: 9, background: '#f4f6f8', border: '1px solid #e8ecf0', overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
