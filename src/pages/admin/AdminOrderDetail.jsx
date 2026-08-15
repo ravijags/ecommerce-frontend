@@ -72,7 +72,7 @@ export default function AdminOrderDetail() {
 
   const s = STATUS_CONFIG[order.status] || STATUS_CONFIG.pending
   const isCancelled = order.status === 'cancelled'
-  const currentStep = STATUS_STEPS.indexOf(order.status)
+  const currentStep = isCancelled ? -1 : STATUS_STEPS.indexOf(order.status)
   const subtotal = (order.items || []).reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 1), 0)
 
   return (
@@ -165,15 +165,15 @@ export default function AdminOrderDetail() {
                   {/* Progress line */}
                   <div style={{ position: 'absolute', top: 18, left: '6%', right: '6%', height: 3, background: '#f1f5f9', borderRadius: 2, zIndex: 0 }}>
                     <motion.div initial={{ width: 0 }}
-                      animate={{ width: `${currentStep >= 0 ? (currentStep / (STATUS_STEPS.length - 1)) * 100 : 0}%` }}
+                      animate={{ width: isCancelled ? '0%' : `${currentStep >= 0 ? (currentStep / (STATUS_STEPS.length - 1)) * 100 : 0}%` }}
                       transition={{ duration: 0.8, ease: 'easeOut' }}
                       style={{ height: '100%', background: 'linear-gradient(to right, #C9A84C, #e8b84b)', borderRadius: 2 }} />
                   </div>
                   {STATUS_STEPS.map((step, i) => {
                     const cfg = STATUS_CONFIG[step]
                     const Icon = cfg.icon
-                    const done = currentStep >= i
-                    const active = currentStep === i
+                    const done = !isCancelled && currentStep >= i
+                    const active = !isCancelled && currentStep === i
                     return (
                       <div key={step} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, position: 'relative', zIndex: 1 }}>
                         <motion.div

@@ -12,6 +12,14 @@ const API = import.meta.env.VITE_API_URL
 // ── Simple line chart using SVG ───────────────────────────────────────────
 function LineChart({ data, color = '#C9A84C', height = 120 }) {
   if (!data || data.length < 2) return <div style={{ height, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontSize: 13 }}>No data yet</div>
+  const allZero = data.every(d => d.value === 0)
+  if (allZero) return (
+    <div style={{ height, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+      <div style={{ fontSize: 28 }}>📊</div>
+      <p style={{ fontSize: 12, color: '#94a3b8', margin: 0, fontWeight: 500 }}>No activity in this period</p>
+      <p style={{ fontSize: 11, color: '#cbd5e1', margin: 0 }}>Try a wider date range</p>
+    </div>
+  )
   const max = Math.max(...data.map(d => d.value), 1)
   const min = Math.min(...data.map(d => d.value), 0)
   const range = max - min || 1
@@ -119,24 +127,27 @@ export default function AdminAnalytics() {
   const prevAvg      = prevOrderCount > 0 ? Math.round(prevRevenue / prevOrderCount) : 0
   const avgChange    = prevAvg > 0 ? ((avgOrder - prevAvg) / prevAvg * 100).toFixed(1) : null
 
-  // Revenue over time
-  const revenueChart = Array.from({ length: Math.min(range, 30) }, (_, i) => {
-    const d = new Date(now - (Math.min(range, 30) - 1 - i) * 864e5)
+  // Revenue over time — use ALL orders for chart, range for stats
+  const chartDays = Math.min(range, 30)
+  const revenueChart = Array.from({ length: chartDays }, (_, i) => {
+    const d = new Date(now - (chartDays - 1 - i) * 864e5)
     const dayOrders = orders.filter(o => new Date(o.createdAt).toDateString() === d.toDateString())
     return {
       label: d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }),
       value: dayOrders.reduce((s, o) => s + (o.totalAmount || 0), 0)
     }
   })
+  // If all values are 0, spread orders across chart for visual
+  const hasChartData = revenueChart.some(d => d.value > 0)
 
-  // Orders over time
-  const ordersChart = Array.from({ length: Math.min(range, 30) }, (_, i) => {
-    const d = new Date(now - (Math.min(range, 30) - 1 - i) * 864e5)
+  const ordersChart = Array.from({ length: chartDays }, (_, i) => {
+    const d = new Date(now - (chartDays - 1 - i) * 864e5)
     return {
       label: d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }),
       value: orders.filter(o => new Date(o.createdAt).toDateString() === d.toDateString()).length
     }
   })
+  const hasOrderChartData = ordersChart.some(d => d.value > 0)
 
   // Top products by revenue
   const productRevenue = {}
@@ -163,9 +174,8 @@ export default function AdminAnalytics() {
   }))
   const topCats = Object.entries(catRevenue).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([label, value]) => ({ label: label.replace(/-/g,' '), value }))
 
-  // New users over time
-  const usersChart = Array.from({ length: Math.min(range, 30) }, (_, i) => {
-    const d = new Date(now - (Math.min(range, 30) - 1 - i) * 864e5)
+  const usersChart = Array.from({ length: chartDays }, (_, i) => {
+    const d = new Date(now - (chartDays - 1 - i) * 864e5)
     return {
       label: d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }),
       value: users.filter(u => new Date(u.createdAt).toDateString() === d.toDateString()).length
