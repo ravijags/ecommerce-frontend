@@ -1,5 +1,5 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { LayoutDashboard, ShoppingBag, Package, Users, Eye, LogOut, X, TrendingUp } from 'lucide-react'
+import { LayoutDashboard, ShoppingBag, Package, Users, Eye, LogOut, X, TrendingUp, Tag, Settings } from 'lucide-react'
 
 const NAV = [
   { to: '/admin',            icon: LayoutDashboard, label: 'Dashboard' },
@@ -7,6 +7,8 @@ const NAV = [
   { to: '/admin/orders',     icon: ShoppingBag,     label: 'Orders' },
   { to: '/admin/products',   icon: Package,          label: 'Products' },
   { to: '/admin/users',      icon: Users,            label: 'Users' },
+  { to: '/admin/coupons',    icon: Tag,              label: 'Coupons' },
+  { to: '/admin/settings',   icon: Settings,         label: 'Settings' },
 ]
 
 export default function AdminSidebar({ onClose }) {
