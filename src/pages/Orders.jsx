@@ -154,7 +154,7 @@ export default function Orders() {
     if (!token) { navigate('/login'); return }
     fetch(`${API}/api/orders`, { headers: { authorization: token } })
       .then(r => r.json())
-      .then(d => { setOrders(d.orders || []); setLoading(false) })
+      .then(d => { setOrders(d.order || d.orders || []); setLoading(false) })
       .catch(() => setLoading(false))
   }, [])
 

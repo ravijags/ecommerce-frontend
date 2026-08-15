@@ -33,7 +33,7 @@ export default function Account() {
       const u = userData.user || userData
       setUser(u)
       setForm({ name: u.name || '', email: u.email || '', phone: u.phone || '' })
-      setOrders(ordersData.orders || [])
+      setOrders(ordersData.order || ordersData.orders || [])
       try {
         const saved = JSON.parse(localStorage.getItem(`premia_addresses_${u._id}`) || '[]')
         setAddresses(saved)
