@@ -435,7 +435,7 @@ Product catalogs have varying attributes across categories — a fragrance has d
 
 <div align="center">
 
-**Built from scratch. Every line written. Nothing copied.**
+
 
 <br />
 
