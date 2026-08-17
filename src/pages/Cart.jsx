@@ -105,7 +105,7 @@ export default function Cart({ cartItems, setCartItems }) {
     if (cartItems.length === 0) return
     setLoading(true)
     try {
-      const res  = await fetch(`${API}/api/orders/create-razorpay-order`, {
+      const res  = await fetch(`${API}/api/payment/create-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', authorization: token },
         body: JSON.stringify({
@@ -125,7 +125,7 @@ export default function Cart({ cartItems, setCartItems }) {
         description: 'Everything Premium. Delivered.',
         order_id: data.order.id,
         handler: async (response) => {
-          const verifyRes = await fetch(`${API}/api/orders/verify-payment`, {
+          const verifyRes = await fetch(`${API}/api/payment/verify`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', authorization: token },
             body: JSON.stringify({ ...response, items: cartItems, totalAmount: total }),
