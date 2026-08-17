@@ -16,6 +16,7 @@ export default function Cart({ cartItems, setCartItems }) {
   const [couponFixed, setCouponFixed]       = useState(0)
   const [couponError, setCouponError]       = useState('')
   const [loading, setLoading]         = useState(false)
+  const [shippingAddress, setShippingAddress] = useState('')
   const [removingId, setRemovingId]   = useState(null)
 
   const subtotal    = cartItems.reduce((sum, i) => sum + i.price * (i.quantity || 1), 0)
