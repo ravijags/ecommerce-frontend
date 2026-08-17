@@ -133,7 +133,7 @@ function Header({ cartCount, wishlistCount, onSearch }) {
                 transition: 'all 0.15s',
                 boxShadow: searchFocused ? '0 0 0 4px rgba(15,23,42,0.06)' : 'none',
               }}>
-                <Search size={15} color="#94a3b8" style={{ marginLeft: 14, flexShrink: 0 }} />
+                <Search size={15} color="#64748b" style={{ marginLeft: 14, flexShrink: 0 }} />
                 <input
                   type="text" placeholder="Search Apple, Nike, Samsung..."
                   value={searchQuery} onChange={handleSearch}
@@ -169,23 +169,23 @@ function Header({ cartCount, wishlistCount, onSearch }) {
               {token ? (
                 <>
                   <Link to="/orders" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '6px 10px', borderRadius: 10, textDecoration: 'none', gap: 2 }} className="nav-icon">
-                    <Package size={20} color="#64748b" />
-                    <span style={{ fontSize: 10, color: '#cbd5e1', fontWeight: 500 }}>Orders</span>
+                    <Package size={20} color="#374151" />
+                    <span style={{ fontSize: 10, color: '#374151', fontWeight: 600 }}>Orders</span>
                   </Link>
                   <Link to="/admin" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '6px 10px', borderRadius: 10, textDecoration: 'none', gap: 2 }} className="nav-icon">
-                    <Settings size={20} color="#64748b" />
-                    <span style={{ fontSize: 10, color: '#cbd5e1', fontWeight: 500 }}>Admin</span>
+                    <Settings size={20} color="#374151" />
+                    <span style={{ fontSize: 10, color: '#374151', fontWeight: 600 }}>Admin</span>
                   </Link>
                   <button onClick={handleLogout} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '6px 10px', borderRadius: 10, border: 'none', backgroundColor: 'transparent', cursor: 'pointer', gap: 2 }} className="nav-icon">
-                    <LogOut size={20} color="#64748b" />
-                    <span style={{ fontSize: 10, color: '#cbd5e1', fontWeight: 500 }}>Logout</span>
+                    <LogOut size={20} color="#374151" />
+                    <span style={{ fontSize: 10, color: '#374151', fontWeight: 600 }}>Logout</span>
                   </button>
                 </>
               ) : (
                 <>
                   <Link to="/login" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '6px 10px', borderRadius: 10, textDecoration: 'none', gap: 2 }} className="nav-icon">
-                    <User size={20} color="#64748b" />
-                    <span style={{ fontSize: 10, color: '#cbd5e1', fontWeight: 500 }}>Login</span>
+                    <User size={20} color="#374151" />
+                    <span style={{ fontSize: 10, color: '#374151', fontWeight: 600 }}>Login</span>
                   </Link>
                   <Link to="/register" style={{ backgroundColor: '#C9A84C', color: '#0f172a', padding: '9px 18px', borderRadius: 10, fontSize: 12, fontWeight: 700, textDecoration: 'none', letterSpacing: '0.02em' }}>
                     Sign Up
@@ -194,19 +194,19 @@ function Header({ cartCount, wishlistCount, onSearch }) {
               )}
 
               <Link to="/wishlist" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '6px 10px', borderRadius: 10, textDecoration: 'none', gap: 2, position: 'relative' }} className="nav-icon">
-                <Heart size={20} color="#64748b" />
+                <Heart size={20} color="#374151" />
                 {wishlistCount > 0 && (
                   <span style={{ position: 'absolute', top: 2, right: 4, background: '#ef4444', color: '#fff', fontSize: 8, fontWeight: 800, borderRadius: '50%', width: 14, height: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     {wishlistCount > 9 ? '9+' : wishlistCount}
                   </span>
                 )}
-                <span style={{ fontSize: 10, color: '#cbd5e1', fontWeight: 500 }}>Wishlist</span>
+                <span style={{ fontSize: 10, color: '#374151', fontWeight: 600 }}>Wishlist</span>
               </Link>
 
               <Link to="/cart" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '6px 10px', borderRadius: 10, textDecoration: 'none', position: 'relative', gap: 2 }} className="nav-icon">
                 <div style={{ position: 'relative' }}>
                   <motion.div animate={cartBounce ? { y: [0, -6, 0], scale: [1, 1.2, 1] } : {}} transition={{ duration: 0.4 }}>
-                    <ShoppingCart size={20} color="#64748b" />
+                    <ShoppingCart size={20} color="#374151" />
                   </motion.div>
                   <AnimatePresence>
                     {cartCount > 0 && (
@@ -217,7 +217,7 @@ function Header({ cartCount, wishlistCount, onSearch }) {
                     )}
                   </AnimatePresence>
                 </div>
-                <span style={{ fontSize: 10, color: '#cbd5e1', fontWeight: 500 }}>Cart</span>
+                <span style={{ fontSize: 10, color: '#374151', fontWeight: 600 }}>Cart</span>
               </Link>
 
               <Link to={token ? '/account' : '/login'} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '6px 10px', borderRadius: 10, textDecoration: 'none', gap: 2 }} className="nav-icon">
@@ -225,8 +225,8 @@ function Header({ cartCount, wishlistCount, onSearch }) {
                   <div style={{ width: 22, height: 22, borderRadius: '50%', background: '#C9A84C', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 900, color: '#0f172a' }}>
                     {(localStorage.getItem('premia_uname') || 'U')[0].toUpperCase()}
                   </div>
-                ) : <User size={20} color="#64748b" />}
-                <span style={{ fontSize: 10, color: '#cbd5e1', fontWeight: 500 }}>{token ? 'Account' : 'Login'}</span>
+                ) : <User size={20} color="#374151" />}
+                <span style={{ fontSize: 10, color: '#374151', fontWeight: 600 }}>{token ? 'Account' : 'Login'}</span>
               </Link>
             </div>
           </div>
@@ -239,9 +239,9 @@ function Header({ cartCount, wishlistCount, onSearch }) {
               {categories.map((cat, i) => (
                 <button key={i}
                   onClick={() => { navigate(`/?category=${cat.slug}`); if (onSearch) onSearch('') }}
-                  style={{ flexShrink: 0, padding: '12px 16px', fontSize: 12, fontWeight: 500, color: '#64748b', backgroundColor: 'transparent', border: 'none', borderBottom: '2px solid transparent', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'color 0.15s, border-color 0.15s', outline: 'none' }}
+                  style={{ flexShrink: 0, padding: '12px 16px', fontSize: 12, fontWeight: 600, color: '#374151', backgroundColor: 'transparent', border: 'none', borderBottom: '2px solid transparent', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'color 0.15s, border-color 0.15s', outline: 'none' }}
                   onMouseEnter={e => { e.currentTarget.style.color = '#0f172a'; e.currentTarget.style.borderBottomColor = '#C9A84C' }}
-                  onMouseLeave={e => { e.currentTarget.style.color = '#64748b'; e.currentTarget.style.borderBottomColor = 'transparent' }}
+                  onMouseLeave={e => { e.currentTarget.style.color = '#374151'; e.currentTarget.style.borderBottomColor = 'transparent' }}
                 >{cat.label}</button>
               ))}
             </div>
@@ -287,7 +287,7 @@ function Header({ cartCount, wishlistCount, onSearch }) {
             className="mobile-header"
           >
             <div style={{ display: 'flex', alignItems: 'center', border: '2px solid #0f172a', borderRadius: 12, backgroundColor: '#fff' }}>
-              <Search size={15} color="#94a3b8" style={{ marginLeft: 12 }} />
+              <Search size={15} color="#64748b" style={{ marginLeft: 12 }} />
               <input type="text" placeholder="Search products..."
                 value={searchQuery} onChange={handleSearch} autoFocus
                 onKeyDown={e => { if (e.key === 'Enter') { handleSearchSubmit(); setMobileSearchOpen(false) } }}
