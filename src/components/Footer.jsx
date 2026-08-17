@@ -76,7 +76,7 @@ export default function Footer() {
           ].map(({ Icon, text }) => (
             <div key={text} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <Icon size={13} color="#C9A84C" />
-              <span style={{ color: '#475569', fontSize: 12, fontWeight: 500 }}>{text}</span>
+              <span style={{ color: '#94a3b8', fontSize: 12, fontWeight: 500 }}>{text}</span>
             </div>
           ))}
         </div>
@@ -97,7 +97,7 @@ export default function Footer() {
               margin: '0 0 4px', letterSpacing: '-0.3px', lineHeight: 1.2 }}>
               Exclusive deals & early access
             </h3>
-            <p style={{ color: '#334155', fontSize: 12, margin: 0 }}>
+            <p style={{ color: '#94a3b8', fontSize: 12, margin: 0 }}>
               Join 50,000+ premium shoppers. No spam, ever.
             </p>
           </div>
@@ -162,7 +162,7 @@ export default function Footer() {
                 textTransform: 'uppercase', fontWeight: 600 }}>Everything Premium. Delivered.</div>
             </div>
 
-            <p style={{ color: '#334155', fontSize: 12, lineHeight: 1.8,
+            <p style={{ color: '#64748b', fontSize: 12, lineHeight: 1.8,
               margin: '0 0 20px', maxWidth: 220 }}>
               India's finest curated marketplace for premium products from the world's best brands.
             </p>
@@ -228,7 +228,7 @@ export default function Footer() {
                 {links.map(({ label, to }) => (
                   <li key={label}>
                     <Link to={to}
-                      style={{ color: '#334155', fontSize: 12, textDecoration: 'none',
+                      style={{ color: '#64748b', fontSize: 12, textDecoration: 'none',
                         fontWeight: 500, transition: 'color 0.15s, padding-left 0.15s',
                         display: 'block' }}
                       onMouseEnter={e => { e.target.style.color = '#C9A84C'; e.target.style.paddingLeft = '4px' }}
@@ -248,7 +248,7 @@ export default function Footer() {
         {/* ── Payment methods — small brand-colored rectangles ── */}
         <div style={{ marginBottom: 28 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-            <span style={{ color: '#334155', fontSize: 11, fontWeight: 500, marginRight: 2 }}>We accept:</span>
+            <span style={{ color: '#64748b', fontSize: 11, fontWeight: 500, marginRight: 2 }}>We accept:</span>
 
             {/* VISA */}
             <div style={{ background: '#1A1F71', borderRadius: 5, padding: '3px 10px', height: 26, display: 'flex', alignItems: 'center' }}>
@@ -282,7 +282,7 @@ export default function Footer() {
 
             {/* EMI */}
             <div style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 5, padding: '3px 10px', height: 26, display: 'flex', alignItems: 'center' }}>
-              <span style={{ color: '#94a3b8', fontSize: 11, fontWeight: 700 }}>EMI</span>
+              <span style={{ color: '#64748b', fontSize: 11, fontWeight: 700 }}>EMI</span>
             </div>
           </div>
         </div>
@@ -290,12 +290,12 @@ export default function Footer() {
         {/* ── Copyright ── */}
         <div style={{ display: 'flex', alignItems: 'center',
           justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
-          <p style={{ color: '#1e293b', fontSize: 11, margin: 0 }}>
+          <p style={{ color: '#64748b', fontSize: 11, margin: 0 }}>
             © {new Date().getFullYear()}{' '}
             <span style={{ color: '#C9A84C', fontWeight: 700 }}>PREMIA</span>
             {' '}· All rights reserved.
           </p>
-          <p style={{ color: '#1e293b', fontSize: 11, margin: 0 }}>
+          <p style={{ color: '#64748b', fontSize: 11, margin: 0 }}>
             Made with <span style={{ color: '#ef4444', fontSize: 12 }}>♥</span> in India
           </p>
         </div>

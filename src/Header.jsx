@@ -170,22 +170,22 @@ function Header({ cartCount, wishlistCount, onSearch }) {
                 <>
                   <Link to="/orders" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '6px 10px', borderRadius: 10, textDecoration: 'none', gap: 2 }} className="nav-icon">
                     <Package size={20} color="#64748b" />
-                    <span style={{ fontSize: 10, color: '#94a3b8', fontWeight: 500 }}>Orders</span>
+                    <span style={{ fontSize: 10, color: '#cbd5e1', fontWeight: 500 }}>Orders</span>
                   </Link>
                   <Link to="/admin" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '6px 10px', borderRadius: 10, textDecoration: 'none', gap: 2 }} className="nav-icon">
                     <Settings size={20} color="#64748b" />
-                    <span style={{ fontSize: 10, color: '#94a3b8', fontWeight: 500 }}>Admin</span>
+                    <span style={{ fontSize: 10, color: '#cbd5e1', fontWeight: 500 }}>Admin</span>
                   </Link>
                   <button onClick={handleLogout} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '6px 10px', borderRadius: 10, border: 'none', backgroundColor: 'transparent', cursor: 'pointer', gap: 2 }} className="nav-icon">
                     <LogOut size={20} color="#64748b" />
-                    <span style={{ fontSize: 10, color: '#94a3b8', fontWeight: 500 }}>Logout</span>
+                    <span style={{ fontSize: 10, color: '#cbd5e1', fontWeight: 500 }}>Logout</span>
                   </button>
                 </>
               ) : (
                 <>
                   <Link to="/login" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '6px 10px', borderRadius: 10, textDecoration: 'none', gap: 2 }} className="nav-icon">
                     <User size={20} color="#64748b" />
-                    <span style={{ fontSize: 10, color: '#94a3b8', fontWeight: 500 }}>Login</span>
+                    <span style={{ fontSize: 10, color: '#cbd5e1', fontWeight: 500 }}>Login</span>
                   </Link>
                   <Link to="/register" style={{ backgroundColor: '#C9A84C', color: '#0f172a', padding: '9px 18px', borderRadius: 10, fontSize: 12, fontWeight: 700, textDecoration: 'none', letterSpacing: '0.02em' }}>
                     Sign Up
@@ -200,7 +200,7 @@ function Header({ cartCount, wishlistCount, onSearch }) {
                     {wishlistCount > 9 ? '9+' : wishlistCount}
                   </span>
                 )}
-                <span style={{ fontSize: 10, color: '#94a3b8', fontWeight: 500 }}>Wishlist</span>
+                <span style={{ fontSize: 10, color: '#cbd5e1', fontWeight: 500 }}>Wishlist</span>
               </Link>
 
               <Link to="/cart" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '6px 10px', borderRadius: 10, textDecoration: 'none', position: 'relative', gap: 2 }} className="nav-icon">
@@ -217,7 +217,7 @@ function Header({ cartCount, wishlistCount, onSearch }) {
                     )}
                   </AnimatePresence>
                 </div>
-                <span style={{ fontSize: 10, color: '#94a3b8', fontWeight: 500 }}>Cart</span>
+                <span style={{ fontSize: 10, color: '#cbd5e1', fontWeight: 500 }}>Cart</span>
               </Link>
 
               <Link to={token ? '/account' : '/login'} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '6px 10px', borderRadius: 10, textDecoration: 'none', gap: 2 }} className="nav-icon">
@@ -226,7 +226,7 @@ function Header({ cartCount, wishlistCount, onSearch }) {
                     {(localStorage.getItem('premia_uname') || 'U')[0].toUpperCase()}
                   </div>
                 ) : <User size={20} color="#64748b" />}
-                <span style={{ fontSize: 10, color: '#94a3b8', fontWeight: 500 }}>{token ? 'Account' : 'Login'}</span>
+                <span style={{ fontSize: 10, color: '#cbd5e1', fontWeight: 500 }}>{token ? 'Account' : 'Login'}</span>
               </Link>
             </div>
           </div>
