@@ -103,32 +103,53 @@ export default function Cart({ cartItems, setCartItems }) {
   const handleCheckout = async () => {
     if (!token) { toast.error('Please login to checkout'); navigate('/login'); return }
     if (cartItems.length === 0) return
+    if (!shippingAddress.trim()) { toast.error('Please enter shipping address'); return }
     setLoading(true)
     try {
-      const res  = await fetch(`${API}/api/payment/create-order`, {
+      // Step 1: Place order first
+      const orderRes = await fetch(`${API}/api/orders`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', authorization: token },
         body: JSON.stringify({
           items: cartItems.map(i => ({ product: i._id, quantity: i.quantity || 1, price: i.price })),
           totalAmount: total,
-          couponCode: couponApplied ? coupon : null,
+          shippingAddress,
         }),
       })
-      const data = await res.json()
-      if (!res.ok) { toast.error(data.message || 'Checkout failed'); setLoading(false); return }
+      const orderData = await orderRes.json()
+      if (!orderRes.ok) { toast.error(orderData.message || 'Could not place order'); setLoading(false); return }
 
+      const orderId = orderData.order._id
+
+      // Step 2: Create Razorpay payment for that order
+      const payRes = await fetch(`${API}/api/payment/create-order`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', authorization: token },
+        body: JSON.stringify({ orderId }),
+      })
+      const payData = await payRes.json()
+      if (!payRes.ok) { toast.error(payData.message || 'Payment setup failed'); setLoading(false); return }
+
+      // Step 3: Open Razorpay popup
       const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-        amount: data.order.amount,
-        currency: 'INR',
+        key: payData.keyId || import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount: payData.amount,
+        currency: payData.currency || 'INR',
         name: 'PREMIA',
         description: 'Everything Premium. Delivered.',
-        order_id: data.order.id,
+        image: 'https://ecommerce-frontend-six-blush.vercel.app/favicon.ico',
+        order_id: payData.razorpayOrderId,
         handler: async (response) => {
+          // Step 4: Verify payment
           const verifyRes = await fetch(`${API}/api/payment/verify`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', authorization: token },
-            body: JSON.stringify({ ...response, items: cartItems, totalAmount: total }),
+            body: JSON.stringify({
+              razorpayOrderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature,
+              orderId,
+            }),
           })
           const verifyData = await verifyRes.json()
           if (verifyRes.ok) {
@@ -141,11 +162,15 @@ export default function Cart({ cartItems, setCartItems }) {
         },
         prefill: { name: '', email: '', contact: '' },
         theme: { color: '#C9A84C' },
+        modal: {
+          ondismiss: () => { toast('Payment cancelled', { icon: 'ℹ️' }) }
+        }
       }
       const rzp = new window.Razorpay(options)
       rzp.open()
     } catch (err) {
-      toast.error('Something went wrong')
+      console.error('Checkout error:', err)
+      toast.error('Something went wrong. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -420,6 +445,22 @@ export default function Cart({ cartItems, setCartItems }) {
                   </p>
                 </div>
               )}
+
+              {/* Shipping address */}
+              <div style={{ marginBottom: 14 }}>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.07em' }}>
+                  Delivery Address *
+                </label>
+                <textarea
+                  value={shippingAddress}
+                  onChange={e => setShippingAddress(e.target.value)}
+                  placeholder="Enter your full delivery address..."
+                  rows={3}
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1.5px solid #e2e8f0', fontSize: 13, color: '#0f172a', outline: 'none', resize: 'none', fontFamily: 'Inter, system-ui', boxSizing: 'border-box', background: '#fafafa' }}
+                  onFocus={e => e.target.style.borderColor = '#C9A84C'}
+                  onBlur={e => e.target.style.borderColor = '#e2e8f0'}
+                />
+              </div>
 
               {/* ── CHECKOUT BUTTON — gold, prominent ── */}
               <motion.button
