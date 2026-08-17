@@ -156,10 +156,17 @@ export default function Footer() {
           <div>
             {/* Logo */}
             <div style={{ marginBottom: 20 }}>
-              <div style={{ fontWeight: 900, fontSize: 22, color: '#fff',
-                letterSpacing: '-1px', lineHeight: 1, marginBottom: 3 }}>PREMIA</div>
-              <div style={{ fontSize: 9, color: '#C9A84C', letterSpacing: '0.3em',
-                textTransform: 'uppercase', fontWeight: 600 }}>Everything Premium. Delivered.</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+                <div style={{ width: 36, height: 36, borderRadius: 10, background: '#C9A84C',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontWeight: 900, fontSize: 18, color: '#0f172a', flexShrink: 0 }}>P</div>
+                <div>
+                  <div style={{ fontWeight: 900, fontSize: 20, color: '#fff',
+                    letterSpacing: '-0.5px', lineHeight: 1 }}>PREMIA</div>
+                  <div style={{ fontSize: 8, color: '#C9A84C', letterSpacing: '0.25em',
+                    textTransform: 'uppercase', fontWeight: 600, marginTop: 2 }}>Everything Premium. Delivered.</div>
+                </div>
+              </div>
             </div>
 
             <p style={{ color: '#64748b', fontSize: 12, lineHeight: 1.8,
